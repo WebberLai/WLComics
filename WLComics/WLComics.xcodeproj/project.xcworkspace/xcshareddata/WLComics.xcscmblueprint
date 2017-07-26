@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "0FB84615404A19FAF209415F84173F40003EE14E",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "0FB84615404A19FAF209415F84173F40003EE14E" : 9223372036854775807,
+    "F2E32EF01FA7E88218C1271D5D658A77E5936C4A" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "35A7A3E8-52C4-4ABB-BA5E-665967A09F12",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "0FB84615404A19FAF209415F84173F40003EE14E" : "WLComics\/",
+    "F2E32EF01FA7E88218C1271D5D658A77E5936C4A" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "WLComics",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "WLComics\/WLComics.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/WebberLai\/WLComics.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0FB84615404A19FAF209415F84173F40003EE14E"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/mobile-web-messaging\/MQTTKit.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F2E32EF01FA7E88218C1271D5D658A77E5936C4A"
+    }
+  ]
+}

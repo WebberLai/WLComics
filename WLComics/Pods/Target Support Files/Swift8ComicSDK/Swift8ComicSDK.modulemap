@@ -1,0 +1,6 @@
+framework module Swift8ComicSDK {
+  umbrella header "Swift8ComicSDK-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,24 @@
+PODS:
+  - Kingfisher (3.10.3)
+  - Swift8ComicSDK (1.1.0)
+
+DEPENDENCIES:
+  - Kingfisher
+  - Swift8ComicSDK (from `https://github.com/RayTW/Swift8ComicSDK.git`)
+
+EXTERNAL SOURCES:
+  Swift8ComicSDK:
+    :git: https://github.com/RayTW/Swift8ComicSDK.git
+
+CHECKOUT OPTIONS:
+  Swift8ComicSDK:
+    :commit: 00941876978b90519f034929481e7bb3786cedb2
+    :git: https://github.com/RayTW/Swift8ComicSDK.git
+
+SPEC CHECKSUMS:
+  Kingfisher: a0ac82dc5bcf0388dd74b294cf2cc13730c63436
+  Swift8ComicSDK: 57a530b59177b0ac7a1775e94ddb75dc607e93bc
+
+PODFILE CHECKSUM: fb00d45140fdd1a2717eb5a5b0d2999da482dfcf
+
+COCOAPODS: 1.1.0.rc.2
