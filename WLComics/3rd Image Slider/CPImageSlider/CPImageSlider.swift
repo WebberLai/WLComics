@@ -221,7 +221,17 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
             }
             else
             {
-                imageV.image = UIImage(named:images[index])
+                let url = URL(string:images[index])!
+                imageV.kf.setImage(with: url,
+                                   placeholder: Image.init(named:"comic_place_holder"),
+                                   options: [.transition(ImageTransition.fade(1))],
+                                   progressBlock: { receivedSize, totalSize in
+                                    
+                },
+                                   completionHandler: { image, error, cacheType, imageURL in
+                                    print("FINISH 4")
+                                    
+                })
             }
             myScrollView.addSubview(imageV)
         }
