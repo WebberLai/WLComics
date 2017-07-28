@@ -16,6 +16,8 @@ class MasterViewController: UITableViewController {
     
     var allComics = [Comic]()
     
+    var currentComic : Comic = R8Comic.get().generatorFakeComic("-1", name: "")
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -25,13 +27,19 @@ class MasterViewController: UITableViewController {
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
         
-        R8Comic.get().getAll { (comics:[Comic]) in
-            self.allComics = comics
+        if currentComic.getId() == "-1" {
+            R8Comic.get().getAll { (comics:[Comic]) in
+                self.allComics = comics
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }else {
+            allComics = [currentComic]
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
         }
-        
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -52,14 +60,27 @@ class MasterViewController: UITableViewController {
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
         if segue.identifier == "showDetail" {
+            
             if let indexPath = tableView.indexPathForSelectedRow {
+                let comicDetailViewController = MasterViewController()
+                currentComic = allComics[indexPath.row]
+                comicDetailViewController.currentComic = currentComic
+                let navController = UINavigationController.init(rootViewController: comicDetailViewController)
+                self.navigationController?.pushViewController(navController, animated: true)
+                
 //                let object = objects[indexPath.row] as! NSDate
 //                let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
 //                controller.detailItem = object
 //                controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
 //                controller.navigationItem.leftItemsSupplementBackButton = true
             }
+        }else if segue.identifier == "showEpisodes" {
+            let indexPath = tableView.indexPathForSelectedRow
+            currentComic = allComics[indexPath!.row]
+            let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
+            comicEpisodesViewController.currentComic = currentComic
         }
     }
 
@@ -94,7 +115,10 @@ class MasterViewController: UITableViewController {
         // Return false if you do not want the specified item to be editable.
         return false
     }
-
-
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.performSegue(withIdentifier: "showEpisodes", sender: self)
+    }
+    
 }
 

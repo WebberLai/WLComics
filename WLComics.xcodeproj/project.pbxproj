@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		601EEE251F29722300504E29 /* ComicEpisodesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */; };
 		6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1D1F28233F007BBE67 /* AppDelegate.swift */; };
 		6056EE201F28233F007BBE67 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1F1F28233F007BBE67 /* MasterViewController.swift */; };
 		6056EE221F28233F007BBE67 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE211F28233F007BBE67 /* DetailViewController.swift */; };
@@ -18,6 +19,7 @@
 
 /* Begin PBXFileReference section */
 		0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.release.xcconfig"; sourceTree = "<group>"; };
+		601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicEpisodesViewController.swift; sourceTree = "<group>"; };
 		6056EE1A1F28233F007BBE67 /* WLComics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WLComics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6056EE1D1F28233F007BBE67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6056EE1F1F28233F007BBE67 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
@@ -51,6 +53,16 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		601EEE231F2971BC00504E29 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				6056EE1F1F28233F007BBE67 /* MasterViewController.swift */,
+				601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */,
+				6056EE211F28233F007BBE67 /* DetailViewController.swift */,
+			);
+			path = "View Controllers";
+			sourceTree = "<group>";
+		};
 		6056EE111F28233F007BBE67 = {
 			isa = PBXGroup;
 			children = (
@@ -72,9 +84,8 @@
 		6056EE1C1F28233F007BBE67 /* WLComics */ = {
 			isa = PBXGroup;
 			children = (
+				601EEE231F2971BC00504E29 /* View Controllers */,
 				6056EE1D1F28233F007BBE67 /* AppDelegate.swift */,
-				6056EE1F1F28233F007BBE67 /* MasterViewController.swift */,
-				6056EE211F28233F007BBE67 /* DetailViewController.swift */,
 				6056EE231F28233F007BBE67 /* Main.storyboard */,
 				6056EE261F28233F007BBE67 /* Assets.xcassets */,
 				6056EE281F28233F007BBE67 /* LaunchScreen.storyboard */,
@@ -216,6 +227,7 @@
 			files = (
 				6056EE221F28233F007BBE67 /* DetailViewController.swift in Sources */,
 				6056EE201F28233F007BBE67 /* MasterViewController.swift in Sources */,
+				601EEE251F29722300504E29 /* ComicEpisodesViewController.swift in Sources */,
 				6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
