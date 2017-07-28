@@ -1,31 +1,44 @@
 //
-//  ComicEpisodesViewController.swift
+//  EpisodeDetailViewController.swift
 //  WLComics
 //
-//  Created by Roca Developer on 2017/7/27.
+//  Created by Roca Developer on 2017/7/28.
 //  Copyright © 2017年 webberlai. All rights reserved.
 //
 
 import UIKit
 import Swift8ComicSDK
 import Kingfisher
+import QuickLook
 
-class ComicEpisodesViewController: UIViewController {
+class EpisodeDetailViewController: UIViewController {
+        
+    var currentEpisode : Episode!
+    
+    var detailViewController: DetailViewController? = nil
+    
+    var pages = Array<String>()
     
     @IBOutlet weak var tableView : UITableView!
-    
-    var allEpisodes = Array<Any>() as! [Episode]
-    
-    var currentComic : Comic = R8Comic.get().generatorFakeComic("-1", name: "")
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        R8Comic.get().loadComicDetail(currentComic) { (comicDetail : Comic) in
-            self.allEpisodes = comicDetail.getEpisode()
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
+        if let split = splitViewController {
+            let controllers = split.viewControllers
+            detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
+        }
+        
+        R8Comic.get().loadSiteUrlList { (hostMap : [String : String]) in
+            self.currentEpisode.setUrl(hostMap[self.currentEpisode.getCatid()]! + self.currentEpisode.getUrl())
+            R8Comic.get().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
+                episode.setUpPages()
+                self.pages = episode.getImageUrlList()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                    self.detailViewController?.updateImages(imgs: self.pages)
+                }
+            })
         }
         
         // Do any additional setup after loading the view.
@@ -36,34 +49,36 @@ class ComicEpisodesViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    
+    
+    /*
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showEpisodeDetail" {
-            let indexPath = tableView.indexPathForSelectedRow
-            let episode = allEpisodes[indexPath!.row]
-            let episodeDetailViewController = segue.destination as! EpisodeDetailViewController
-            episodeDetailViewController.currentEpisode = episode
-        }
+        // Get the new view controller using segue.destinationViewController.
+        // Pass the selected object to the new view controller.
     }
+    */
+
 }
 
-extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDelegate{
+extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDelegate{
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return allEpisodes.count
+        return pages.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
-        let episode = allEpisodes[indexPath.row]
-        cell.textLabel?.text = episode.getName()
-        let url = URL(string:currentComic.getSmallIconUrl()!)!
+        cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")
+        
+        let url = URL(string:pages[indexPath.row])
+                
         cell.imageView!.kf.setImage(with: url,
                                     placeholder: Image.init(named:"comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1))],
@@ -77,6 +92,7 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "showEpisodeDetail", sender: self)
+        
     }
 }
+

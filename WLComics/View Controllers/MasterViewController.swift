@@ -11,8 +11,6 @@ import Swift8ComicSDK
 import Kingfisher
 
 class MasterViewController: UITableViewController {
-
-    var detailViewController: DetailViewController? = nil
     
     var allComics = [Comic]()
     
@@ -21,11 +19,6 @@ class MasterViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
-        if let split = splitViewController {
-            let controllers = split.viewControllers
-            detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
-        }
         
         if currentComic.getId() == "-1" {
             R8Comic.get().getAll { (comics:[Comic]) in
@@ -61,22 +54,7 @@ class MasterViewController: UITableViewController {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
-        if segue.identifier == "showDetail" {
-            
-            if let indexPath = tableView.indexPathForSelectedRow {
-                let comicDetailViewController = MasterViewController()
-                currentComic = allComics[indexPath.row]
-                comicDetailViewController.currentComic = currentComic
-                let navController = UINavigationController.init(rootViewController: comicDetailViewController)
-                self.navigationController?.pushViewController(navController, animated: true)
-                
-//                let object = objects[indexPath.row] as! NSDate
-//                let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
-//                controller.detailItem = object
-//                controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
-//                controller.navigationItem.leftItemsSupplementBackButton = true
-            }
-        }else if segue.identifier == "showEpisodes" {
+        if segue.identifier == "showEpisodes" {
             let indexPath = tableView.indexPathForSelectedRow
             currentComic = allComics[indexPath!.row]
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController

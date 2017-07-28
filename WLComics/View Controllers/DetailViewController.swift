@@ -8,37 +8,34 @@
 
 import UIKit
 
-class DetailViewController: UIViewController {
+class DetailViewController: UIViewController,CPSliderDelegate{
 
     @IBOutlet weak var detailDescriptionLabel: UILabel!
-
-    func configureView() {
-        // Update the user interface for the detail item.
-        if let detail = detailItem {
-            if let label = detailDescriptionLabel {
-                label.text = detail.description
-            }
-        }
-    }
+    
+    var comicImages = Array<String>()
+    
+    @IBOutlet weak var imgSlider : CPImageSlider!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        configureView()
+        imgSlider.delegate = self
+        imgSlider.enableSwipe = true
+        imgSlider.allowCircular = false
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    var detailItem: NSDate? {
-        didSet {
-            // Update the view.
-            configureView()
+    
+    func updateImages(imgs : Array<String>){
+        DispatchQueue.main.async {
+            self.imgSlider.images = imgs
         }
     }
-
-
+    
+    func sliderImageTapped(slider: CPImageSlider, index: Int) {
+        
+    }
 }
 
