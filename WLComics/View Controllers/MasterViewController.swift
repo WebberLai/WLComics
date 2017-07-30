@@ -14,14 +14,14 @@ class MasterViewController: UITableViewController {
     
     var allComics = [Comic]()
     
-    var currentComic : Comic = R8Comic.get().generatorFakeComic("-1", name: "")
+    var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
         if currentComic.getId() == "-1" {
-            R8Comic.get().getAll { (comics:[Comic]) in
+            WLComics.sharedInstance().getR8Comic().getAll { (comics:[Comic]) in
                 self.allComics = comics
                 DispatchQueue.main.async {
                     self.tableView.reloadData()

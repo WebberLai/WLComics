@@ -16,12 +16,12 @@ class ComicEpisodesViewController: UIViewController {
     
     var allEpisodes = Array<Any>() as! [Episode]
     
-    var currentComic : Comic = R8Comic.get().generatorFakeComic("-1", name: "")
+    var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        R8Comic.get().loadComicDetail(currentComic) { (comicDetail : Comic) in
+        WLComics.sharedInstance().getR8Comic().loadComicDetail(currentComic) { (comicDetail : Comic) in
             self.allEpisodes = comicDetail.getEpisode()
             DispatchQueue.main.async {
                 self.tableView.reloadData()

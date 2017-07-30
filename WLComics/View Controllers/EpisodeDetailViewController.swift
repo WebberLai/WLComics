@@ -29,17 +29,17 @@ class EpisodeDetailViewController: UIViewController {
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
         
-        R8Comic.get().loadSiteUrlList { (hostMap : [String : String]) in
-            self.currentEpisode.setUrl(hostMap[self.currentEpisode.getCatid()]! + self.currentEpisode.getUrl())
-            R8Comic.get().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
-                episode.setUpPages()
-                self.pages = episode.getImageUrlList()
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                    self.detailViewController?.updateImages(imgs: self.pages)
-                }
-            })
-        }
+        let hostMap : [String : String] = WLComics.sharedInstance().getHostMap()!
+        
+        self.currentEpisode.setUrl(hostMap[self.currentEpisode.getCatid()]! + self.currentEpisode.getUrl())
+        WLComics.sharedInstance().getR8Comic().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
+            episode.setUpPages()
+            self.pages = episode.getImageUrlList()
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+                self.detailViewController?.updateImages(imgs: self.pages)
+            }
+        })
         
         // Do any additional setup after loading the view.
     }
