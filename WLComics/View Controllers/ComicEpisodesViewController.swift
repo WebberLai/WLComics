@@ -27,7 +27,7 @@ class ComicEpisodesViewController: UIViewController {
                 self.tableView.reloadData()
             }
         }
-        
+        self.tableView.tableHeaderView = nil
         // Do any additional setup after loading the view.
     }
 

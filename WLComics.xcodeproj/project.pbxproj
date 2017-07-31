@@ -179,7 +179,6 @@
 				TargetAttributes = {
 					6056EE191F28233F007BBE67 = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = 2MG56ASAW3;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -405,6 +404,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = WLComics/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComics;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -419,6 +419,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = WLComics/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComics;
 				PRODUCT_NAME = "$(TARGET_NAME)";

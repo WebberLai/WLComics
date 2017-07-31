@@ -10,15 +10,24 @@ import UIKit
 import Swift8ComicSDK
 import Kingfisher
 
-class MasterViewController: UITableViewController {
+class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate {
     
     var allComics = [Comic]()
+    
+    //搜尋過濾之後的找到的漫畫
+    var filterComics = [Comic]()
+    
+    var shouldShowSearchResults = false
+    
+    var searchController: UISearchController!
     
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        self.initSearchController()
         
         if currentComic.getId() == "-1" {
             WLComics.sharedInstance().getR8Comic().getAll { (comics:[Comic]) in
@@ -27,17 +36,28 @@ class MasterViewController: UITableViewController {
                     self.tableView.reloadData()
                 }
             }
-        }else {
-            allComics = [currentComic]
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
         }
+    }
+    
+    func initSearchController() {
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.dimsBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "輸入想要搜尋的漫畫名稱"
+        searchController.searchBar.delegate = self
+        //把搜尋功能加入tableview的最上面
+        self.tableView.tableHeaderView = searchController.searchBar
     }
 
     override func viewWillAppear(_ animated: Bool) {
         clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
         super.viewWillAppear(animated)
+        self.tableView.reloadData()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        shouldShowSearchResults = false
     }
 
     override func didReceiveMemoryWarning() {
@@ -53,10 +73,15 @@ class MasterViewController: UITableViewController {
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
         if segue.identifier == "showEpisodes" {
             let indexPath = tableView.indexPathForSelectedRow
-            currentComic = allComics[indexPath!.row]
+            if shouldShowSearchResults {
+                currentComic = filterComics [indexPath!.row]
+            }
+            else {
+                currentComic = allComics[indexPath!.row]
+            }
+            searchController.isActive = false
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
             comicEpisodesViewController.currentComic = currentComic
         }
@@ -69,12 +94,25 @@ class MasterViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.allComics.count
+        if shouldShowSearchResults {
+            return filterComics.count
+        }
+        else {
+            return self.allComics.count
+        }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        let comic = self.allComics [indexPath.row]
+        
+        var comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
+        
+        if shouldShowSearchResults {
+            comic = filterComics [indexPath.row]
+        }
+        else {
+            comic = allComics [indexPath.row]
+        }
         cell.textLabel!.text = comic.getName()
         let url = URL(string:comic.getSmallIconUrl()!)!
         cell.imageView!.kf.setImage(with: url,
@@ -96,6 +134,37 @@ class MasterViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.performSegue(withIdentifier: "showEpisodes", sender: self)
+    }
+    
+    // MARK: - Search Bar
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchString = searchController.searchBar.text else {
+            return
+        }
+        
+        filterComics = allComics.filter({ (comic) -> Bool in
+            let comicName = comic.getName() as NSString
+            return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound
+        })
+        self.tableView.reloadData()
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        shouldShowSearchResults = true
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        shouldShowSearchResults = false
+    }
+    
+    //按下搜尋按鈕之後才會顯示搜尋結果
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if !shouldShowSearchResults {
+            shouldShowSearchResults = true
+            self.tableView.reloadData()
+        }
+        searchController.searchBar.resignFirstResponder()
     }
     
 }
