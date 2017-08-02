@@ -37,9 +37,11 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                 }
             }
         }
+        self.title = "漫畫列表"
     }
     
     func initSearchController() {
+        self.definesPresentationContext = true
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
         searchController.dimsBackgroundDuringPresentation = false
@@ -84,6 +86,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             searchController.isActive = false
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
             comicEpisodesViewController.currentComic = currentComic
+            comicEpisodesViewController.title = currentComic.getName()
         }
     }
 

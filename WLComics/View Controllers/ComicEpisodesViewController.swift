@@ -45,11 +45,13 @@ class ComicEpisodesViewController: UIViewController {
             let episode = allEpisodes[indexPath!.row]
             let episodeDetailViewController = segue.destination as! EpisodeDetailViewController
             episodeDetailViewController.currentEpisode = episode
+            episodeDetailViewController.title = episode.getName()
         }else if segue.identifier == "showPageDetail" {
             let navController = segue.destination as! UINavigationController
             let pageDetailViewController = navController.viewControllers[0] as! DetailViewController
             let hostMap : [String : String] = WLComics.sharedInstance().getHostMap()!
             let episode = allEpisodes[index]
+            pageDetailViewController.title = episode.getName()
             episode.setUrl(hostMap[episode.getCatid()]! + episode.getUrl())
             WLComics.sharedInstance().getR8Comic().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
                 episode.setUpPages()
