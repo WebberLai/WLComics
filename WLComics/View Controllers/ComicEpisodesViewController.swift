@@ -2,7 +2,7 @@
 //  ComicEpisodesViewController.swift
 //  WLComics
 //
-//  Created by Roca Developer on 2017/7/27.
+//  Created by Webber Lai on 2017/7/27.
 //  Copyright © 2017年 webberlai. All rights reserved.
 //
 
@@ -18,9 +18,10 @@ class ComicEpisodesViewController: UIViewController {
     
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
     
+    var index = 0
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         WLComics.sharedInstance().getR8Comic().loadComicDetail(currentComic) { (comicDetail : Comic) in
             self.allEpisodes = comicDetail.getEpisode()
             DispatchQueue.main.async {
@@ -28,7 +29,6 @@ class ComicEpisodesViewController: UIViewController {
             }
         }
         self.tableView.tableHeaderView = nil
-        // Do any additional setup after loading the view.
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,6 +45,17 @@ class ComicEpisodesViewController: UIViewController {
             let episode = allEpisodes[indexPath!.row]
             let episodeDetailViewController = segue.destination as! EpisodeDetailViewController
             episodeDetailViewController.currentEpisode = episode
+        }else if segue.identifier == "showPageDetail" {
+            let navController = segue.destination as! UINavigationController
+            let pageDetailViewController = navController.viewControllers[0] as! DetailViewController
+            let hostMap : [String : String] = WLComics.sharedInstance().getHostMap()!
+            let episode = allEpisodes[index]
+            episode.setUrl(hostMap[episode.getCatid()]! + episode.getUrl())
+            WLComics.sharedInstance().getR8Comic().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
+                episode.setUpPages()
+                let pages = episode.getImageUrlList()
+                pageDetailViewController.updateImages(imgs: pages)
+            })
         }
     }
 }
@@ -77,6 +88,13 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "showEpisodeDetail", sender: self)
+        print(UIDevice.current.model)
+        index = indexPath.row
+        if UIDevice.current.model.description == "iPad" {
+            self.performSegue(withIdentifier: "showEpisodeDetail", sender: self)
+        }
+        else if UIDevice.current.model.description == "iPhone"{
+            self.performSegue(withIdentifier: "showPageDetail", sender: self)
+        }
     }
 }

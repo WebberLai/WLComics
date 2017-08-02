@@ -2,7 +2,7 @@
 //  DetailViewController.swift
 //  WLComics
 //
-//  Created by Roca Developer on 2017/7/26.
+//  Created by Webber Lai on 2017/7/26.
 //  Copyright © 2017年 webberlai. All rights reserved.
 //
 

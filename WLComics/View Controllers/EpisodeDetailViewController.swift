@@ -2,7 +2,7 @@
 //  EpisodeDetailViewController.swift
 //  WLComics
 //
-//  Created by Roca Developer on 2017/7/28.
+//  Created by Webber Lai on 2017/7/28.
 //  Copyright © 2017年 webberlai. All rights reserved.
 //
 
