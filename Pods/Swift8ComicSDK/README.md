@@ -51,6 +51,15 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Requirements
 
+Add trusted comic site in info.plist
+```
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
+```
 ## Installation
 
 Swift8ComicSDK is available through [CocoaPods](http://cocoapods.org). To install

@@ -217,13 +217,12 @@ open class Parser{
         let startTagTi = "var ti="
         let endTagTi = ";var cs="
         let startTagCs = "var cs='"
-        let endTagCs = "';eval(unescape('"
+        let endTagCs = "';for(var"
         
         for txt in html {
-            let chs = StringUtility.substring(source: txt, upperString: startTagChs, lowerString: endTagChs)
-            let ti = StringUtility.substring(source: txt, upperString: startTagTi, lowerString: endTagTi)
-            let cs = StringUtility.substring(source: txt, upperString: startTagCs, lowerString: endTagCs)
-            
+            let chs = StringUtility.substring(txt, startTagChs, endTagChs)
+            let ti = StringUtility.substring(txt, startTagTi, endTagTi)
+            let cs = StringUtility.substring(txt, startTagCs, endTagCs)
             
             if(chs != nil){
                 episode.setChs(Int(chs!)!)
@@ -233,6 +232,7 @@ open class Parser{
             }
             if(cs != nil){
                 episode.setCs(cs!)
+                episode.setSource(txt)
                 break
             }
         }

@@ -16,6 +16,15 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     
     @IBOutlet weak var imgSlider : CPImageSlider!
 
+    var hidden = false {
+        didSet {
+            if let nav = navigationController {
+                nav.setNavigationBarHidden(hidden, animated: true)
+                nav.setToolbarHidden(hidden, animated: true)
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         imgSlider.delegate = self
@@ -28,6 +37,11 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.hidesBarsOnTap = true
+    }
+    
     func updateImages(imgs : Array<String>){
         DispatchQueue.main.async {
             self.imgSlider.images = imgs
@@ -35,7 +49,8 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     }
     
     func sliderImageTapped(slider: CPImageSlider, index: Int) {
-        
+        hidden = !hidden
+        self.navigationController?.navigationBar.isHidden = hidden
     }
 }
 

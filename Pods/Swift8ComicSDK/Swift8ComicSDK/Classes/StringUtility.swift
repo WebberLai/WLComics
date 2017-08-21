@@ -21,6 +21,13 @@ open class StringUtility{
         return source.range(of: search)
     }
     
+    open class func indexOfInt(_ source : String, _ search : String) -> Int{
+        let range = source.range(of: search)
+        let result = source.characters.distance(from: source.characters.startIndex, to: (range?.lowerBound)!)
+        
+        return result;
+    }
+    
     open class func indexOfUpper(source : String, search : String) -> String.Index?{
         let range =  source.range(of: search)
         
@@ -47,7 +54,7 @@ open class StringUtility{
         return source.substring(with: range)
     }
     
-    open class func substring(source : String, upperString : String, lowerString : String ) -> String?{
+    open class func substring(_ source : String,_ upperString : String,_ lowerString : String ) -> String?{
         let upper : String.Index? = indexOfUpper(source: source, search: upperString)
         let lower : String.Index? = indexOfLower(source: source, search: lowerString)
         
@@ -91,6 +98,10 @@ open class StringUtility{
     
     open class func trim(_ source : String) -> String{
         return source.trimmingCharacters(in: .whitespaces)
+    }
+    
+    open class func replace(_ source : String, _ of : String,_ with : String) -> String{
+        return source.replacingOccurrences(of: of, with: with)
     }
     
 }
