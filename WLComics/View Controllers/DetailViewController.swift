@@ -42,6 +42,11 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         self.navigationController?.hidesBarsOnTap = true
     }
     
+    //設定每集漫畫的root網址
+    func setEpisodeUrl(_ url : String){
+        self.imgSlider.episodeUrl = url
+    }
+    
     func updateImages(imgs : Array<String>){
         DispatchQueue.main.async {
             self.imgSlider.images = imgs

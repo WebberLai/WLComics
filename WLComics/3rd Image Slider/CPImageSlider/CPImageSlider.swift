@@ -48,6 +48,8 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         }
     }
     
+    var episodeUrl : String?;//一集(話)的漫畫網址，例如http://v.comicbus.com/online/comic-3099.html?ch=2
+    
     var enableSwipe : Bool = false{
         didSet{
             myScrollView.isUserInteractionEnabled = enableSwipe
@@ -221,10 +223,19 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
             }
             else
             {
+                
                 let url = URL(string:images[index])!
+                
+                //部份漫畫下載時，若client未帶Referer上去會被伺服器檔，造成無法正確下載圖片。 by Ray
+                let modifier = AnyModifier { request in
+                    var r = request
+                    r.setValue(self.episodeUrl, forHTTPHeaderField: "Referer")
+                    return r
+                }
+            
                 imageV.kf.setImage(with: url,
                                    placeholder: Image.init(named:"comic_place_holder"),
-                                   options: [.transition(ImageTransition.fade(1))],
+                                   options: [.transition(ImageTransition.fade(1)),.requestModifier(modifier)],
                                    progressBlock: { receivedSize, totalSize in
                                     
                 },

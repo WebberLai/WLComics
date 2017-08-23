@@ -37,6 +37,7 @@ class EpisodeDetailViewController: UIViewController {
             self.pages = episode.getImageUrlList()
             DispatchQueue.main.async {
                 self.tableView.reloadData()
+                self.detailViewController?.setEpisodeUrl(episode.getUrl())
                 self.detailViewController?.updateImages(imgs: self.pages)
             }
         })
