@@ -32,7 +32,12 @@ open class WLComics{
         }
     }
     
-    open func getHostMap() -> [String : String]?{
-        return mHostMap
+    open func loadEpisodeDetail(_ episode : Episode, onLoadDetail: @escaping (Episode) -> Void){
+        //檢查此漫畫集數是否已有串過完整url，若未有完成url則將url重組
+        if(!episode.getUrl().hasPrefix("http")){
+            episode.setUrl((mHostMap?[episode.getCatid()]!)! + episode.getUrl())
+        }
+
+        mR8Comic.loadEpisodeDetail(episode, onLoadDetail: onLoadDetail)
     }
 }

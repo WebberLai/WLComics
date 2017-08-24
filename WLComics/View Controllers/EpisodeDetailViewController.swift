@@ -28,11 +28,8 @@ class EpisodeDetailViewController: UIViewController {
             let controllers = split.viewControllers
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
-        
-        let hostMap : [String : String] = WLComics.sharedInstance().getHostMap()!
-        
-        self.currentEpisode.setUrl(hostMap[self.currentEpisode.getCatid()]! + self.currentEpisode.getUrl())
-        WLComics.sharedInstance().getR8Comic().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
+  
+        WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
             episode.setUpPages()
             self.pages = episode.getImageUrlList()
             DispatchQueue.main.async {
