@@ -23,6 +23,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
     
+    var selectIndexOfComic : Int = -1
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -76,14 +78,12 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEpisodes" {
-            let indexPath = tableView.indexPathForSelectedRow
             if shouldShowSearchResults {
-                currentComic = filterComics [indexPath!.row]
+                currentComic = filterComics [selectIndexOfComic]
             }
             else {
-                currentComic = allComics[indexPath!.row]
+                currentComic = allComics[selectIndexOfComic]
             }
-            searchController.isActive = false
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
             comicEpisodesViewController.currentComic = currentComic
             comicEpisodesViewController.title = currentComic.getName()
@@ -136,6 +136,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectIndexOfComic = indexPath.row
         self.performSegue(withIdentifier: "showEpisodes", sender: self)
     }
     

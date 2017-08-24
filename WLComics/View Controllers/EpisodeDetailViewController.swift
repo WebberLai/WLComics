@@ -28,7 +28,6 @@ class EpisodeDetailViewController: UIViewController {
             let controllers = split.viewControllers
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
-  
         WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
             episode.setUpPages()
             self.pages = episode.getImageUrlList()
@@ -38,17 +37,14 @@ class EpisodeDetailViewController: UIViewController {
                 self.detailViewController?.updateImages(imgs: self.pages)
             }
         })
-        
-        // Do any additional setup after loading the view.
+        self.tableView.tableHeaderView = nil
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-    
-    
+        
     /*
     // MARK: - Navigation
 

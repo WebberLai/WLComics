@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13168.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="H1p-Uh-vWS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="H1p-Uh-vWS">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13147.4"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -38,16 +37,16 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g2T-BS-5lh" customClass="CPImageSlider" customModule="WLComics" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                                <rect key="frame" x="16" y="72" width="343" height="587"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="GAO-Cl-Wes" firstAttribute="top" secondItem="g2T-BS-5lh" secondAttribute="bottom" id="N3Y-vd-rO2"/>
-                            <constraint firstItem="g2T-BS-5lh" firstAttribute="leading" secondItem="svH-Pt-448" secondAttribute="leading" id="Rah-Pc-nVm"/>
-                            <constraint firstAttribute="trailing" secondItem="g2T-BS-5lh" secondAttribute="trailing" id="hyH-es-gY5"/>
-                            <constraint firstItem="g2T-BS-5lh" firstAttribute="top" secondItem="SYR-Wa-9uf" secondAttribute="bottom" id="ua9-XO-Xkq"/>
+                            <constraint firstItem="GAO-Cl-Wes" firstAttribute="top" secondItem="g2T-BS-5lh" secondAttribute="bottom" constant="8" id="N3Y-vd-rO2"/>
+                            <constraint firstItem="g2T-BS-5lh" firstAttribute="leading" secondItem="svH-Pt-448" secondAttribute="leading" constant="16" id="Rah-Pc-nVm"/>
+                            <constraint firstAttribute="trailing" secondItem="g2T-BS-5lh" secondAttribute="trailing" constant="16" id="hyH-es-gY5"/>
+                            <constraint firstItem="g2T-BS-5lh" firstAttribute="top" secondItem="SYR-Wa-9uf" secondAttribute="bottom" constant="8" id="ua9-XO-Xkq"/>
                         </constraints>
                     </view>
                     <toolbarItems/>
@@ -91,7 +90,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Arm-wq-HPj">
-                                            <rect key="frame" x="16" y="0.0" width="344" height="43.5"/>
+                                            <rect key="frame" x="15" y="0.0" width="345" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
@@ -169,7 +168,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="IeZ-Jr-TCg">
-                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
                                     <outlet property="dataSource" destination="GfN-7X-AML" id="9pX-Nr-xDe"/>
@@ -179,10 +178,13 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="IeZ-Jr-TCg" firstAttribute="top" secondItem="dcF-PS-Quq" secondAttribute="bottom" id="DH5-Sy-njX"/>
+                            <constraint firstItem="IeZ-Jr-TCg" firstAttribute="top" secondItem="dcF-PS-Quq" secondAttribute="bottom" constant="-64" id="BWN-fk-8y8"/>
+                            <constraint firstItem="hkZ-1w-E8o" firstAttribute="top" secondItem="IeZ-Jr-TCg" secondAttribute="bottom" id="Bkd-Ss-mZX"/>
+                            <constraint firstAttribute="trailing" secondItem="IeZ-Jr-TCg" secondAttribute="trailing" id="CRN-pD-MYS"/>
                             <constraint firstItem="IeZ-Jr-TCg" firstAttribute="leading" secondItem="1eB-Ne-Djv" secondAttribute="leading" id="FB0-SW-dJl"/>
                             <constraint firstItem="hkZ-1w-E8o" firstAttribute="top" secondItem="IeZ-Jr-TCg" secondAttribute="bottom" id="HgX-P8-k5d"/>
                             <constraint firstAttribute="trailing" secondItem="IeZ-Jr-TCg" secondAttribute="trailing" id="Vp5-r3-IN9"/>
+                            <constraint firstItem="IeZ-Jr-TCg" firstAttribute="leading" secondItem="1eB-Ne-Djv" secondAttribute="leading" id="qOt-5T-tCL"/>
                         </constraints>
                     </view>
                     <connections>
