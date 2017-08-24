@@ -76,10 +76,10 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
         cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")
         
         let url = URL(string:pages[indexPath.row])
-                
         cell.imageView!.kf.setImage(with: url,
                                     placeholder: Image.init(named:"comic_place_holder"),
-                                    options: [.transition(ImageTransition.fade(1))],
+                                    options: [.transition(ImageTransition.fade(1)),
+                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))],
                                     progressBlock: { receivedSize, totalSize in
                                         print("\(indexPath.row + 1): \(receivedSize)/\(totalSize)")
         },

@@ -8,6 +8,7 @@
 
 import Foundation
 import Swift8ComicSDK
+import Kingfisher
 
 open class WLComics{
     fileprivate static let sInstance : WLComics = WLComics()
@@ -39,5 +40,16 @@ open class WLComics{
         }
 
         mR8Comic.loadEpisodeDetail(episode, onLoadDetail: onLoadDetail)
+    }
+    
+    //部份漫畫下載時，若client未帶Referer上去會被伺服器檔，造成無法正確下載圖片。 by Ray
+    open func buildDownloadEpisodeHeader(_ episodeUrl : String) -> ImageDownloadRequestModifier{
+        let modifier = AnyModifier { request in
+            var r = request
+            r.setValue(episodeUrl, forHTTPHeaderField: "Referer")
+            return r
+        }
+        
+        return modifier
     }
 }
