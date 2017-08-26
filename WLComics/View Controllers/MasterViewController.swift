@@ -32,7 +32,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.initSearchController()
         
         if currentComic.getId() == "-1" {
-            WLComics.sharedInstance().getR8Comic().getAll { (comics:[Comic]) in
+            WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
                 self.allComics = comics
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
