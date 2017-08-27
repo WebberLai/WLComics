@@ -73,6 +73,10 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
         return allEpisodes.count
     }
     
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat{
+        return 100.0
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
         let episode = allEpisodes[indexPath.row]
@@ -100,4 +104,6 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
             self.performSegue(withIdentifier: "showPageDetail", sender: self)
         }
     }
+    
+   
 }

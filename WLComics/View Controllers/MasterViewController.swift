@@ -104,6 +104,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             return self.allComics.count
         }
     }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat{
+        return 100.0
+    }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
@@ -123,10 +127,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                                     options: [.transition(ImageTransition.fade(1))],
                                     progressBlock: { receivedSize, totalSize in
                                         print("\(indexPath.row + 1): \(receivedSize)/\(totalSize)")
-        },
+                                    },
                                     completionHandler: { image, error, cacheType, imageURL in
                                         print("\(indexPath.row + 1): Finished")
-        })
+                                    })
         return cell
     }
 

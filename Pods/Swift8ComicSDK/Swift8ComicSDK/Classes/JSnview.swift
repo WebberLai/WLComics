@@ -20,7 +20,6 @@ open class JSnview{
     fileprivate var mCs : String = ""
     fileprivate var mC : String = ""
     fileprivate static let Y : Int = 46;
-    fileprivate let mJSContext = JSContext()!
     
     open func setSource(_ source : String){
         mSource = source
@@ -73,6 +72,7 @@ open class JSnview{
     }
     
     open func invokeJS(_ js : String, _ y : Int, _ ch : Int) -> [String]{
+        let context = JSContext()!
         var str : String = StringUtility.substring(js, 0, StringUtility.indexOfInt(js, "var pt="))
         str = StringUtility.replace(str, "ge('TheImg').src", "var src")
         let unuseScript : String = StringUtility.substring(str, "\'.jpg\';", "break;")!
@@ -83,10 +83,10 @@ open class JSnview{
         str = StringUtility.replace(str, "break;", getPageJS)
         let script : String = "function sp2(ch, y){" + str + "} " + buildNviewJS()
         
-        mJSContext.evaluateScript(script)
+        context.evaluateScript(script)
         
         //取出funciton sp2()
-        let sp2Function = mJSContext.objectForKeyedSubscript("sp2")
+        let sp2Function = context.objectForKeyedSubscript("sp2")
         //呼叫javsccript的 sp2() function
         let jsvalue : JSValue = (sp2Function?.call(withArguments: [ch, y]))!
         let list = jsvalue.toArray() as! [String]

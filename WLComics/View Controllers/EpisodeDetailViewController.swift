@@ -67,6 +67,10 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
         return pages.count
     }
     
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat{
+        return 100.0
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
         cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")

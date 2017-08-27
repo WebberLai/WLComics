@@ -30,6 +30,7 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         imgSlider.delegate = self
         imgSlider.enableSwipe = true
         imgSlider.allowCircular = false
+        imgSlider.enablePageIndicator = false
     }
 
     override func didReceiveMemoryWarning() {
