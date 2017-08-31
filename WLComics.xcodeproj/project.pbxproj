@@ -37,6 +37,7 @@
 		6012D8191F57FE7900F5C688 /* Full.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Full.PNG; sourceTree = "<group>"; };
 		6012D81A1F57FE7900F5C688 /* Rotate.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Rotate.PNG; sourceTree = "<group>"; };
 		6012D81B1F57FE7900F5C688 /* Preview.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Preview.PNG; sourceTree = "<group>"; };
+		6012D81C1F5802EB00F5C688 /* Cache.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cache.PNG; sourceTree = "<group>"; };
 		601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicEpisodesViewController.swift; sourceTree = "<group>"; };
 		6056EE1A1F28233F007BBE67 /* WLComics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WLComics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6056EE1D1F28233F007BBE67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -108,6 +109,7 @@
 		6012D8151F57FE5F00F5C688 /* App Preview */ = {
 			isa = PBXGroup;
 			children = (
+				6012D81C1F5802EB00F5C688 /* Cache.PNG */,
 				6012D8171F57FE7800F5C688 /* Comics.PNG */,
 				6012D8191F57FE7900F5C688 /* Full.PNG */,
 				6012D8181F57FE7900F5C688 /* List.PNG */,
