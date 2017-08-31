@@ -259,7 +259,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         }
         
         let imageV = UIImageView()
-        imageV.contentMode = .scaleAspectFill
+        imageV.contentMode = .scaleAspectFit
         imageV.clipsToBounds = true
         imageV.isUserInteractionEnabled = true
         let tapOnImage = UITapGestureRecognizer(target: self, action: #selector(self.tapOnImage))
