@@ -27,6 +27,8 @@ class EpisodeDetailViewController: UIViewController {
         if let split = splitViewController {
             let controllers = split.viewControllers
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
+            detailViewController?.imgSlider.currentIndex = 0
+            detailViewController?.delegate = self
         }
         WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
             episode.setUpPages()
@@ -57,7 +59,7 @@ class EpisodeDetailViewController: UIViewController {
 
 }
 
-extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDelegate{
+extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDelegate,DetailViewControllerDelegate{
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -74,7 +76,6 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
         cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")
-        
         let url = URL(string:pages[indexPath.row])
         cell.imageView!.kf.setImage(with: url,
                                     placeholder: Image.init(named:"comic_place_holder"),
@@ -84,13 +85,19 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
                                         print("\(indexPath.row + 1): \(receivedSize)/\(totalSize)")
         },
                                     completionHandler: { image, error, cacheType, imageURL in
+                                        self.detailViewController?.imgSlider.imageViewArray[indexPath.row].image = image
                                         print("\(indexPath.row + 1): Finished")
         })
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        detailViewController?.imgSlider.adjustContentOffsetFor(index: indexPath.row, offsetIndex: indexPath.row, animated: true)
     }
+    
+    func sliderImageTapped(index: Int) {
+        tableView.selectRow(at: IndexPath.init(row: index, section: 0), animated: true, scrollPosition: .none)
+    }
+    
 }
 

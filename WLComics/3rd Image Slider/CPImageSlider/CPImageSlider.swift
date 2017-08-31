@@ -31,7 +31,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     @IBOutlet weak fileprivate var nextArrowButton : UIButton!
     @IBOutlet weak fileprivate var arrowButtonsView : UIView!
     
-    private var currentIndex : Int = 0
+    var currentIndex : Int = 0
     
     var allowCircular : Bool = true{
         didSet{
@@ -149,7 +149,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         return view
     }
     
-    private func adjustContentOffsetFor(index : Int, offsetIndex offset : Int, animated : Bool)
+    func adjustContentOffsetFor(index : Int, offsetIndex offset : Int, animated : Bool)
     {
         myScrollView.setContentOffset(CGPoint(x: CGFloat(offset)*bounds.width, y: 0), animated: animated)
         myPageControl.currentPage = index
@@ -188,7 +188,6 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                                         
                     },
                                        completionHandler: { image, error, cacheType, imageURL in
-                                        print("FINISH 1")
                                         
                     })
                 }
@@ -203,7 +202,6 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                                         
                     },
                                        completionHandler: { image, error, cacheType, imageURL in
-                                        print("FINISH 2")
                                         
                     })
                 }
@@ -218,7 +216,6 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                                         
                     },
                                        completionHandler: { image, error, cacheType, imageURL in
-                                        print("FINISH 3")
                                         
                     })
                     
@@ -237,7 +234,6 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                                     
                 },
                                    completionHandler: { image, error, cacheType, imageURL in
-                                    print("FINISH 4")
                                     
                 })
             }
@@ -265,7 +261,6 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         let tapOnImage = UITapGestureRecognizer(target: self, action: #selector(self.tapOnImage))
         imageV.addGestureRecognizer(tapOnImage)
         imageViewArray.append(imageV)
-        
         return imageV
     }
     

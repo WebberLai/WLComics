@@ -8,6 +8,10 @@
 
 import UIKit
 
+@objc protocol DetailViewControllerDelegate: NSObjectProtocol {
+    func sliderImageTapped(index: Int)
+}
+
 class DetailViewController: UIViewController,CPSliderDelegate{
 
     @IBOutlet weak var detailDescriptionLabel: UILabel!
@@ -16,6 +20,8 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     
     @IBOutlet weak var imgSlider : CPImageSlider!
 
+    weak var delegate: DetailViewControllerDelegate?
+    
     var hidden = false {
         didSet {
             if let nav = navigationController {
@@ -57,6 +63,7 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     func sliderImageTapped(slider: CPImageSlider, index: Int) {
         hidden = !hidden
         self.navigationController?.navigationBar.isHidden = hidden
+        delegate?.sliderImageTapped(index: index)
     }
 }
 
