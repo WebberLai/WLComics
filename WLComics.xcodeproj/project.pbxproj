@@ -31,6 +31,12 @@
 		6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicTableViewCell.swift; sourceTree = "<group>"; };
 		6012D7E91F57D16A00F5C688 /* ComicTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ComicTableViewCell.xib; sourceTree = "<group>"; };
 		6012D7ED1F57DF8000F5C688 /* FavoriteTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteTableViewController.swift; sourceTree = "<group>"; };
+		6012D8161F57FE7800F5C688 /* Search Result.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Search Result.PNG"; sourceTree = "<group>"; };
+		6012D8171F57FE7800F5C688 /* Comics.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Comics.PNG; sourceTree = "<group>"; };
+		6012D8181F57FE7900F5C688 /* List.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = List.PNG; sourceTree = "<group>"; };
+		6012D8191F57FE7900F5C688 /* Full.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Full.PNG; sourceTree = "<group>"; };
+		6012D81A1F57FE7900F5C688 /* Rotate.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Rotate.PNG; sourceTree = "<group>"; };
+		6012D81B1F57FE7900F5C688 /* Preview.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Preview.PNG; sourceTree = "<group>"; };
 		601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicEpisodesViewController.swift; sourceTree = "<group>"; };
 		6056EE1A1F28233F007BBE67 /* WLComics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WLComics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6056EE1D1F28233F007BBE67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -99,6 +105,19 @@
 			path = "Right View Controllers";
 			sourceTree = "<group>";
 		};
+		6012D8151F57FE5F00F5C688 /* App Preview */ = {
+			isa = PBXGroup;
+			children = (
+				6012D8171F57FE7800F5C688 /* Comics.PNG */,
+				6012D8191F57FE7900F5C688 /* Full.PNG */,
+				6012D8181F57FE7900F5C688 /* List.PNG */,
+				6012D81B1F57FE7900F5C688 /* Preview.PNG */,
+				6012D81A1F57FE7900F5C688 /* Rotate.PNG */,
+				6012D8161F57FE7800F5C688 /* Search Result.PNG */,
+			);
+			path = "App Preview";
+			sourceTree = "<group>";
+		};
 		601EEE231F2971BC00504E29 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -130,6 +149,7 @@
 		6056EE1C1F28233F007BBE67 /* WLComics */ = {
 			isa = PBXGroup;
 			children = (
+				6012D8151F57FE5F00F5C688 /* App Preview */,
 				6079D0EF1F2B06FD002E6A3B /* 3rd Image Slider */,
 				601EEE231F2971BC00504E29 /* View Controllers */,
 				6056EE1D1F28233F007BBE67 /* AppDelegate.swift */,
