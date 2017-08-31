@@ -60,7 +60,7 @@
         <scene sceneID="pY4-Hu-kfo">
             <objects>
                 <navigationController title="Master" id="RMx-3f-FxP" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="漫畫列表" id="49O-XW-TAd"/>
+                    <tabBarItem key="tabBarItem" title="漫畫列表" image="comic_place_holder" id="49O-XW-TAd"/>
                     <navigationBar key="navigationBar" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="Pmd-2v-anx">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -262,6 +262,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="comic_place_holder" width="32" height="32"/>
         <image name="like" width="32" height="32"/>
     </resources>
     <inferredMetricsTieBreakers>
