@@ -27,8 +27,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
+
+        tableView.register(UINib(nibName: "ComicTableViewCell", bundle: nil), forCellReuseIdentifier: "ComicTableViewCell")
+
         self.initSearchController()
         
         if currentComic.getId() == "-1" {
@@ -106,12 +107,13 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat{
-        return 100.0
+        return 106
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ComicTableViewCell") as! ComicTableViewCell
+
         var comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
         
         if shouldShowSearchResults {
@@ -120,17 +122,29 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         else {
             comic = allComics [indexPath.row]
         }
-        cell.textLabel!.text = comic.getName()
+        
+        cell.comicNametextLabel.text = comic.getName()
+        
         let url = URL(string:comic.getSmallIconUrl()!)!
-        cell.imageView!.kf.setImage(with: url,
+        
+        cell.coverImageView!.kf.setImage(with: url,
                                     placeholder: Image.init(named:"comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1))],
                                     progressBlock: { receivedSize, totalSize in
                                         print("\(indexPath.row + 1): \(receivedSize)/\(totalSize)")
-                                    },
+        },
                                     completionHandler: { image, error, cacheType, imageURL in
                                         print("\(indexPath.row + 1): Finished")
-                                    })
+        })
+        
+        cell.favoriteButtonPress = { (button) in
+            cell.isFavorite = !cell.isFavorite
+            if cell.isFavorite == true {
+                print("INEDX \(indexPath.row) 改成我的最愛")
+            }else {
+                print("INEDX \(indexPath.row) 移除我的最愛")
+            }
+        }
         return cell
     }
 
