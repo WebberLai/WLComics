@@ -37,6 +37,13 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         imgSlider.enableSwipe = true
         imgSlider.allowCircular = false
         imgSlider.enablePageIndicator = false
+        if UIDevice.current.model.description == "iPhone"{
+            navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .cancel , target: self, action: #selector(close))
+        }
+    }
+    
+    func close(){
+        self.dismiss(animated: true, completion: nil)
     }
 
     override func didReceiveMemoryWarning() {
