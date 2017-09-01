@@ -21,6 +21,7 @@
 		6079D0F81F2B0AF8002E6A3B /* cp_next_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 6079D0F41F2B081C002E6A3B /* cp_next_arrow.png */; };
 		6079D0F91F2B0AFB002E6A3B /* cp_prev_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 6079D0F51F2B081C002E6A3B /* cp_prev_arrow.png */; };
 		60A1B90D1F58DCEF00E41AAB /* ComicTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 60A1B90B1F58DCEF00E41AAB /* ComicTableViewCell.xib */; };
+		60A1B9101F58E2EB00E41AAB /* FavoriteComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */; };
 		60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */; };
 		71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
@@ -51,6 +52,7 @@
 		6079D0F41F2B081C002E6A3B /* cp_next_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cp_next_arrow.png; sourceTree = "<group>"; };
 		6079D0F51F2B081C002E6A3B /* cp_prev_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cp_prev_arrow.png; sourceTree = "<group>"; };
 		60A1B90B1F58DCEF00E41AAB /* ComicTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ComicTableViewCell.xib; sourceTree = "<group>"; };
+		60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FavoriteComics.swift; sourceTree = "<group>"; };
 		60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeDetailViewController.swift; sourceTree = "<group>"; };
 		71BB3F481F2DBAF000EBED7D /* WLComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WLComics.swift; sourceTree = "<group>"; };
 		7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -117,7 +119,8 @@
 				6012D81A1F57FE7900F5C688 /* Rotate.PNG */,
 				6012D8161F57FE7800F5C688 /* Search Result.PNG */,
 			);
-			path = "App Preview";
+			name = "App Preview";
+			path = "WLComics/App Preview";
 			sourceTree = "<group>";
 		};
 		601EEE231F2971BC00504E29 /* View Controllers */ = {
@@ -137,6 +140,7 @@
 				6056EE1B1F28233F007BBE67 /* Products */,
 				3526AE096006480C1DF0ADAF /* Pods */,
 				E63344A200A32F08202A6A7C /* Frameworks */,
+				6012D8151F57FE5F00F5C688 /* App Preview */,
 			);
 			sourceTree = "<group>";
 		};
@@ -151,7 +155,7 @@
 		6056EE1C1F28233F007BBE67 /* WLComics */ = {
 			isa = PBXGroup;
 			children = (
-				6012D8151F57FE5F00F5C688 /* App Preview */,
+				60A1B90E1F58E2B600E41AAB /* Favorite Model */,
 				6079D0EF1F2B06FD002E6A3B /* 3rd Image Slider */,
 				601EEE231F2971BC00504E29 /* View Controllers */,
 				6056EE1D1F28233F007BBE67 /* AppDelegate.swift */,
@@ -189,6 +193,14 @@
 				6079D0F51F2B081C002E6A3B /* cp_prev_arrow.png */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		60A1B90E1F58E2B600E41AAB /* Favorite Model */ = {
+			isa = PBXGroup;
+			children = (
+				60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */,
+			);
+			name = "Favorite Model";
 			sourceTree = "<group>";
 		};
 		E63344A200A32F08202A6A7C /* Frameworks */ = {
@@ -339,6 +351,7 @@
 				6012D7EE1F57DF8000F5C688 /* FavoriteTableViewController.swift in Sources */,
 				6056EE221F28233F007BBE67 /* DetailViewController.swift in Sources */,
 				6056EE201F28233F007BBE67 /* MasterViewController.swift in Sources */,
+				60A1B9101F58E2EB00E41AAB /* FavoriteComics.swift in Sources */,
 				71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */,
 				601EEE251F29722300504E29 /* ComicEpisodesViewController.swift in Sources */,
 				6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */,

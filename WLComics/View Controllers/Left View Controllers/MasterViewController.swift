@@ -67,7 +67,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
     func insertNewObject(_ sender: Any) {
@@ -107,11 +106,11 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat{
-        return 106
+        return 116
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "ComicTableViewCell") as! ComicTableViewCell
 
         var comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
@@ -137,13 +136,20 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                                         print("\(indexPath.row + 1): Finished")
         })
         
+        let isFavorite : Bool = FavoriteComics.checkComicIsMyFavorite(comic)
+        if isFavorite == false {
+            cell.favoriteBtn.setImage(UIImage.init(named: "dislike"), for: .normal)
+        }else {
+            cell.favoriteBtn.setImage(UIImage.init(named: "like"), for: .normal)
+        }
+        
         cell.favoriteButtonPress = { (button) in
-            cell.isFavorite = !cell.isFavorite
-            if cell.isFavorite == true {
-                print("INEDX \(indexPath.row) 改成我的最愛")
+            if isFavorite == false {
+               FavoriteComics.addComicToMyFavorite(comic)
             }else {
-                print("INEDX \(indexPath.row) 移除我的最愛")
+                FavoriteComics.removeComicFromMyFavorite(comic)
             }
+            self.tableView.reloadRows(at: [indexPath], with: .none)
         }
         return cell
     }

@@ -40,6 +40,9 @@
                             <constraint firstAttribute="height" constant="100" id="rew-ae-1PS"/>
                         </constraints>
                         <state key="normal" image="dislike"/>
+                        <connections>
+                            <action selector="favoriteBtnToggle:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="Skd-Xt-gCV"/>
+                        </connections>
                     </button>
                 </subviews>
                 <constraints>

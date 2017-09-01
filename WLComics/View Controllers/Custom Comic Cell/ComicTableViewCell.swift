@@ -2,7 +2,7 @@
 //  ComicTableViewCell.swift
 //  WLComics
 //
-//  Created by Roca Developer on 2017/8/31.
+//  Created by Webber Lai on 2017/8/31.
 //  Copyright © 2017年 webberlai. All rights reserved.
 //
 
@@ -13,9 +13,7 @@ class ComicTableViewCell: UITableViewCell {
     @IBOutlet weak var coverImageView : UIImageView!
     @IBOutlet weak var comicNametextLabel: UILabel!
     @IBOutlet weak var favoriteBtn : UIButton!
-    
-    var isFavorite : Bool = false
-    
+        
     var favoriteButtonPress : ((UIButton) -> Void)?
     
     override func awakeFromNib() {
