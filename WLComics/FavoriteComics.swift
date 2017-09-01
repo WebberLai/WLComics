@@ -45,14 +45,15 @@ class FavoriteComics: NSObject {
     
     static func listAllFavorite() -> NSMutableArray {
         let defaults = UserDefaults.standard
-        var favorites = (defaults.object(forKey: "favorite_list") as! NSMutableArray).mutableCopy() as! NSMutableArray
+        var favorites = defaults.object(forKey: "favorite_list")
+        
         if favorites == nil {
             let favoriteList = NSMutableArray.init()
             favorites = favoriteList
             defaults.set(favoriteList, forKey: "favorite_list")
             defaults.synchronize()
         }
-        return favorites
+        return (favorites as! NSMutableArray)
     }
     
     static func checkComicIsMyFavorite(_ comic:Comic) -> Bool{
