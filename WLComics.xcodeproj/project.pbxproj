@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		6012D7EA1F57D16A00F5C688 /* ComicTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */; };
-		6012D7EB1F57D16A00F5C688 /* ComicTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6012D7E91F57D16A00F5C688 /* ComicTableViewCell.xib */; };
 		6012D7EE1F57DF8000F5C688 /* FavoriteTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6012D7ED1F57DF8000F5C688 /* FavoriteTableViewController.swift */; };
 		601EEE251F29722300504E29 /* ComicEpisodesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */; };
 		6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1D1F28233F007BBE67 /* AppDelegate.swift */; };
@@ -21,6 +20,7 @@
 		6079D0F71F2B0AF3002E6A3B /* CPImageSlider.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6079D0F21F2B081C002E6A3B /* CPImageSlider.xib */; };
 		6079D0F81F2B0AF8002E6A3B /* cp_next_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 6079D0F41F2B081C002E6A3B /* cp_next_arrow.png */; };
 		6079D0F91F2B0AFB002E6A3B /* cp_prev_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 6079D0F51F2B081C002E6A3B /* cp_prev_arrow.png */; };
+		60A1B90D1F58DCEF00E41AAB /* ComicTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 60A1B90B1F58DCEF00E41AAB /* ComicTableViewCell.xib */; };
 		60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */; };
 		71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
@@ -29,7 +29,6 @@
 /* Begin PBXFileReference section */
 		0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.release.xcconfig"; sourceTree = "<group>"; };
 		6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicTableViewCell.swift; sourceTree = "<group>"; };
-		6012D7E91F57D16A00F5C688 /* ComicTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ComicTableViewCell.xib; sourceTree = "<group>"; };
 		6012D7ED1F57DF8000F5C688 /* FavoriteTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteTableViewController.swift; sourceTree = "<group>"; };
 		6012D8161F57FE7800F5C688 /* Search Result.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Search Result.PNG"; sourceTree = "<group>"; };
 		6012D8171F57FE7800F5C688 /* Comics.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Comics.PNG; sourceTree = "<group>"; };
@@ -51,6 +50,7 @@
 		6079D0F21F2B081C002E6A3B /* CPImageSlider.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CPImageSlider.xib; sourceTree = "<group>"; };
 		6079D0F41F2B081C002E6A3B /* cp_next_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cp_next_arrow.png; sourceTree = "<group>"; };
 		6079D0F51F2B081C002E6A3B /* cp_prev_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cp_prev_arrow.png; sourceTree = "<group>"; };
+		60A1B90B1F58DCEF00E41AAB /* ComicTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ComicTableViewCell.xib; sourceTree = "<group>"; };
 		60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeDetailViewController.swift; sourceTree = "<group>"; };
 		71BB3F481F2DBAF000EBED7D /* WLComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WLComics.swift; sourceTree = "<group>"; };
 		7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -82,7 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */,
-				6012D7E91F57D16A00F5C688 /* ComicTableViewCell.xib */,
+				60A1B90B1F58DCEF00E41AAB /* ComicTableViewCell.xib */,
 			);
 			path = "Custom Comic Cell";
 			sourceTree = "<group>";
@@ -263,8 +263,8 @@
 			files = (
 				6056EE2A1F28233F007BBE67 /* LaunchScreen.storyboard in Resources */,
 				6056EE271F28233F007BBE67 /* Assets.xcassets in Resources */,
+				60A1B90D1F58DCEF00E41AAB /* ComicTableViewCell.xib in Resources */,
 				6056EE251F28233F007BBE67 /* Main.storyboard in Resources */,
-				6012D7EB1F57D16A00F5C688 /* ComicTableViewCell.xib in Resources */,
 				6079D0F91F2B0AFB002E6A3B /* cp_prev_arrow.png in Resources */,
 				6079D0F71F2B0AF3002E6A3B /* CPImageSlider.xib in Resources */,
 				6079D0F81F2B0AF8002E6A3B /* cp_next_arrow.png in Resources */,
