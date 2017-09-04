@@ -29,6 +29,11 @@ class ComicEpisodesViewController: UIViewController {
             }
         }
         self.tableView.tableHeaderView = nil
+        navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .fastForward , target: self, action: #selector(scrollToBottom))
+    }
+    
+    func scrollToBottom (){
+        tableView.scrollToRow(at: IndexPath.init(item: allEpisodes.count-1 , section: 0), at: .bottom , animated: true)
     }
 
     override func didReceiveMemoryWarning() {

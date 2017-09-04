@@ -41,6 +41,11 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             }
         }
         self.title = "漫畫列表"
+        navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
+    }
+    
+    func clearCache(){
+        ImageCache.default.clearMemoryCache()
     }
     
     func initSearchController() {
