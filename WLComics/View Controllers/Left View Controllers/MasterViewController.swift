@@ -45,7 +45,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
     
     func clearCache(){
-        ImageCache.default.clearMemoryCache()
+        ImageCache.default.clearDiskCache()
     }
     
     func initSearchController() {
