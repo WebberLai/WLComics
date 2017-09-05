@@ -19,6 +19,8 @@ class FavoriteTableViewController: UITableViewController {
         super.viewDidLoad()
         self.title = "收藏列表"
         tableView.register(UINib(nibName: "ComicTableViewCell", bundle: nil), forCellReuseIdentifier: "ComicTableViewCell")
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboard(noti:)), name:Notification.Name("BLEClickNotification"), object: nil)
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -32,6 +34,15 @@ class FavoriteTableViewController: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
 
+     @objc private func handleKeyboard(noti : Notification) {
+        guard let click = noti.object as? UIKeyInput  else {return}
+        if click as! String == UIKeyInputRightArrow {
+            print("翻到下一頁")
+        }else if click as! String == UIKeyInputLeftArrow {
+            print("翻到上一頁")
+        }
+    }
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
