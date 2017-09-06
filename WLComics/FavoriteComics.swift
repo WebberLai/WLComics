@@ -13,7 +13,7 @@ class FavoriteComics: NSObject {
     
     static func addComicToMyFavorite(_ comic : Comic){
         let defaults = UserDefaults.standard
-        let favorites = (defaults.object(forKey: "favorite_list") as! NSMutableArray).mutableCopy() as! NSMutableArray
+        var favorites = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
         if favorites == nil {
             let favoriteList = NSMutableArray.init() as! [NSMutableDictionary]
             defaults.set(favoriteList, forKey: "favorite_list")
@@ -24,18 +24,17 @@ class FavoriteComics: NSObject {
         let idDict = NSDictionary.init(object: comic.getId() , forKey: "comic_id" as NSCopying)
         dict.addEntries(from: iconDict as! [AnyHashable : Any])
         dict.addEntries(from: idDict as! [AnyHashable : Any])
-        favorites.add(dict)
+        favorites?.append(dict)
         defaults.set(favorites, forKey: "favorite_list")
         defaults.synchronize()
     }
     
     static func removeComicFromMyFavorite(_ comic : Comic){
         let defaults = UserDefaults.standard
-        let favorites = (defaults.object(forKey: "favorite_list") as! NSMutableArray).mutableCopy() as! NSMutableArray
-        for (index , c) in (favorites.enumerated()){
-            let dict = c as! NSMutableDictionary
-            if comic.getId() == dict.object(forKey: "comic_id") as! String {
-                favorites.removeObject(at: index)
+        var favorites = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
+        for (index , c) in (favorites?.enumerated())!{
+            if comic.getId() == c.object(forKey: "comic_id") as! String {
+                favorites?.remove(at: index)
                 break
             }
         }
@@ -45,25 +44,22 @@ class FavoriteComics: NSObject {
     
     static func listAllFavorite() -> NSMutableArray {
         let defaults = UserDefaults.standard
-        var favorites = defaults.object(forKey: "favorite_list")
-        
+        var favorites : [NSMutableDictionary]? = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
         if favorites == nil {
             let favoriteList = NSMutableArray.init()
-            favorites = favoriteList
+            favorites = favoriteList as? [NSMutableDictionary]
             defaults.set(favoriteList, forKey: "favorite_list")
             defaults.synchronize()
         }
-        return (favorites as! NSMutableArray)
+        return favorites as! NSMutableArray
     }
     
     static func checkComicIsMyFavorite(_ comic:Comic) -> Bool{
         var isMyFavorite : Bool = false
         let defaults = UserDefaults.standard
-        let favorites = defaults.object(forKey: "favorite_list") as! NSMutableArray
-        let copyFavorites = favorites.mutableCopy() as! NSMutableArray
-        for (_ , c) in (copyFavorites.enumerated()){
-            let comicCopy = c as!NSMutableDictionary
-            if comic.getId() == (comicCopy as AnyObject).object(forKey: "comic_id") as! String {
+        let favorites : [NSMutableDictionary]? = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
+        for (_ , c) in (favorites?.enumerated())!{
+            if comic.getId() == (c as AnyObject).object(forKey: "comic_id") as! String {
                 isMyFavorite = true
             }
         }
