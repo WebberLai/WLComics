@@ -44,7 +44,7 @@ class FavoriteComics: NSObject {
     
     static func listAllFavorite() -> NSMutableArray {
         let defaults = UserDefaults.standard
-        var favorites : [NSMutableDictionary]? = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
+        var favorites = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
         if favorites == nil {
             let favoriteList = NSMutableArray.init()
             favorites = favoriteList as? [NSMutableDictionary]
@@ -57,7 +57,7 @@ class FavoriteComics: NSObject {
     static func checkComicIsMyFavorite(_ comic:Comic) -> Bool{
         var isMyFavorite : Bool = false
         let defaults = UserDefaults.standard
-        let favorites : [NSMutableDictionary]? = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
+        let favorites = defaults.array(forKey: "favorite_list") as! [NSMutableDictionary]?
         for (_ , c) in (favorites?.enumerated())!{
             if comic.getId() == (c as AnyObject).object(forKey: "comic_id") as! String {
                 isMyFavorite = true
