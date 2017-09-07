@@ -51,20 +51,28 @@ class DetailViewController: UIViewController,CPSliderDelegate{
                 print("不支援的鍵盤指令")
                 return
         }
-        if action == UIKeyInputRightArrow {
-            print("翻到下一頁")
-        } else if action == UIKeyInputLeftArrow{
-            print("翻到上一頁")
-
+        
+        if imgSlider.images.count == 0 {
+            print("尚未載入漫畫")
+            return
         }
-    }
-    
-    @objc private func handleKeyboard(noti : Notification) {
-        guard let click = noti.object as? UIKeyInput  else {return}
-        if click as! String == UIKeyInputRightArrow {
-            print("翻到下一頁")
-        }else if click as! String == UIKeyInputLeftArrow {
-            print("翻到上一頁")
+
+        var pageIndex = imgSlider.currentIndex
+
+        if action == UIKeyInputRightArrow {
+            
+            pageIndex += 1
+            
+            if pageIndex < imgSlider.images.count {
+                imgSlider.nextButtonPressed()
+            }
+        } else if action == UIKeyInputLeftArrow{
+            pageIndex -= 1
+            if pageIndex < 0 {
+                pageIndex = 0
+            }else {
+                imgSlider.previousButtonPressed()
+            }
         }
     }
     
