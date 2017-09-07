@@ -14,7 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var window: UIWindow?
     
     // Define identifier
-    let notificationName = Notification.Name("BLEClickNotification")
+    let notificationName = Notification.Name(rawValue:"BLEClickNotification")
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -29,18 +29,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     }
     
     override var keyCommands: [UIKeyCommand]? {
-        return [
-            UIKeyCommand.init(input: UIKeyInputRightArrow , modifierFlags: .command, action: #selector(rightClick)),
-            UIKeyCommand.init(input: UIKeyInputLeftArrow , modifierFlags: .command, action: #selector(leftClick))
+        let commands = [
+            UIKeyCommand(input: UIKeyInputRightArrow, modifierFlags:[], action: #selector(AppDelegate.rightClick(command:)), discoverabilityTitle: "Next Page"),
+            UIKeyCommand(input: UIKeyInputLeftArrow , modifierFlags:[], action: #selector(AppDelegate.leftClick(command:)), discoverabilityTitle: "Previous Page"),
         ]
+        return commands
     }
     
-    func rightClick(){
-        NotificationCenter.default.post(name: notificationName, object: UIKeyInputRightArrow)
+    func rightClick(command:UIKeyCommand) {
+        NotificationCenter.default.post(name:notificationName,
+                                        object: nil,
+                                        userInfo: ["action":UIKeyInputRightArrow])
     }
     
-    func leftClick(){
-        NotificationCenter.default.post(name: notificationName, object: UIKeyInputLeftArrow)
+    func leftClick(command:UIKeyCommand) {
+        NotificationCenter.default.post(name:notificationName,
+                                        object: nil,
+                                        userInfo: ["action":UIKeyInputLeftArrow])
     }
     
     func applicationWillResignActive(_ application: UIApplication) {

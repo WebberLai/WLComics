@@ -40,6 +40,32 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         if UIDevice.current.model.description == "iPhone"{
             navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .cancel , target: self, action: #selector(close))
         }
+        NotificationCenter.default.addObserver(forName:Notification.Name(rawValue:"BLEClickNotification"),
+                                               object:nil, queue:nil,
+                                               using:catchNotification(notification:))
+    }
+    
+    func catchNotification(notification:Notification) -> Void {
+        guard let userInfo = notification.userInfo,
+            let action  = userInfo["action"] as? String else {
+                print("不支援的鍵盤指令")
+                return
+        }
+        if action == UIKeyInputRightArrow {
+            print("翻到下一頁")
+        } else if action == UIKeyInputLeftArrow{
+            print("翻到上一頁")
+
+        }
+    }
+    
+    @objc private func handleKeyboard(noti : Notification) {
+        guard let click = noti.object as? UIKeyInput  else {return}
+        if click as! String == UIKeyInputRightArrow {
+            print("翻到下一頁")
+        }else if click as! String == UIKeyInputLeftArrow {
+            print("翻到上一頁")
+        }
     }
     
     func close(){
