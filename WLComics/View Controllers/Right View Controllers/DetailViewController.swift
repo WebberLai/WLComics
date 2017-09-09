@@ -40,6 +40,40 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         if UIDevice.current.model.description == "iPhone"{
             navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .cancel , target: self, action: #selector(close))
         }
+        NotificationCenter.default.addObserver(forName:Notification.Name(rawValue:"BLEClickNotification"),
+                                               object:nil, queue:nil,
+                                               using:catchNotification(notification:))
+    }
+    
+    func catchNotification(notification:Notification) -> Void {
+        guard let userInfo = notification.userInfo,
+            let action  = userInfo["action"] as? String else {
+                print("不支援的鍵盤指令")
+                return
+        }
+        
+        if imgSlider.images.count == 0 {
+            print("尚未載入漫畫")
+            return
+        }
+
+        var pageIndex = imgSlider.currentIndex
+
+        if action == UIKeyInputRightArrow {
+            
+            pageIndex += 1
+            
+            if pageIndex < imgSlider.images.count {
+                imgSlider.nextButtonPressed()
+            }
+        } else if action == UIKeyInputLeftArrow{
+            pageIndex -= 1
+            if pageIndex < 0 {
+                pageIndex = 0
+            }else {
+                imgSlider.previousButtonPressed()
+            }
+        }
     }
     
     func close(){
