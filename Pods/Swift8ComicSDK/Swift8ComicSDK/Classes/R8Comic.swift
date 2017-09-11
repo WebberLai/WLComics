@@ -115,6 +115,105 @@ open class R8Comic{
         task.resume()
     }
     
+    /**
+     * 搜尋漫畫，搜尋到的漫畫僅有id、name，不包含漫畫簡介、集數等等資訊
+     *
+     * @param keyword
+     *            搜尋漫畫的關鍵字，比如"海賊王"
+     *
+     */
+    open func searchComic(_ keyword : String, onLoadList: @escaping ([Comic]) -> Void) -> Void{
+        DispatchQueue.global(qos: .userInitiated).async {
+            var comics : [Comic] = [Comic]()
+            let url = URL(string: self.mConfig.getSearchUrl(keyword, 1))
+            print("url\(url)")
+            let request = URLRequest(url: url!)
+            let session = URLSession(configuration: URLSessionConfiguration.default)
+            let downloadGroup = DispatchGroup()
+            downloadGroup.enter()
+            
+            let task = session.dataTask(with: request, completionHandler: {(data, response, error) -> Void in
+                if let data = data {
+                    let htmlString = StringUtility.dataToStringBig5(data: data)
+                    let maxPage = self.mParser.searchComic(htmlString, onLoadComics: { (list : [Comic]) in
+                        comics += list
+                    })
+                    
+                    if let response = response as? HTTPURLResponse , 200...299 ~= response.statusCode {
+                        if(maxPage > 1){
+                            
+                            for i in 2..<maxPage {
+                                let url2 = URL(string: self.mConfig.getSearchUrl(keyword, i))
+                                
+                                let request = URLRequest(url: url2!)
+                                let session = URLSession(configuration: URLSessionConfiguration.default)
+                                
+                                downloadGroup.enter()
+                                
+                                let task = session.dataTask(with: request, completionHandler: {(data, response, error) -> Void in
+                                    if let data = data {
+                                        
+                                        let htmlString = StringUtility.dataToStringBig5(data: data)
+                                        //用'_'接收回傳值可不處理，以消除編譯的警告訊息
+                                        _ = self.mParser.searchComic(htmlString, onLoadComics: { (list : [Comic]) in
+                                            comics += list
+                                        })
+                                        
+                                        if let response = response as? HTTPURLResponse , 200...299 ~= response.statusCode {
+                                            //not thing
+                                        } else {
+                                            print("searchComic,page=\(i) fail")
+                                        }
+                                    }
+                                    downloadGroup.leave()
+                                })
+                                task.resume()
+                            }
+                        }
+                    } else {
+                        print("searchComic fail")
+                    }
+                    downloadGroup.leave()
+                }
+            })
+            task.resume()
+            
+            //停留等待全部查詢漫畫的分頁結果解析完成後，再將往下執行
+            downloadGroup.wait()
+            
+            onLoadList(comics)
+        }
+    }
+    
+    /**
+     * 快速搜尋漫畫名稱
+     *
+     * @param keyword
+     *            搜尋漫畫的關鍵字，比如"海賊王"
+     * @param listener
+     **/
+    open func quickSearchComic(_ keyword : String, onLoadList: @escaping ([String]) -> Void) -> Void{
+        let url = URL(string: mConfig.getQuickSearchUrl(keyword))
+        
+        let request = URLRequest(url: url!)
+        let session = URLSession(configuration: URLSessionConfiguration.default)
+        
+        let task = session.dataTask(with: request, completionHandler: {(data, response, error) -> Void in
+            if let data = data {
+                
+                let htmlString = StringUtility.dataToStringGB2312(data: data)
+                let comicList = self.mParser.quickSearchComic(htmlString)
+                
+                if let response = response as? HTTPURLResponse , 200...299 ~= response.statusCode {
+                    onLoadList(comicList)
+                } else {
+                    print("quickSearchComic fail")
+                }
+            }
+        })
+        task.resume()
+    }
+    
     /*
      * 取得指定漫畫封面大圖
      */

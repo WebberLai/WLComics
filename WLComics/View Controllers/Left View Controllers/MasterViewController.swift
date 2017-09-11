@@ -181,7 +181,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         guard let searchString = searchController.searchBar.text else {
             return
         }
-        
+
         filterComics = allComics.filter({ (comic) -> Bool in
             let comicName = comic.getName() as NSString
             return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound

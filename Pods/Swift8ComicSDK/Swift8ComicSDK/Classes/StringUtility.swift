@@ -9,6 +9,8 @@
 import Foundation
 
 open class StringUtility{
+    open static let ENCODE_BIG5 = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5_HKSCS_1999.rawValue))
+    open static let ENCODE_GB2312 = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))
     
     public init() {
     }
@@ -19,6 +21,18 @@ open class StringUtility{
 
     open class func indexOf(source : String, search : String) -> Range<String.Index>?{
         return source.range(of: search)
+    }
+    
+    open class func lastIndexOf( source : String, target: String) -> Int {
+        let ret = source.range(of: target, options: .backwards)
+        
+        if( ret != nil){
+            let result = source.characters.distance(from: source.characters.startIndex, to: (ret?.lowerBound)!)
+            
+            return result
+        }
+        
+        return -1
     }
     
     open class func indexOfInt(_ source : String, _ search : String) -> Int{
@@ -67,6 +81,18 @@ open class StringUtility{
         return nil
     }
     
+    open class func lastSubstring(_ source : String,_ upperString : String,_ lowerString : String ) -> String?{
+        
+        let upperIndex = lastIndexOf(source: source, target: upperString)
+        let lowerIndex = lastIndexOf(source: source, target: lowerString)
+        
+        if(upperIndex != -1 && lowerIndex != -1){
+            return substring(source, upperIndex + upperString.characters.count, lowerIndex)
+        }
+        
+        return nil
+    }
+    
     open class func substring(source : String, beginIndex : String.Index) -> String{
         return source.substring(from: beginIndex)
     }
@@ -86,8 +112,13 @@ open class StringUtility{
     }
     
     open class func dataToStringBig5(data : Data) -> String{
-        let encodeBig5 = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5_HKSCS_1999.rawValue))
-        let string = NSString.init(data: data, encoding: encodeBig5)
+        let string = NSString.init(data: data, encoding: ENCODE_BIG5)
+        
+        return string! as String;
+    }
+    
+    open class func dataToStringGB2312(data : Data) -> String{
+        let string = NSString.init(data: data, encoding: ENCODE_GB2312)
         
         return string! as String;
     }
@@ -104,4 +135,23 @@ open class StringUtility{
         return source.replacingOccurrences(of: of, with: with)
     }
     
+    open class func urlEncodeUsingBIG5(_ source : String) -> String{
+        return urlEncode(source, ENCODE_BIG5)
+    }
+    
+    open class func urlEncodeUsingGB2312(_ source : String) -> String{
+        return urlEncode(source, ENCODE_GB2312)
+    }
+    
+    open class func urlEncode(_ source : String,_ encode: UInt) -> String{
+        let encodeUrlString = source.data(using: String.Encoding(rawValue: encode), allowLossyConversion: true)
+        
+        return encodeUrlString!.hexEncodedString()
+    }
+}
+
+extension Data {
+    func hexEncodedString() -> String {
+        return map { String(format: "%%%02hhX", $0) }.joined()
+    }
 }

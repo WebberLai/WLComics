@@ -13,9 +13,8 @@ open class Config {
     fileprivate let mSmallIconUrl : String = mComicHost + "pics/0/%@s.jpg"
     fileprivate let mIconUrl : String = mComicHost + "pics/0/%@.jpg"
     fileprivate let mComicDetail : String = mComicHost + "html/%@.html"
-    
-    
-    
+    fileprivate let mQuickSearchUrl : String = mComicHost + "member/quicksearchjs.aspx?r=%.16f&t=item&o=id&k=%@"
+    fileprivate let mSearchUrl : String = mComicHost + "member/search.aspx?k=%@&page=%d"
     
     open func getComicDetailUrl(_ comicId: String) -> String{
         return String(format: mComicDetail, comicId)
@@ -27,5 +26,13 @@ open class Config {
     
     open func getComicSmallIconUrl(_ comicId: String) -> String{
         return String(format: mSmallIconUrl, comicId)
+    }
+    
+    open func getQuickSearchUrl(_ keyword: String) -> String{
+        return String(format: mQuickSearchUrl,(CGFloat(Float(arc4random()) / Float(UINT32_MAX))), StringUtility.urlEncodeUsingGB2312(keyword))
+    }
+    
+    open func getSearchUrl(_ keyword: String, _ page : Int) -> String{
+        return String(format: mSearchUrl, StringUtility.urlEncodeUsingBIG5(keyword), page)
     }
 }
