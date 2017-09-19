@@ -11,7 +11,7 @@ import Kingfisher
 
 class FavoriteTableViewController: UITableViewController {
     
-    var myFavoriteList : NSMutableArray = FavoriteComics.listAllFavorite()
+    var myFavoriteList : NSMutableArray? = FavoriteComics.listAllFavorite()
     
     var currentIndex : Int = 0
     
@@ -42,7 +42,7 @@ class FavoriteTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return myFavoriteList.count
+        return (myFavoriteList?.count)!
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat{
@@ -53,7 +53,7 @@ class FavoriteTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ComicTableViewCell") as! ComicTableViewCell
         cell.favoriteBtn.isHidden = true
         
-        let comicDict : NSMutableDictionary = myFavoriteList[indexPath.row] as! NSMutableDictionary
+        let comicDict : NSMutableDictionary = myFavoriteList?[indexPath.row] as! NSMutableDictionary
         
         cell.comicNametextLabel.text = comicDict.object(forKey: "name") as? String
         
@@ -88,11 +88,11 @@ class FavoriteTableViewController: UITableViewController {
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            let comicDict  : NSMutableDictionary = myFavoriteList[currentIndex] as! NSMutableDictionary
+            let comicDict  : NSMutableDictionary = myFavoriteList?[currentIndex] as! NSMutableDictionary
             let currentComic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicDict.object(forKey: "comic_id") as! String , name: comicDict.object(forKey: "name") as! String)
             currentComic.setSmallIconUrl(comicDict.object(forKey: "icon_url") as! String)
             FavoriteComics.removeComicFromMyFavorite(currentComic)
-            myFavoriteList.removeObject(at: indexPath.row)
+            myFavoriteList?.removeObject(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
@@ -119,7 +119,7 @@ class FavoriteTableViewController: UITableViewController {
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEpisodes" {
-            let comicDict  : NSMutableDictionary = myFavoriteList[currentIndex] as! NSMutableDictionary
+            let comicDict  : NSMutableDictionary = myFavoriteList?[currentIndex] as! NSMutableDictionary
             let currentComic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicDict.object(forKey: "comic_id") as! String , name: comicDict.object(forKey: "name") as! String)
             currentComic.setSmallIconUrl(comicDict.object(forKey: "icon_url") as! String)
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
