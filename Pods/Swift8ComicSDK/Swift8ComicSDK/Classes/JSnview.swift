@@ -98,7 +98,7 @@ open class JSnview{
         var buf : String = String();
         
         buf.append("var result = [];")
-        buf.append("for(var p = 1; p < ps; p++){")
+        buf.append("for(var p = 1; p <= ps; p++){")
         buf.append("%@")
         buf.append("result.push(src);")
         buf.append("}")
