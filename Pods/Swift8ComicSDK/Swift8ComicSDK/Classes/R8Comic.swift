@@ -126,7 +126,7 @@ open class R8Comic{
         DispatchQueue.global(qos: .userInitiated).async {
             var comics : [Comic] = [Comic]()
             let url = URL(string: self.mConfig.getSearchUrl(keyword, 1))
-            print("url\(url)")
+            
             let request = URLRequest(url: url!)
             let session = URLSession(configuration: URLSessionConfiguration.default)
             let downloadGroup = DispatchGroup()

@@ -11,7 +11,7 @@ import Kingfisher
 
 class FavoriteTableViewController: UITableViewController {
     
-    var myFavoriteList : NSMutableArray? = FavoriteComics.listAllFavorite()
+    var myFavoriteList : Array? = FavoriteComics.listAllFavorite()
     
     var currentIndex : Int = 0
     
@@ -24,7 +24,7 @@ class FavoriteTableViewController: UITableViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        myFavoriteList = (FavoriteComics.listAllFavorite().mutableCopy()) as! NSMutableArray
+        myFavoriteList = FavoriteComics.listAllFavorite()
         tableView.reloadData()
     }
     
@@ -88,11 +88,11 @@ class FavoriteTableViewController: UITableViewController {
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            let comicDict  : NSMutableDictionary = myFavoriteList?[currentIndex] as! NSMutableDictionary
+            let comicDict  : NSMutableDictionary = myFavoriteList![currentIndex]
             let currentComic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicDict.object(forKey: "comic_id") as! String , name: comicDict.object(forKey: "name") as! String)
             currentComic.setSmallIconUrl(comicDict.object(forKey: "icon_url") as! String)
             FavoriteComics.removeComicFromMyFavorite(currentComic)
-            myFavoriteList?.removeObject(at: indexPath.row)
+            myFavoriteList?.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }

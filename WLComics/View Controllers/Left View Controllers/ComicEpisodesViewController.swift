@@ -32,7 +32,7 @@ class ComicEpisodesViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .fastForward , target: self, action: #selector(scrollToBottom))
     }
     
-    func scrollToBottom (){
+    @objc func scrollToBottom (){
         tableView.scrollToRow(at: IndexPath.init(item: allEpisodes.count-1 , section: 0), at: .bottom , animated: true)
     }
 

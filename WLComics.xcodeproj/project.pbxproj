@@ -10,6 +10,9 @@
 		6012D7EA1F57D16A00F5C688 /* ComicTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */; };
 		6012D7EE1F57DF8000F5C688 /* FavoriteTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6012D7ED1F57DF8000F5C688 /* FavoriteTableViewController.swift */; };
 		601EEE251F29722300504E29 /* ComicEpisodesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */; };
+		6034C2FF1F73456200D2B861 /* FavoriteComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */; };
+		6034C3011F73463600D2B861 /* SwiftyPlistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */; };
+		6034C3031F73479900D2B861 /* MyFavoritesComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6034C3021F73479900D2B861 /* MyFavoritesComics.plist */; };
 		6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1D1F28233F007BBE67 /* AppDelegate.swift */; };
 		6056EE201F28233F007BBE67 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1F1F28233F007BBE67 /* MasterViewController.swift */; };
 		6056EE221F28233F007BBE67 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE211F28233F007BBE67 /* DetailViewController.swift */; };
@@ -21,7 +24,6 @@
 		6079D0F81F2B0AF8002E6A3B /* cp_next_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 6079D0F41F2B081C002E6A3B /* cp_next_arrow.png */; };
 		6079D0F91F2B0AFB002E6A3B /* cp_prev_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 6079D0F51F2B081C002E6A3B /* cp_prev_arrow.png */; };
 		60A1B90D1F58DCEF00E41AAB /* ComicTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 60A1B90B1F58DCEF00E41AAB /* ComicTableViewCell.xib */; };
-		60A1B9101F58E2EB00E41AAB /* FavoriteComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */; };
 		60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */; };
 		71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
@@ -39,6 +41,8 @@
 		6012D81B1F57FE7900F5C688 /* Preview.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Preview.PNG; sourceTree = "<group>"; };
 		6012D81C1F5802EB00F5C688 /* Cache.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cache.PNG; sourceTree = "<group>"; };
 		601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicEpisodesViewController.swift; sourceTree = "<group>"; };
+		6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftyPlistManager.swift; sourceTree = "<group>"; };
+		6034C3021F73479900D2B861 /* MyFavoritesComics.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = MyFavoritesComics.plist; sourceTree = "<group>"; };
 		6056EE1A1F28233F007BBE67 /* WLComics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WLComics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6056EE1D1F28233F007BBE67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6056EE1F1F28233F007BBE67 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
@@ -164,6 +168,7 @@
 				6056EE281F28233F007BBE67 /* LaunchScreen.storyboard */,
 				6056EE2B1F28233F007BBE67 /* Info.plist */,
 				71BB3F481F2DBAF000EBED7D /* WLComics.swift */,
+				6034C3021F73479900D2B861 /* MyFavoritesComics.plist */,
 			);
 			path = WLComics;
 			sourceTree = "<group>";
@@ -199,6 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */,
+				6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */,
 			);
 			name = "Favorite Model";
 			sourceTree = "<group>";
@@ -246,6 +252,7 @@
 				TargetAttributes = {
 					6056EE191F28233F007BBE67 = {
 						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = E935HHVHT5;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -273,6 +280,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6034C3031F73479900D2B861 /* MyFavoritesComics.plist in Resources */,
 				6056EE2A1F28233F007BBE67 /* LaunchScreen.storyboard in Resources */,
 				6056EE271F28233F007BBE67 /* Assets.xcassets in Resources */,
 				60A1B90D1F58DCEF00E41AAB /* ComicTableViewCell.xib in Resources */,
@@ -336,7 +344,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -346,12 +354,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6034C3011F73463600D2B861 /* SwiftyPlistManager.swift in Sources */,
+				6034C2FF1F73456200D2B861 /* FavoriteComics.swift in Sources */,
 				60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */,
 				6012D7EA1F57D16A00F5C688 /* ComicTableViewCell.swift in Sources */,
 				6012D7EE1F57DF8000F5C688 /* FavoriteTableViewController.swift in Sources */,
 				6056EE221F28233F007BBE67 /* DetailViewController.swift in Sources */,
 				6056EE201F28233F007BBE67 /* MasterViewController.swift in Sources */,
-				60A1B9101F58E2EB00E41AAB /* FavoriteComics.swift in Sources */,
 				71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */,
 				601EEE251F29722300504E29 /* ComicEpisodesViewController.swift in Sources */,
 				6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */,
@@ -481,13 +490,13 @@
 			baseConfigurationReference = EBCC57C77576999D43679021 /* Pods-WLComics.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E935HHVHT5;
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComics;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -496,13 +505,13 @@
 			baseConfigurationReference = 0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E935HHVHT5;
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComics;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

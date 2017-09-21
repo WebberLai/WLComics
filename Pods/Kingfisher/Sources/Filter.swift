@@ -78,9 +78,9 @@ public struct Filter {
     public typealias ColorElement = (CGFloat, CGFloat, CGFloat, CGFloat)
     
     /// Color control filter which will apply color control change to images.
-    public static var colorControl: (ColorElement) -> Filter = {
-        brightness, contrast, saturation, inputEV in
-        Filter { input in
+    public static var colorControl: (ColorElement) -> Filter = { arg -> Filter in
+        let (brightness, contrast, saturation, inputEV) = arg
+        return Filter { input in
             let paramsColor = [kCIInputBrightnessKey: brightness,
                                kCIInputContrastKey: contrast,
                                kCIInputSaturationKey: saturation]
@@ -125,21 +125,4 @@ extension Kingfisher where Base: Image {
         #endif
     }
 
-}
-
-public extension Image {
-    
-    /// Apply a `Filter` containing `CIImage` transformer to `self`.
-    ///
-    /// - parameter filter: The filter used to transform `self`.
-    ///
-    /// - returns: A transformed image by input `Filter`.
-    ///
-    /// - Note: Only CG-based images are supported. If any error happens during transforming, `self` will be returned.
-    @available(*, deprecated,
-    message: "Extensions directly on Image are deprecated. Use `kf.apply` instead.",
-    renamed: "kf.apply")
-    public func kf_apply(_ filter: Filter) -> Image {
-        return kf.apply(filter)
-    }
 }

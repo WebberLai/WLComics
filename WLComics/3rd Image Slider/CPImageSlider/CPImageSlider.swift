@@ -271,7 +271,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         autoSrcollEnabled = isAutoScrollEnabled
     }
     
-    func tapOnImage(gesture: UITapGestureRecognizer){
+    @objc func tapOnImage(gesture: UITapGestureRecognizer){
         delegate?.sliderImageTapped(slider: self, index: currentIndex)
     }
     
@@ -342,7 +342,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     }
     
     //pragma mark end
-    func slideImage()
+    @objc func slideImage()
     {
         let previous = currentIndex
         currentIndex = currentIndex + 1

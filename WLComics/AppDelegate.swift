@@ -17,6 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     let notificationName = Notification.Name(rawValue:"BLEClickNotification")
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        SwiftyPlistManager.shared.start(plistNames:["MyFavoritesComics"], logging: false)
         // Override point for customization after application launch.
         let splitViewController = window!.rootViewController as! UISplitViewController
         splitViewController.preferredDisplayMode = UISplitViewControllerDisplayMode.allVisible
@@ -36,13 +37,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         return commands
     }
     
-    func rightClick(command:UIKeyCommand) {
+    @objc func rightClick(command:UIKeyCommand) {
         NotificationCenter.default.post(name:notificationName,
                                         object: nil,
                                         userInfo: ["action":UIKeyInputRightArrow])
     }
     
-    func leftClick(command:UIKeyCommand) {
+    @objc func leftClick(command:UIKeyCommand) {
         NotificationCenter.default.post(name:notificationName,
                                         object: nil,
                                         userInfo: ["action":UIKeyInputLeftArrow])

@@ -12,52 +12,39 @@ import Swift8ComicSDK
 class FavoriteComics: NSObject {
     
     static func addComicToMyFavorite(_ comic : Comic){
-        let defaults = UserDefaults.standard
-        var favorites = defaults.object(forKey: "favorite_list") as! [NSMutableDictionary]?
-        if favorites == nil {
-            let favoriteList = NSMutableArray.init() as! [NSMutableDictionary]
-            defaults.set(favoriteList, forKey: "favorite_list")
-            defaults.synchronize()
-        }
+        var favorites = SwiftyPlistManager.shared.fetchValue(for: "favorite_list", fromPlistWithName: "MyFavoritesComics") as! [NSMutableDictionary]
         let dict  = NSMutableDictionary.init(object: comic.getName() , forKey: "name" as NSCopying)
         let iconDict = NSDictionary.init(object: comic.getSmallIconUrl()! , forKey: "icon_url" as NSCopying)
         let idDict = NSDictionary.init(object: comic.getId() , forKey: "comic_id" as NSCopying)
         dict.addEntries(from: iconDict as! [AnyHashable : Any])
         dict.addEntries(from: idDict as! [AnyHashable : Any])
-        favorites?.append(dict)
-        defaults.set(favorites, forKey: "favorite_list")
-        defaults.synchronize()
+        favorites.append(dict)
+        
+        SwiftyPlistManager.shared.save(favorites, forKey: "favorite_list", toPlistWithName: "MyFavoritesComics") { (error) in
+            //寫入檔案
+        }
     }
     
     static func removeComicFromMyFavorite(_ comic : Comic){
-        let defaults = UserDefaults.standard
-        var favorites = defaults.object(forKey: "favorite_list") as! [NSMutableDictionary]?
-        for (index , c) in (favorites?.enumerated())!{
+        var favorites = SwiftyPlistManager.shared.fetchValue(for: "favorite_list", fromPlistWithName: "MyFavoritesComics") as! [NSMutableDictionary]
+        for (index , c) in favorites.enumerated() {
             if comic.getId() == c.object(forKey: "comic_id") as! String {
-                favorites?.remove(at: index)
+                favorites.remove(at: index)
+                SwiftyPlistManager.shared.save(favorites, forKey: "favorite_list", toPlistWithName: "MyFavoritesComics") { (error) in
+                }
                 break
             }
         }
-        defaults.set(favorites, forKey: "favorite_list")
-        defaults.synchronize()
     }
     
-    static func listAllFavorite() -> NSMutableArray {
-        let defaults = UserDefaults.standard
-        var favorites = defaults.object(forKey: "favorite_list") as? NSMutableArray
-        if favorites == nil {
-            let favoriteList = NSMutableArray.init()
-            favorites = favoriteList
-            defaults.set(favoriteList, forKey: "favorite_list")
-            defaults.synchronize()
-        }
-        return favorites!
+    static func listAllFavorite() -> Array<NSMutableDictionary> {
+        let favorites = SwiftyPlistManager.shared.fetchValue(for: "favorite_list", fromPlistWithName: "MyFavoritesComics") as! [NSMutableDictionary]
+        return favorites
     }
     
     static func checkComicIsMyFavorite(_ comic:Comic) -> Bool{
         var isMyFavorite : Bool = false
-        let defaults = UserDefaults.standard
-        let favorites = defaults.object(forKey: "favorite_list") as? [NSMutableDictionary]
+        let favorites = SwiftyPlistManager.shared.fetchValue(for: "favorite_list", fromPlistWithName: "MyFavoritesComics") as! [NSMutableDictionary]?
         for (_ , c) in (favorites?.enumerated())!{
             if comic.getId() == (c as AnyObject).object(forKey: "comic_id") as! String {
                 isMyFavorite = true

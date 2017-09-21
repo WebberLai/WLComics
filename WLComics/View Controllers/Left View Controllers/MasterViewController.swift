@@ -46,11 +46,11 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     }
     
-    func clearCache(){
+    @objc func clearCache(){
         ImageCache.default.clearDiskCache()
     }
     
-    func startSearch() {
+    @objc func startSearch() {
         searchController.searchBar.becomeFirstResponder()
     }
     
