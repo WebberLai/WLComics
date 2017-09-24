@@ -25,6 +25,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     var selectIndexOfComic : Int = -1
     
+    var scrollRecordTop :  IndexPath = IndexPath.init()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -52,6 +54,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     @objc func startSearch() {
         searchController.searchBar.becomeFirstResponder()
+        scrollRecordTop = self.tableView.indexPathsForVisibleRows![0]
     }
     
     func initSearchController() {
@@ -195,6 +198,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         shouldShowSearchResults = false
+        DispatchQueue.main.async {
+            self.tableView.scrollToRow(at: self.scrollRecordTop, at: .middle, animated: false)
+        }
     }
     
     //按下搜尋按鈕之後才會顯示搜尋結果
