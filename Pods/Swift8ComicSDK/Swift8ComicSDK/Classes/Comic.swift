@@ -9,14 +9,14 @@
 import Foundation
 
 open class Comic{
-    fileprivate var mId : String? // 漫畫編號
-    fileprivate var mIconUrl : String? // 漫畫封面大圖網址
-    fileprivate var mSmallIconUrl : String? // 漫畫封面小圖網址
-    fileprivate var mName : String?// 漫畫名稱
-    fileprivate var mAuthor : String?// 漫畫作者
-    fileprivate var mLatestUpdateDateTime : String? //最後更新的時間
-    fileprivate var mDescription : String? //漫畫描述
-    fileprivate var mEpisodes = [Episode]() //漫畫集數列表
+    private var mId : String? // 漫畫編號
+    private var mIconUrl : String? // 漫畫封面大圖網址
+    private var mSmallIconUrl : String? // 漫畫封面小圖網址
+    private var mName : String?// 漫畫名稱
+    private var mAuthor : String?// 漫畫作者
+    private var mLatestUpdateDateTime : String? //最後更新的時間
+    private var mDescription : String? //漫畫描述
+    private var mEpisodes = [Episode]() //漫畫集數列表
     
     open func getId() -> String{
         return mId!

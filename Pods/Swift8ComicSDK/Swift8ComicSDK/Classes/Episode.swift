@@ -9,12 +9,12 @@
 import Foundation
 
 open class Episode{
-    fileprivate var mName : String?// 漫畫每集(話)(卷)名稱
-    fileprivate var mUrl : String?
-    fileprivate var mCatid : String?
-    fileprivate var mCopyright : String?
-    fileprivate var mImageUrl : [String] = [String]()//每頁漫畫圖片
-    fileprivate let mJSnview = JSnview();
+    private var mName : String?// 漫畫每集(話)(卷)名稱
+    private var mUrl : String?
+    private var mCatid : String?
+    private var mCopyright : String?
+    private var mImageUrl : [String] = [String]()//每頁漫畫圖片
+    private let mJSnview = JSnview();
     
     
     //讀取1話(集、卷)全部漫畫圖片網址

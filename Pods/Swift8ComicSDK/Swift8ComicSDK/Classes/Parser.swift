@@ -254,7 +254,7 @@ open class Parser{
         return episode
     }
     
-    open func searchComic(_ htmlString : String, onLoadComics: @escaping ([Comic]) -> Void) -> Int{
+    open func searchComic(_ htmlString : String, onLoadComics: @escaping ([Comic]) -> Void, _ config: Config) -> Int{
         let html : [String] = StringUtility.split(htmlString, separatedBy: "\n")
         var comics = [Comic]()
         var text : String = ""
@@ -274,8 +274,8 @@ open class Parser{
                 let comic = Comic()
                 comic.setId(comicId!)
                 comic.setName(comicName!)
-                comic.setIconUrl(comicId!)
-                comic.setSmallIconUrl(comicId!)
+                comic.setIconUrl(config.getComicIconUrl(comicId!))
+                comic.setSmallIconUrl(config.getComicSmallIconUrl(comicId!))
                 comics.append(comic)
             }else{
                 comicName = nil
@@ -336,7 +336,8 @@ open class Parser{
         let upper : String.Index? = StringUtility.indexOfUpper(source: st, search: endStr)
         
         if(upper != nil && lower != nil){
-            ret = st.substring(to: lower!) + st.substring(from: upper!)
+            ret =  String(st[..<lower!]) + String(st[upper!...])
+            //ret = st.substring(to: lower!) + st.substring(from: upper!)
         }
         
         return ret

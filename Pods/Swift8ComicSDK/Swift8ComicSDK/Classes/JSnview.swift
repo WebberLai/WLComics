@@ -12,14 +12,14 @@ import Foundation
 import JavaScriptCore
 
 open class JSnview{
-    fileprivate var mSource : String?
-    fileprivate var mCh : Int?
-    fileprivate var mChs : Int = 0
-    fileprivate var mTi : Int = 0
-    fileprivate var mPs : Int = 0 //漫畫總頁數
-    fileprivate var mCs : String = ""
-    fileprivate var mC : String = ""
-    fileprivate static let Y : Int = 46;
+    private var mSource : String?
+    private var mCh : Int?
+    private var mChs : Int = 0
+    private var mTi : Int = 0
+    private var mPs : Int = 0 //漫畫總頁數
+    private var mCs : String = ""
+    private var mC : String = ""
+    private static let Y : Int = 46;
     
     open func setSource(_ source : String){
         mSource = source
@@ -94,7 +94,7 @@ open class JSnview{
         return list;
     }
     
-    fileprivate func buildGetPagesJS() -> String{
+    private func buildGetPagesJS() -> String{
         var buf : String = String();
         
         buf.append("var result = [];")
@@ -107,7 +107,7 @@ open class JSnview{
         return buf;
     }
     
-    fileprivate func buildNviewJS() -> String{
+    private func buildNviewJS() -> String{
         var buf : String = String();
         
         buf.append("function lc(l) {")

@@ -1,7 +1,7 @@
 open class R8Comic{
-    fileprivate static let sInstance : R8Comic = R8Comic()
-    fileprivate var mConfig : Config = Config()
-    fileprivate let mParser : Parser = Parser()
+    private static let sInstance : R8Comic = R8Comic()
+    private var mConfig : Config = Config()
+    private let mParser : Parser = Parser()
     
     init() {
         
@@ -137,7 +137,7 @@ open class R8Comic{
                     let htmlString = StringUtility.dataToStringBig5(data: data)
                     let maxPage = self.mParser.searchComic(htmlString, onLoadComics: { (list : [Comic]) in
                         comics += list
-                    })
+                    }, self.mConfig)
                     
                     if let response = response as? HTTPURLResponse , 200...299 ~= response.statusCode {
                         if(maxPage > 1){
@@ -157,7 +157,7 @@ open class R8Comic{
                                         //用'_'接收回傳值可不處理，以消除編譯的警告訊息
                                         _ = self.mParser.searchComic(htmlString, onLoadComics: { (list : [Comic]) in
                                             comics += list
-                                        })
+                                        }, self.mConfig)
                                         
                                         if let response = response as? HTTPURLResponse , 200...299 ~= response.statusCode {
                                             //not thing

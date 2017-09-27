@@ -65,7 +65,7 @@ open class StringUtility{
     open class func substring(source : String, upper : String.Index, lower : String.Index) -> String{
         let range = upper ..< lower
         
-        return source.substring(with: range)
+        return String(source[range])
     }
     
     open class func substring(_ source : String,_ upperString : String,_ lowerString : String ) -> String?{
@@ -75,7 +75,7 @@ open class StringUtility{
         if(upper != nil && lower != nil){
             let range = upper! ..< lower!
             
-            return source.substring(with: range)
+            return String(source[range])
         }
         
         return nil
@@ -94,7 +94,8 @@ open class StringUtility{
     }
     
     open class func substring(source : String, beginIndex : String.Index) -> String{
-        return source.substring(from: beginIndex)
+        return String(source[beginIndex...])
+            //source.substring(from: beginIndex)
     }
     
     //like JAVA String.substring(beginIndex, endIndex)
@@ -108,7 +109,7 @@ open class StringUtility{
         let endInx = source.index(source.startIndex, offsetBy: endIndex)
         let range = beginInx ..< endInx
 
-        return source.substring(with: range)
+        return String(source[range])
     }
     
     open class func dataToStringBig5(data : Data) -> String{
