@@ -25,7 +25,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     var selectIndexOfComic : Int = -1
     
-    var scrollRecordTop :  IndexPath = IndexPath.init()
+    var scrollRecordTop :  IndexPath = IndexPath.init(row: 0, section: 0)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -199,7 +199,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         shouldShowSearchResults = false
         DispatchQueue.main.async {
-            self.tableView.scrollToRow(at: self.scrollRecordTop, at: .middle, animated: false)
+            self.tableView.scrollToRow(at: self.scrollRecordTop, at: .top, animated: false)
         }
     }
     
