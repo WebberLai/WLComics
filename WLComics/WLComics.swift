@@ -113,4 +113,12 @@ open class WLComics{
         
         return modifier
     }
+    
+    //搜尋漫畫
+    
+    open func searchComics( keyword : String , _ onLoadedComics: @escaping ([Comic]) -> Void) {
+        mR8Comic.searchComic(keyword) { (comics:[Comic]) in
+            onLoadedComics(comics)
+        }
+    }
 }

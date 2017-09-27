@@ -184,11 +184,22 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         guard let searchString = searchController.searchBar.text else {
             return
         }
-
+        
         filterComics = allComics.filter({ (comic) -> Bool in
             let comicName = comic.getName() as NSString
             return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound
         })
+        
+        if filterComics.count == 0 {
+            WLComics.sharedInstance().searchComics(keyword: searchString, { (comics:[Comic]) in
+                if comics.count != 0 {
+                    self.filterComics = comics
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
+            })
+        }
         self.tableView.reloadData()
     }
     
