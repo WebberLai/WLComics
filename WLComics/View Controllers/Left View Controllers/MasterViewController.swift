@@ -190,16 +190,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound
         })
         
-        if filterComics.count == 0 {
-            WLComics.sharedInstance().searchComics(keyword: searchString, { (comics:[Comic]) in
-                if comics.count != 0 {
-                    self.filterComics = comics
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
-                }
-            })
-        }
         self.tableView.reloadData()
     }
     
@@ -216,10 +206,26 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     //按下搜尋按鈕之後才會顯示搜尋結果
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let searchString = searchController.searchBar.text else {
+            return
+        }
+
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
             self.tableView.reloadData()
         }
+        
+        if filterComics.count == 0 {
+            WLComics.sharedInstance().searchComics(keyword: searchString, { (comics:[Comic]) in
+                if comics.count != 0 {
+                    self.filterComics = comics
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
+            })
+        }
+        
         searchController.searchBar.resignFirstResponder()
     }
     
