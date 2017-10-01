@@ -252,7 +252,6 @@
 				TargetAttributes = {
 					6056EE191F28233F007BBE67 = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = 7T4QCGLNFF;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -490,7 +489,7 @@
 			baseConfigurationReference = EBCC57C77576999D43679021 /* Pods-WLComics.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 7T4QCGLNFF;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -505,7 +504,7 @@
 			baseConfigurationReference = 0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 7T4QCGLNFF;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
