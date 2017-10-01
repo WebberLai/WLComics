@@ -5,6 +5,33 @@
 [![License](https://img.shields.io/cocoapods/l/Swift8ComicSDK.svg?style=flat)](http://cocoapods.org/pods/Swift8ComicSDK)
 [![Platform](https://img.shields.io/cocoapods/p/Swift8ComicSDK.svg?style=flat)](http://cocoapods.org/pods/Swift8ComicSDK)
 
+## Requirements
+
+* 必須要在 app 啟動時，先呼叫 R8Comic.get().loadSiteUrlList(…)，以取得該站漫畫圖片存放的伺服器列表。
+* 信任全部 http 開頭的網址，因無法明確得知此網站存放漫畫的主機 domain，請在 info.plist 加上下列設定：
+
+```xml
+<key>NSAppTransportSecurity</key>
+<dict>
+	<key>NSAllowsArbitraryLoads</key>
+	<true/>
+</dict>
+```
+
+## Installation
+
+Swift8ComicSDK is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod "Swift8ComicSDK"
+```
+
+### Swift language version
+
+* version <= v1.2.3 swift 3.2
+* version >= v2.0.0 swift 4
+
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
@@ -12,6 +39,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 ### Class R8Comic, for example
 
 讀取全部漫畫
+
 ```swift
 R8Comic.get().getAll { (comics:[Comic]) in
     self.mComics = comics
@@ -22,6 +50,7 @@ R8Comic.get().getAll { (comics:[Comic]) in
 ```
 	
 搜尋漫畫
+
 ```swift
 R8Comic.get().searchComic("火影") { (comics) in
     print("searchComic=>\(comics.count)")
@@ -33,6 +62,7 @@ R8Comic.get().searchComic("火影") { (comics) in
 ```
 
 快速搜尋漫畫
+
 ```swift
 R8Comic.get().quickSearchComic("火影") { (comics) in
     print("testQuickSearchComic=>\(comics.count)")
@@ -44,6 +74,7 @@ R8Comic.get().quickSearchComic("火影") { (comics) in
 ```
 
 讀取指定一款漫畫的資訊
+
 ```swift
 let comic = R8Comic.get().generatorFakeComic("103", name: "海賊王")
     
@@ -58,6 +89,7 @@ R8Comic.get().loadComicDetail(comic) { (comicDetail : Comic) in
 ```
 
 完整流程範例
+
 ```swift
 R8Comic.get().loadSiteUrlList { (hostMap: [String: String]) in
      //self.mHostMap = hostMap
@@ -96,30 +128,9 @@ R8Comic.get().loadSiteUrlList { (hostMap: [String: String]) in
  }
 ```
 
-## Requirements
-* 必須要在app啟動時，先呼叫R8Comic.get().loadSiteUrlList(…)，以取得該站漫畫圖片存放的伺服器列表。
-* 信任全部http開頭的網址，因無法明確得知此網站存放漫畫的主機domain，請在info.plist加上下列設定:
-```xml
-<key>NSAppTransportSecurity</key>
-<dict>
-	<key>NSAllowsArbitraryLoads</key>
-	<true/>
-</dict>
-```
+## Note
 
-
-## Installation
-
-Swift8ComicSDK is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
-
-```ruby
-pod "Swift8ComicSDK"
-```
-
-### Swift language version
-* version <= v1.2.3 swift 3.2
-* version >= v2.0.0 swift 4
+* 必須要在 app 啟動時，先呼叫 R8Comic.get().loadSiteUrlList(…)，以取得該站漫畫圖片存放的伺服器列表。
 
 ## Author
 
@@ -127,7 +138,4 @@ RayTW, ray00000sina@gmail.com
 
 ## License
 
-Swift8ComicSDK is available under the MIT license. See the LICENSE file for more info.
-
-## Note
-* 必須要在app啟動時，先呼叫R8Comic.get().loadSiteUrlList(…)，以取得該站漫畫圖片存放的伺服器列表。
+Swift8ComicSDK is available under the MIT license. See the [LICENSE](LICENSE) file for more info.

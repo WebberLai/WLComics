@@ -1,6 +1,6 @@
 PODS:
-  - Kingfisher (4.0.1)
-  - Swift8ComicSDK (2.0.2)
+  - Kingfisher (4.1.0)
+  - Swift8ComicSDK (2.0.3)
 
 DEPENDENCIES:
   - Kingfisher
@@ -12,12 +12,12 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Swift8ComicSDK:
-    :commit: 46c5a431e2c56616d16d6f4be67a84941a47ddf3
+    :commit: 0b0bb5798dc64a8ec43ac4e35bd77bce1272aabe
     :git: https://github.com/RayTW/Swift8ComicSDK.git
 
 SPEC CHECKSUMS:
-  Kingfisher: b771785e9461ed4b8686d40e7145f9e58100cb24
-  Swift8ComicSDK: 0f3b3aa6e06f864e6b5743244c466e7d7f8a355b
+  Kingfisher: f14df8cbe576bf55f211fa589e9869bceb4ea87d
+  Swift8ComicSDK: 9221213af20f98e062e5a137472a47f867cfd0e8
 
 PODFILE CHECKSUM: fb00d45140fdd1a2717eb5a5b0d2999da482dfcf
 

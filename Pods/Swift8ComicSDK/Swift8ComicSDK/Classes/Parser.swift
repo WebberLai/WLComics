@@ -17,6 +17,7 @@ open class Parser{
     let mCommicNameEnd = "</a></td>"
     let mFindCview = "cview("
     let mFindDeaitlTag = "style=\"line-height:25px\">"
+    let mFinishTag = "class=\"hide\"";
     
     //comicDetail
     let mAuthorTag = "作者：</td>"
@@ -101,9 +102,14 @@ open class Parser{
         var latestUpdateTimeRange :Range<String.Index>?
         var nameTagRange :Range<String.Index>?
         var episodes = [Episode]() //建立集數物件
+        var isFinishEpisode : Bool = false
         
         for i in 0..<html.count {
             let txt : String = html[i]
+            
+            if(!isFinishEpisode) {
+                isFinishEpisode = (txt.range(of: mFinishTag) != nil)
+            }
             findCviewRange = StringUtility.indexOf(source: txt, search: mFindCview)
             
             //解析集數
@@ -121,6 +127,10 @@ open class Parser{
                 let catid : String = dataAry[1]
                 let copyright : String = dataAry[2]
                 
+                if(isFinishEpisode){
+                    continue;
+                }
+                
                 if(nameTagRange == nil){
                     nameTagRange = StringUtility.indexOf(source: txt, search: mNameTag)
                     
@@ -128,9 +138,12 @@ open class Parser{
                         continue
                     }
                 }
+                
+                
                 //解析集數名稱
                 if(nameTagRange != nil){
                     var episodeName = html[i + 1]
+                    
                     episodeName = self.removeScriptsTag(episodeName)
                     episodeName = self.replaceTag(episodeName)
                     episodeName = episodeName.replacingOccurrences(of: ":", with: ":")
