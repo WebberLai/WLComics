@@ -33,6 +33,9 @@ class ComicEpisodesViewController: UIViewController {
     }
     
     @objc func scrollToBottom (){
+        if self.allEpisodes.count == 0 {
+            return
+        }
         tableView.scrollToRow(at: IndexPath.init(item: allEpisodes.count-1 , section: 0), at: .bottom , animated: true)
     }
 
