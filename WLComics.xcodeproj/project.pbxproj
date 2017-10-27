@@ -47,7 +47,7 @@
 		601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicEpisodesViewController.swift; sourceTree = "<group>"; };
 		6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftyPlistManager.swift; sourceTree = "<group>"; };
 		6034C3021F73479900D2B861 /* MyFavoritesComics.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = MyFavoritesComics.plist; sourceTree = "<group>"; };
-		6056EE1A1F28233F007BBE67 /* WLComics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WLComics.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6056EE1A1F28233F007BBE67 /* 看漫畫.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "看漫畫.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6056EE1D1F28233F007BBE67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6056EE1F1F28233F007BBE67 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
 		6056EE211F28233F007BBE67 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
@@ -170,7 +170,7 @@
 		6056EE1B1F28233F007BBE67 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6056EE1A1F28233F007BBE67 /* WLComics.app */,
+				6056EE1A1F28233F007BBE67 /* 看漫畫.app */,
 				60A561981F82264B004C71C1 /* WLMacComic.app */,
 			);
 			name = Products;
@@ -253,9 +253,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6056EE191F28233F007BBE67 /* WLComics */ = {
+		6056EE191F28233F007BBE67 /* 看漫畫 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6056EE2E1F28233F007BBE67 /* Build configuration list for PBXNativeTarget "WLComics" */;
+			buildConfigurationList = 6056EE2E1F28233F007BBE67 /* Build configuration list for PBXNativeTarget "看漫畫" */;
 			buildPhases = (
 				E5019BE780296B63622675AE /* [CP] Check Pods Manifest.lock */,
 				6056EE161F28233F007BBE67 /* Sources */,
@@ -268,9 +268,9 @@
 			);
 			dependencies = (
 			);
-			name = WLComics;
+			name = "看漫畫";
 			productName = WLComics;
-			productReference = 6056EE1A1F28233F007BBE67 /* WLComics.app */;
+			productReference = 6056EE1A1F28233F007BBE67 /* 看漫畫.app */;
 			productType = "com.apple.product-type.application";
 		};
 		60A561971F82264B004C71C1 /* WLMacComic */ = {
@@ -323,7 +323,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6056EE191F28233F007BBE67 /* WLComics */,
+				6056EE191F28233F007BBE67 /* 看漫畫 */,
 				60A561971F82264B004C71C1 /* WLMacComic */,
 			);
 		};
@@ -611,6 +611,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = WLMacComic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -638,6 +639,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = WLMacComic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -661,7 +663,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6056EE2E1F28233F007BBE67 /* Build configuration list for PBXNativeTarget "WLComics" */ = {
+		6056EE2E1F28233F007BBE67 /* Build configuration list for PBXNativeTarget "看漫畫" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6056EE2F1F28233F007BBE67 /* Debug */,

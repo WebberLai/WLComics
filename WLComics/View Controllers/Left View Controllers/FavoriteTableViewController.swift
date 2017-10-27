@@ -88,7 +88,7 @@ class FavoriteTableViewController: UITableViewController {
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            let comicDict  : NSMutableDictionary = myFavoriteList![currentIndex]
+            let comicDict  : NSMutableDictionary = myFavoriteList![indexPath.row]
             let currentComic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicDict.object(forKey: "comic_id") as! String , name: comicDict.object(forKey: "name") as! String)
             currentComic.setSmallIconUrl(comicDict.object(forKey: "icon_url") as! String)
             FavoriteComics.removeComicFromMyFavorite(currentComic)
