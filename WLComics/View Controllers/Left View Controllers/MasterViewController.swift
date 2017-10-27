@@ -9,6 +9,7 @@
 import UIKit
 import Swift8ComicSDK
 import Kingfisher
+import HUD
 
 class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate {
     
@@ -34,10 +35,13 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
         self.initSearchController()
         
+        HUD.show(.loading, text: "漫畫載入中...")
+        
         if currentComic.getId() == "-1" {
             WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
                 self.allComics = comics
                 DispatchQueue.main.async {
+                    HUD.dismiss()
                     self.tableView.reloadData()
                 }
             }
