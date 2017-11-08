@@ -39,7 +39,7 @@ open class Parser{
     
     //searchComic
     let mComidIdBegin = "<a href=\"/html/"
-    let mComidIdEnd = ".html\"><img src="
+    let mComidIdEnd = ".html\">"
     let mComidNameBegin = "<b><font color=\"#0099CC\">"
     let mComidNameEnd = "</font></b>"
     let mPageBegin = "&page="
@@ -279,9 +279,9 @@ open class Parser{
             text = html[i]
             
             comicId = StringUtility.substring(text, mComidIdBegin, mComidIdEnd)
-            
+
             if(comicId != nil){
-                text = html[i + 1]
+                text = html[i + 9]
                 comicName = StringUtility.substring(text, mComidNameBegin, mComidNameEnd)
                 comicName = self.replaceTag(comicName!)
                 let comic = Comic()

@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '1365250A468053C2763EADFE11DA6B94'
-               BlueprintName = 'Swift8ComicSDK'
+               BlueprintIdentifier = '7B6C981CBD141EE16C808AE8F137AD01'
+               BlueprintName = 'HUD'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'Swift8ComicSDK.framework'>
+               BuildableName = 'HUD.framework'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

@@ -1,7 +1,7 @@
 PODS:
   - HUD (2.0.1)
-  - Kingfisher (4.1.0)
-  - Swift8ComicSDK (2.0.3)
+  - Kingfisher (4.2.0)
+  - Swift8ComicSDK (2.0.4)
 
 DEPENDENCIES:
   - HUD (~> 2.0.1)
@@ -14,13 +14,13 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Swift8ComicSDK:
-    :commit: 0b0bb5798dc64a8ec43ac4e35bd77bce1272aabe
+    :commit: 5b2c2d9bac47e6164604b72cb5152b4737a2440f
     :git: https://github.com/RayTW/Swift8ComicSDK.git
 
 SPEC CHECKSUMS:
   HUD: 08e61fa44e2573dd88407ade83a526b9e95e7284
-  Kingfisher: f14df8cbe576bf55f211fa589e9869bceb4ea87d
-  Swift8ComicSDK: 9221213af20f98e062e5a137472a47f867cfd0e8
+  Kingfisher: 9ee7e788d8ba07c3f21ce0d43f33cec310a4f781
+  Swift8ComicSDK: 64c4a00770c3c0276a1624c7739610c0e1ae0e07
 
 PODFILE CHECKSUM: 822227d78ac06b5306e52c7c4920be3a61c6a13a
 

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6056EE191F28233F007BBE67"
-               BuildableName = "WLComics.app"
+               BuildableName = "&#x770b;&#x6f2b;&#x756b;.app"
                BlueprintName = "WLComics"
                ReferencedContainer = "container:WLComics.xcodeproj">
             </BuildableReference>
@@ -26,6 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -33,7 +34,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6056EE191F28233F007BBE67"
-            BuildableName = "WLComics.app"
+            BuildableName = "&#x770b;&#x6f2b;&#x756b;.app"
             BlueprintName = "WLComics"
             ReferencedContainer = "container:WLComics.xcodeproj">
          </BuildableReference>
@@ -45,6 +46,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -56,7 +58,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6056EE191F28233F007BBE67"
-            BuildableName = "WLComics.app"
+            BuildableName = "&#x770b;&#x6f2b;&#x756b;.app"
             BlueprintName = "WLComics"
             ReferencedContainer = "container:WLComics.xcodeproj">
          </BuildableReference>
@@ -75,7 +77,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6056EE191F28233F007BBE67"
-            BuildableName = "WLComics.app"
+            BuildableName = "&#x770b;&#x6f2b;&#x756b;.app"
             BlueprintName = "WLComics"
             ReferencedContainer = "container:WLComics.xcodeproj">
          </BuildableReference>
