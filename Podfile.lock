@@ -1,6 +1,6 @@
 PODS:
   - HUD (2.0.1)
-  - Kingfisher (4.2.0)
+  - Kingfisher (4.8.0)
   - Swift8ComicSDK (2.0.4)
 
 DEPENDENCIES:
@@ -19,7 +19,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   HUD: 08e61fa44e2573dd88407ade83a526b9e95e7284
-  Kingfisher: 9ee7e788d8ba07c3f21ce0d43f33cec310a4f781
+  Kingfisher: 976d828df2b24834c6a3f2fc4d82cdbd26552be1
   Swift8ComicSDK: 64c4a00770c3c0276a1624c7739610c0e1ae0e07
 
 PODFILE CHECKSUM: 822227d78ac06b5306e52c7c4920be3a61c6a13a
