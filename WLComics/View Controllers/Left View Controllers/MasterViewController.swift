@@ -24,8 +24,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
     
-    var selectIndexOfComic : Int = -1
-    
     var scrollRecordTop :  IndexPath = IndexPath.init(row: 0, section: 0)
     
     var comicLibrary  : Dictionary = [String: [Comic]]()
@@ -33,6 +31,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     var comicSectionTitles = [String]()
     
     var sortedComicLib = NSMutableDictionary()
+    
+    var selectIntexPath  : IndexPath = IndexPath()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,7 +45,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         
         if currentComic.getId() == "-1" {
             WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
-                self.allComics = comics
                 for comic in comics {
                     let s :String = self.translateChineseStringToPyinyin(chineseStr:comic.getName())
                     let comicKey = String(s.prefix(1))
@@ -138,10 +137,12 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEpisodes" {
             if shouldShowSearchResults {
-                currentComic = filterComics [selectIndexOfComic]
+                currentComic = filterComics [selectIntexPath.row]
             }
             else {
-                currentComic = allComics[selectIndexOfComic]
+                let comics : [Comic] = self.sortedComicLib.object(forKey:comicSectionTitles[selectIntexPath.section]) as! [Comic]
+                let comic = comics[selectIntexPath.row]
+                currentComic = comic
             }
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
             comicEpisodesViewController.currentComic = currentComic
@@ -244,7 +245,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectIndexOfComic = indexPath.row
+        selectIntexPath = indexPath
         self.performSegue(withIdentifier: "showEpisodes", sender: self)
     }
     
