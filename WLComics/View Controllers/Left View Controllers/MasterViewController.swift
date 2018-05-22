@@ -28,6 +28,12 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     var scrollRecordTop :  IndexPath = IndexPath.init(row: 0, section: 0)
     
+    var comicLibrary  : Dictionary = [String: [Comic]]()
+    
+    var comicSectionTitles = [String]()
+    
+    var sortedComicLib = NSMutableDictionary()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -40,6 +46,27 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         if currentComic.getId() == "-1" {
             WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
                 self.allComics = comics
+                for comic in comics {
+                    let s :String = self.translateChineseStringToPyinyin(chineseStr:comic.getName())
+                    let comicKey = String(s.prefix(1))
+                    if var comicValues = self.comicLibrary[comicKey] {
+                        comicValues.append(comic)
+                        self.comicLibrary[comicKey] = comicValues
+                    } else {
+                        self.comicLibrary[comicKey] = [comic]
+                    }
+                }
+                self.comicSectionTitles = [String](self.comicLibrary.keys)
+                self.comicSectionTitles = self.comicSectionTitles.sorted(by: { $0 < $1 })
+
+                let sortedByKeyLibrary = self.comicLibrary.sorted { firstDictionary, secondDictionary in
+                    return firstDictionary.0 < secondDictionary.0
+                }
+                for (index, title) in self.comicSectionTitles.enumerated(){
+                    let comics = sortedByKeyLibrary[index].value
+                    let comicDict : NSDictionary = NSDictionary.init(object: comics, forKey: title as NSCopying)
+                    self.sortedComicLib.addEntries(from: (comicDict as NSCopying) as! [AnyHashable : Any])
+                }
                 DispatchQueue.main.async {
                     HUD.dismiss()
                     self.tableView.reloadData()
@@ -49,8 +76,22 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.title = "漫畫列表"
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
-
     }
+
+    func translateChineseStringToPyinyin(chineseStr:String) -> String {
+        var translatedPinyinStr:String = ""
+        let zhcnStrToTranslate:CFMutableString = NSMutableString(string: chineseStr)
+        var translatedOk:Bool = CFStringTransform(zhcnStrToTranslate, nil, kCFStringTransformMandarinLatin, false)
+        if translatedOk {
+            let translatedPinyinWithAccents = zhcnStrToTranslate
+            translatedOk = CFStringTransform(translatedPinyinWithAccents, nil, kCFStringTransformStripCombiningMarks, false)
+            if translatedOk {
+                translatedPinyinStr = translatedPinyinWithAccents as String
+            }
+        }
+        return translatedPinyinStr
+    }
+    
     
     @objc func clearCache(){
         ImageCache.default.clearDiskCache()
@@ -111,7 +152,30 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     // MARK: - Table View
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        if shouldShowSearchResults {
+            return 1
+        }else {
+            return comicSectionTitles.count
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+        var tpIndex:Int = 0
+        for character in comicSectionTitles{
+            if character == title{
+                return tpIndex
+            }
+            tpIndex += 1
+        }
+        return 0
+    }
+    
+    override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+        return comicSectionTitles
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return comicSectionTitles[section]
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -119,7 +183,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             return filterComics.count
         }
         else {
-            return self.allComics.count
+            let comics : [Comic] = self.sortedComicLib.object(forKey:comicSectionTitles[section]) as! [Comic]
+            return comics.count
         }
     }
     
@@ -130,14 +195,15 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "ComicTableViewCell") as! ComicTableViewCell
-
+  
+        let comics : [Comic] = self.sortedComicLib.object(forKey:comicSectionTitles[indexPath.section]) as! [Comic]
+        
         var comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
         
         if shouldShowSearchResults {
             comic = filterComics [indexPath.row]
-        }
-        else {
-            comic = allComics [indexPath.row]
+        }else {
+            comic = comics[indexPath.row]
         }
         
         cell.comicNametextLabel.text = comic.getName()
