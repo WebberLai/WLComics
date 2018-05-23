@@ -46,7 +46,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         if currentComic.getId() == "-1" {
             WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
                 for comic in comics {
-                    let s :String = self.translateChineseStringToPyinyin(chineseStr:comic.getName())
+                    let s : String = self.translateChineseStringToPyinyin(chineseStr:comic.getName())
                     let comicKey = String(s.prefix(1))
                     if var comicValues = self.comicLibrary[comicKey] {
                         comicValues.append(comic)
@@ -88,7 +88,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                 translatedPinyinStr = translatedPinyinWithAccents as String
             }
         }
-        return translatedPinyinStr
+        return translatedPinyinStr.uppercased()
     }
     
     
