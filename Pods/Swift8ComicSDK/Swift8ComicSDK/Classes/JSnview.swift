@@ -74,7 +74,6 @@ open class JSnview{
     open func invokeJS(_ js : String, _ y : Int, _ ch : Int) -> [String]{
         let context = JSContext()!
         var str : String = StringUtility.substring(js, 0, StringUtility.indexOfInt(js, "var pt="))
-        print("str \(str)")
         str = StringUtility.replace(str, "ge('TheImg').src", "var src")
         let unuseScript : String = StringUtility.substring(str, "\'.jpg\';", "break;")!
         str = StringUtility.replace(str, unuseScript, "")
