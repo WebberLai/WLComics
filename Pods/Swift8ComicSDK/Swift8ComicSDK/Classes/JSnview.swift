@@ -77,7 +77,15 @@ open class JSnview{
         str = StringUtility.replace(str, "ge('TheImg').src", "var src")
         let unuseScript : String = StringUtility.substring(str, "\'.jpg\';", "break;")!
         str = StringUtility.replace(str, unuseScript, "")
-        let varSrc : String = StringUtility.substring(str, "ci=i;", "break;")!
+        
+        var varSrc : String;
+        
+        if(StringUtility.indexOfInt(str, "ci=i;") > 0){
+            varSrc = StringUtility.substring(str, "ci=i;", "break;")!
+        }else{
+            varSrc = StringUtility.substring(str, "ci = i;", "break;")!
+        }
+        
         let getPageJS : String = String.init(format: buildGetPagesJS(), varSrc)
         str = StringUtility.replace(str, varSrc, "")
         str = StringUtility.replace(str, "break;", getPageJS)

@@ -1,6 +1,6 @@
 {
   "name": "Swift8ComicSDK",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "summary": "Comic SDK for iOS.",
   "description": "TODO: Add long description of the pod here.",
   "homepage": "https://github.com/RayTW/Swift8ComicSDK",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/RayTW/Swift8ComicSDK.git",
-    "tag": "2.0.4"
+    "tag": "2.0.5"
   },
   "platforms": {
     "ios": "8.0"
