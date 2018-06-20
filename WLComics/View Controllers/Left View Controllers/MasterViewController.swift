@@ -215,10 +215,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                                     placeholder: Image.init(named:"comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1))],
                                     progressBlock: { receivedSize, totalSize in
-                                        print("\(indexPath.row + 1): \(receivedSize)/\(totalSize)")
         },
                                     completionHandler: { image, error, cacheType, imageURL in
-                                        print("\(indexPath.row + 1): Finished")
         })
         
         let isFavorite : Bool = FavoriteComics.checkComicIsMyFavorite(comic)

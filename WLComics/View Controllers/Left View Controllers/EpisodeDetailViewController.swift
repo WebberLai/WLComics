@@ -86,11 +86,9 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
                                     options: [.transition(ImageTransition.fade(1)),
                                               .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))],
                                     progressBlock: { receivedSize, totalSize in
-                                        print("\(indexPath.row + 1): \(receivedSize)/\(totalSize)")
         },
                                     completionHandler: { image, error, cacheType, imageURL in
                                         self.detailViewController?.imgSlider.imageViewArray[indexPath.row].image = image
-                                        print("\(indexPath.row + 1): Finished")
         })
         return cell
     }
