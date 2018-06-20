@@ -15,9 +15,13 @@ class EpisodeDetailViewController: UIViewController {
         
     var currentEpisode : Episode!
     
+    var allEpisodes = Array<Any>() as! [Episode]
+    
     var detailViewController: DetailViewController? = nil
     
     var pages = Array<String>()
+    
+    var episodeIndex : Int = 0
     
     @IBOutlet weak var tableView : UITableView!
     
@@ -97,6 +101,24 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     
     func sliderImageTapped(index: Int) {
         tableView.selectRow(at: IndexPath.init(row: index, section: 0), animated: true, scrollPosition: .none)
+    }
+    
+    func showNextEpisode() {
+        if episodeIndex < allEpisodes.count-1 {
+            episodeIndex += 1
+            self.currentEpisode = self.allEpisodes[episodeIndex]
+            detailViewController?.imgSlider.currentIndex = 0
+            WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
+                episode.setUpPages()
+                self.pages = episode.getImageUrlList()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                    self.title = self.currentEpisode.getName()
+                    self.detailViewController?.setEpisodeUrl(episode.getUrl())
+                    self.detailViewController?.updateImages(imgs: self.pages)
+                }
+            })
+        }
     }
     
 }

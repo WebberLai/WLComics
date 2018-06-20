@@ -10,6 +10,7 @@ import UIKit
 
 @objc protocol DetailViewControllerDelegate: NSObjectProtocol {
     func sliderImageTapped(index: Int)
+    func showNextEpisode()
 }
 
 class DetailViewController: UIViewController,CPSliderDelegate{
@@ -65,6 +66,8 @@ class DetailViewController: UIViewController,CPSliderDelegate{
             
             if pageIndex < imgSlider.images.count {
                 imgSlider.nextButtonPressed()
+            }else if (pageIndex == imgSlider.images.count){
+                self.delegate?.showNextEpisode()
             }
         } else if action == UIKeyInputLeftArrow{
             pageIndex -= 1

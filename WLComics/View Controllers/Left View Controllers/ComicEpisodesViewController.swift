@@ -54,6 +54,8 @@ class ComicEpisodesViewController: UIViewController {
             let episodeDetailViewController = segue.destination as! EpisodeDetailViewController
             episodeDetailViewController.currentEpisode = episode
             episodeDetailViewController.title = episode.getName()
+            episodeDetailViewController.allEpisodes = self.allEpisodes
+            episodeDetailViewController.episodeIndex = index
         }else if segue.identifier == "showPageDetail" {
             let navController = segue.destination as! UINavigationController
             let pageDetailViewController = navController.viewControllers[0] as! DetailViewController
