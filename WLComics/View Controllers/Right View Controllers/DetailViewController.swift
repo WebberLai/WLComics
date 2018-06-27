@@ -11,6 +11,7 @@ import UIKit
 @objc protocol DetailViewControllerDelegate: NSObjectProtocol {
     func sliderImageTapped(index: Int)
     func showNextEpisode()
+    func showPreviousEpisode()
 }
 
 class DetailViewController: UIViewController,CPSliderDelegate{
@@ -73,6 +74,7 @@ class DetailViewController: UIViewController,CPSliderDelegate{
             pageIndex -= 1
             if pageIndex < 0 {
                 pageIndex = 0
+                self.delegate?.showPreviousEpisode()
             }else {
                 imgSlider.previousButtonPressed()
             }

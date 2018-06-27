@@ -151,6 +151,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     
     func adjustContentOffsetFor(index : Int, offsetIndex offset : Int, animated : Bool)
     {
+        currentIndex = index
         myScrollView.setContentOffset(CGPoint(x: CGFloat(offset)*bounds.width, y: 0), animated: animated)
         myPageControl.currentPage = index
         checkButtonsIfNeedsDisable()

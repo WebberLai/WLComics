@@ -119,5 +119,23 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
         }
     }
     
+    func showPreviousEpisode() {
+        if episodeIndex > 0{
+            episodeIndex -= 1
+            self.currentEpisode = self.allEpisodes[episodeIndex]
+            detailViewController?.imgSlider.currentIndex = 0
+            WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
+                episode.setUpPages()
+                self.pages = episode.getImageUrlList()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                    self.title = self.currentEpisode.getName()
+                    self.detailViewController?.setEpisodeUrl(episode.getUrl())
+                    self.detailViewController?.updateImages(imgs: self.pages)
+                }
+            })
+        }
+    }
+    
 }
 
