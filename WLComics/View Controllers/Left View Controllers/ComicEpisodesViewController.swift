@@ -103,7 +103,6 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(UIDevice.current.model)
         index = indexPath.row
         if UIDevice.current.model.description == "iPad" {
             self.performSegue(withIdentifier: "showEpisodeDetail", sender: self)
