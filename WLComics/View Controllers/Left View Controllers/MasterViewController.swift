@@ -93,7 +93,14 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     
     @objc func clearCache(){
-        ImageCache.default.clearDiskCache()
+        let alert = UIAlertController(title: "清除暫存資料" , message: "確定要清除暫存資料?" , preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "是", style: .default, handler: { (_) in
+            ImageCache.default.clearDiskCache()
+        }))
+        alert.addAction(UIAlertAction(title: "否", style: .default, handler: { (_) in
+            
+        }))
+        self.present(alert, animated: true, completion: nil)
     }
     
     @objc func startSearch() {
