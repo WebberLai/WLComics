@@ -28,6 +28,7 @@
 		60A5619D1F82264B004C71C1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A5619C1F82264B004C71C1 /* ViewController.swift */; };
 		60A5619F1F82264B004C71C1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 60A5619E1F82264B004C71C1 /* Assets.xcassets */; };
 		60A561A21F82264B004C71C1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 60A561A01F82264B004C71C1 /* Main.storyboard */; };
+		60AA01002106D73B0093780B /* AllComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 60AA00FF2106D73B0093780B /* AllComics.plist */; };
 		60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */; };
 		71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
@@ -68,6 +69,7 @@
 		60A561A11F82264B004C71C1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		60A561A31F82264B004C71C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		60A561A41F82264B004C71C1 /* WLMacComic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WLMacComic.entitlements; sourceTree = "<group>"; };
+		60AA00FF2106D73B0093780B /* AllComics.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AllComics.plist; sourceTree = "<group>"; };
 		60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeDetailViewController.swift; sourceTree = "<group>"; };
 		71BB3F481F2DBAF000EBED7D /* WLComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WLComics.swift; sourceTree = "<group>"; };
 		7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -188,6 +190,7 @@
 				6056EE281F28233F007BBE67 /* LaunchScreen.storyboard */,
 				6056EE2B1F28233F007BBE67 /* Info.plist */,
 				71BB3F481F2DBAF000EBED7D /* WLComics.swift */,
+				60AA00FF2106D73B0093780B /* AllComics.plist */,
 				6034C3021F73479900D2B861 /* MyFavoritesComics.plist */,
 			);
 			path = WLComics;
@@ -342,6 +345,7 @@
 				6079D0F91F2B0AFB002E6A3B /* cp_prev_arrow.png in Resources */,
 				6079D0F71F2B0AF3002E6A3B /* CPImageSlider.xib in Resources */,
 				6079D0F81F2B0AF8002E6A3B /* cp_next_arrow.png in Resources */,
+				60AA01002106D73B0093780B /* AllComics.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

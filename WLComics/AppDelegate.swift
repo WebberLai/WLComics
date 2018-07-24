@@ -18,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         SwiftyPlistManager.shared.start(plistNames:["MyFavoritesComics"], logging: false)
+        SwiftyPlistManager.shared.start(plistNames:["AllComics"], logging: false)
         // Override point for customization after application launch.
         let splitViewController = window!.rootViewController as! UISplitViewController
         splitViewController.preferredDisplayMode = UISplitViewControllerDisplayMode.allVisible

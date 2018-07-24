@@ -42,29 +42,35 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.initSearchController()
         
         HUD.show(.loading, text: "漫畫載入中...")
-        
-        if currentComic.getId() == "-1" {
-            WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
-                for comic in comics {
-                    let s : String = self.translateChineseStringToPyinyin(chineseStr:comic.getName())
+       
+        DispatchQueue.global(qos: .default).async {
+            if self.currentComic.getId() == "-1" {
+                let myAllComics = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as! [NSMutableDictionary]
+                for comic:NSMutableDictionary in myAllComics {
+                    let s : String = self.translateChineseStringToPyinyin(chineseStr:comic.object(forKey:"name") as! String)
+                    let c = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
+                    c.setId(comic.object(forKey:"comic_id") as! String)
+                    c.setSmallIconUrl(comic.object(forKey:"icon_url") as! String)
+                    c.setName(comic.object(forKey:"name") as! String)
+                    
                     let comicKey = String(s.prefix(1))
                     if var comicValues = self.comicLibrary[comicKey] {
-                        comicValues.append(comic)
+                        comicValues.append(c)
                         self.comicLibrary[comicKey] = comicValues
                     } else {
-                        self.comicLibrary[comicKey] = [comic]
+                        self.comicLibrary[comicKey] = [c]
                     }
-                }
-                self.comicSectionTitles = [String](self.comicLibrary.keys)
-                self.comicSectionTitles = self.comicSectionTitles.sorted(by: { $0 < $1 })
-
-                let sortedByKeyLibrary = self.comicLibrary.sorted { firstDictionary, secondDictionary in
-                    return firstDictionary.0 < secondDictionary.0
-                }
-                for (index, title) in self.comicSectionTitles.enumerated(){
-                    let comics = sortedByKeyLibrary[index].value
-                    let comicDict : NSDictionary = NSDictionary.init(object: comics, forKey: title as NSCopying)
-                    self.sortedComicLib.addEntries(from: (comicDict as NSCopying) as! [AnyHashable : Any])
+                    self.comicSectionTitles = [String](self.comicLibrary.keys)
+                    self.comicSectionTitles = self.comicSectionTitles.sorted(by: { $0 < $1 })
+                    
+                    let sortedByKeyLibrary = self.comicLibrary.sorted { firstDictionary, secondDictionary in
+                        return firstDictionary.0 < secondDictionary.0
+                    }
+                    for (index, title) in self.comicSectionTitles.enumerated(){
+                        let comics = sortedByKeyLibrary[index].value
+                        let comicDict : NSDictionary = NSDictionary.init(object: comics, forKey: title as NSCopying)
+                        self.sortedComicLib.addEntries(from: (comicDict as NSCopying) as! [AnyHashable : Any])
+                    }
                 }
                 DispatchQueue.main.async {
                     HUD.dismiss()
@@ -72,9 +78,55 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                 }
             }
         }
+    
         self.title = "漫畫列表"
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
+    }
+    
+    func updateAllComicsPlist(){
+        let ary  : NSMutableArray = NSMutableArray()
+
+        WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
+            for comic in comics {
+                let dict  = NSMutableDictionary.init(object: comic.getName() , forKey: "name" as NSCopying)
+                let iconDict = NSDictionary.init(object: comic.getSmallIconUrl() as Any , forKey: "icon_url" as NSCopying)
+                let idDict = NSDictionary.init(object: comic.getId() , forKey: "comic_id" as NSCopying)
+                dict.addEntries(from: iconDict as! [AnyHashable : Any])
+                dict.addEntries(from: idDict as! [AnyHashable : Any])
+                
+                ary.add(dict)
+                
+                let s : String = self.translateChineseStringToPyinyin(chineseStr:comic.getName())
+                let comicKey = String(s.prefix(1))
+                if var comicValues = self.comicLibrary[comicKey] {
+                    comicValues.append(comic)
+                    self.comicLibrary[comicKey] = comicValues
+                } else {
+                    self.comicLibrary[comicKey] = [comic]
+                }
+            }
+            
+            SwiftyPlistManager.shared.save(ary, forKey:"comics", toPlistWithName: "AllComics", completion: { (error) in
+                
+            })
+            
+            self.comicSectionTitles = [String](self.comicLibrary.keys)
+            self.comicSectionTitles = self.comicSectionTitles.sorted(by: { $0 < $1 })
+            
+            let sortedByKeyLibrary = self.comicLibrary.sorted { firstDictionary, secondDictionary in
+                return firstDictionary.0 < secondDictionary.0
+            }
+            for (index, title) in self.comicSectionTitles.enumerated(){
+                let comics = sortedByKeyLibrary[index].value
+                let comicDict : NSDictionary = NSDictionary.init(object: comics, forKey: title as NSCopying)
+                self.sortedComicLib.addEntries(from: (comicDict as NSCopying) as! [AnyHashable : Any])
+            }
+            DispatchQueue.main.async {
+                HUD.dismiss()
+                self.tableView.reloadData()
+            }
+        }
     }
 
     func translateChineseStringToPyinyin(chineseStr:String) -> String {
