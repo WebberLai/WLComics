@@ -86,6 +86,8 @@ open class JSnview{
             varSrc = StringUtility.substring(str, "ci = i;", "break;")!
         }
         
+        varSrc = StringUtility.replace(str, "//img", "https://img")
+        
         let getPageJS : String = String.init(format: buildGetPagesJS(), varSrc)
         str = StringUtility.replace(str, varSrc, "")
         str = StringUtility.replace(str, "break;", getPageJS)
