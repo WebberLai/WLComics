@@ -44,6 +44,11 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         HUD.show(.loading, text: "漫畫載入中...")
        
         DispatchQueue.global(qos: .default).async {
+            
+            WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
+                self.allComics = comics
+            }
+            
             if self.currentComic.getId() == "-1" {
                 let myAllComics = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as! [NSMutableDictionary]
                 for comic:NSMutableDictionary in myAllComics {
@@ -266,7 +271,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             comic = comics[indexPath.row]
         }
         
-        cell.comicNametextLabel.text = comic.getName()
+        let comicName = comic.getName()
+        
+        cell.comicNametextLabel.text = comicName
         
         let url = URL(string:comic.getSmallIconUrl()!)!
         
@@ -312,7 +319,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         guard let searchString = searchController.searchBar.text else {
             return
         }
-        
         filterComics = allComics.filter({ (comic) -> Bool in
             let comicName = comic.getName() as NSString
             return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound
@@ -337,23 +343,14 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         guard let searchString = searchController.searchBar.text else {
             return
         }
-
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
-            self.tableView.reloadData()
         }
-        
-        if filterComics.count == 0 {
-            WLComics.sharedInstance().searchComics(keyword: searchString, { (comics:[Comic]) in
-                if comics.count != 0 {
-                    self.filterComics = comics
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
-                }
-            })
-        }
-        
+        filterComics = allComics.filter({ (comic) -> Bool in
+            let comicName = comic.getName() as NSString
+            return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound
+        })
+        self.tableView.reloadData()
         searchController.searchBar.resignFirstResponder()
     }
     
