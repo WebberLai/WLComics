@@ -1,9 +1,10 @@
 use_frameworks!
-
+platform :ios, '9.0'
 target 'WLComics' do
   pod 'Swift8ComicSDK', :git => 'https://github.com/RayTW/Swift8ComicSDK.git'
   pod 'Kingfisher'
   pod 'HUD', '~>2.0.1'
+  pod 'SwiftyDropbox'
 end
 
 # if use Xcode9(Swift4.0)

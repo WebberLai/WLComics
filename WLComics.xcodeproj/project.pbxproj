@@ -265,7 +265,6 @@
 				6056EE171F28233F007BBE67 /* Frameworks */,
 				6056EE181F28233F007BBE67 /* Resources */,
 				7CA6D2859019703195AABF8D /* [CP] Embed Pods Frameworks */,
-				A8639279CD8C35009306CCC2 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -305,6 +304,7 @@
 				TargetAttributes = {
 					6056EE191F28233F007BBE67 = {
 						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = E935HHVHT5;
 						ProvisioningStyle = Automatic;
 					};
 					60A561971F82264B004C71C1 = {
@@ -368,34 +368,23 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/HUD/HUD.framework",
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
 				"${BUILT_PRODUCTS_DIR}/Swift8ComicSDK/Swift8ComicSDK.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyDropbox/SwiftyDropbox.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/HUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Swift8ComicSDK.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyDropbox.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A8639279CD8C35009306CCC2 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-WLComics/Pods-WLComics-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E5019BE780296B63622675AE /* [CP] Check Pods Manifest.lock */ = {
@@ -579,7 +568,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E935HHVHT5;
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -599,7 +588,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Webber Lai (7T4QCGLNFF)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Webber Lai (7T4QCGLNFF)";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E935HHVHT5;
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

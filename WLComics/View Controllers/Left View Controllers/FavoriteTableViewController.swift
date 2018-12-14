@@ -8,6 +8,7 @@
 
 import UIKit
 import Kingfisher
+import SwiftyDropbox
 
 class FavoriteTableViewController: UITableViewController {
     
@@ -22,16 +23,29 @@ class FavoriteTableViewController: UITableViewController {
     
     var sortedComicLib = NSMutableDictionary()
     
+    let client = DropboxClientsManager.authorizedClient
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "收藏列表"
         tableView.register(UINib(nibName: "ComicTableViewCell", bundle: nil), forCellReuseIdentifier: "ComicTableViewCell")
+        navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .bookmarks , target: self, action: #selector(loginDropbox))
+    }
+    
+    @objc func loginDropbox(){
+        DropboxClientsManager.authorizeFromController(UIApplication.shared,
+                                                      controller: self,
+                                                      openURL: { (url: URL) -> Void in
+                                                        UIApplication.shared.openURL(url)
+        })
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         myFavoriteList = FavoriteComics.listAllFavorite()
         self.sortComicList()
+        //Sync Favorite List
+        
         tableView.reloadData()
     }
     
