@@ -40,15 +40,87 @@ class FavoriteTableViewController: UITableViewController {
         })
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    func reloadFavoriteComics () {
         myFavoriteList = FavoriteComics.listAllFavorite()
         self.sortComicList()
-        //Sync Favorite List
-        
         tableView.reloadData()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.reloadFavoriteComics()
+        //Sync Favorite List
+        if let client = DropboxClientsManager.authorizedClient {
+            client.files.listFolder(path: "").response { response, error in
+                if let result = response {
+                    print("Folder contents: \(result)")
+                    if result.entries.count == 0 {
+                        //上傳本地的
+                        print("上傳本地的")
+                        self.uploadDropboxPlsit()
+                    }else{
+                        //同步雲端的下來
+                        print("同步雲端的下來")
+                        self.downloadDropboxPlist()
+                    }
+                } else {
+                    print("Error: \(error!)")
+                }
+            }
+        }
+    }
+    
+    func uploadDropboxPlsit() {
+        if let client = DropboxClientsManager.authorizedClient {
+            client.files.listFolder(path: "").response { response, error in
+                if let _ = response {
+                    let fileData = FavoriteComics.getFavoritePlistData()!
+                    //let fileData = "testing data example".data(using: String.Encoding.utf8, allowLossyConversion: false)!
+                    let _ = client.files.upload(path: "/MyFavoritesComics.plist", mode: .overwrite , input: fileData).response { response, error in
+                        if let response = response {
+                            print("Dropbox 上傳完成 \(response)")
+                        } else if let error = error {
+                            print("Dropbox 上傳失敗 \(error)")
+                        }
+                    }
+                        .progress { progressData in
+                            print(progressData)
+                    }
+                } else {
+                    print("Dropbox 上傳失敗 Error: \(error!)")
+                }
+            }
+        }
+    }
+    
+    func downloadDropboxPlist (){
+        if let client = DropboxClientsManager.authorizedClient {
+            client.files.listFolder(path:"").response { response, error in
+                if let _ = response {
+                    let fileManager = FileManager.default
+                    let directoryURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    let destURL = directoryURL.appendingPathComponent("MyFavoritesComics.plist")
+                    let destination: (URL, HTTPURLResponse) -> URL = { temporaryURL, response in
+                        return destURL
+                    }
+                    client.files.download(path: "/MyFavoritesComics.plist", overwrite: true, destination: destination)
+                        .response { response, error in
+                            if let response = response {
+                                print("Dropbox 下載完成 \(response)")
+                                self.reloadFavoriteComics()
+                            } else if let error = error {
+                                print("Dropbox 下載失敗 \(error)")
+                            }
+                        }
+                        .progress { progressData in
+                            print(progressData)
+                    }
+                } else {
+                    print("Dropbox 下載失敗 Error: \(error!)")
+                }
+            }
+        }
+    }
     
     func sortComicList(){
         comicLibrary.removeAll()
@@ -100,7 +172,6 @@ class FavoriteTableViewController: UITableViewController {
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         return comicSectionTitles.count
-
     }
     
     
@@ -198,6 +269,8 @@ class FavoriteTableViewController: UITableViewController {
             }
             sortedComicLib.setObject(comics, forKey: comicSectionTitles[indexPath.section] as NSCopying)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            self.uploadDropboxPlsit()
+            tableView.reloadData()
         }
     }
     

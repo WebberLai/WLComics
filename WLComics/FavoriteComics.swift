@@ -10,7 +10,7 @@ import UIKit
 import Swift8ComicSDK
 
 class FavoriteComics: NSObject {
-    
+        
     static func addComicToMyFavorite(_ comic : Comic){
         var favorites = SwiftyPlistManager.shared.fetchValue(for: "favorite_list", fromPlistWithName: "MyFavoritesComics") as! [NSMutableDictionary]
         let dict  = NSMutableDictionary.init(object: comic.getName() , forKey: "name" as NSCopying)
@@ -51,6 +51,25 @@ class FavoriteComics: NSObject {
             }
         }
         return isMyFavorite
+    }
+    
+    static func getFavoritePlistData () -> Data? {
+        let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+        let url = NSURL(fileURLWithPath: path)
+        if let pathComponent = url.appendingPathComponent("MyFavoritesComics.plist") {
+            let filePath = pathComponent.path
+            let fileManager = FileManager.default
+            if fileManager.fileExists(atPath: filePath) {
+                print("FILE AVAILABLE")
+                return fileManager.contents(atPath: filePath)
+            } else {
+                print("FILE NOT AVAILABLE")
+                return   nil
+            }
+        } else {
+            print("FILE PATH NOT AVAILABLE")
+            return nil
+        }
     }
     
 }

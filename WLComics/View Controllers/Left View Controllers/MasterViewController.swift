@@ -10,6 +10,7 @@ import UIKit
 import Swift8ComicSDK
 import Kingfisher
 import HUD
+import SwiftyDropbox
 
 class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate {
     
@@ -33,6 +34,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     var sortedComicLib = NSMutableDictionary()
     
     var selectIntexPath  : IndexPath = IndexPath()
+    
+    let client = DropboxClientsManager.authorizedClient
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -191,6 +194,28 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         super.didReceiveMemoryWarning()
     }
 
+    func uploadDropboxPlsit() {
+        if let client = DropboxClientsManager.authorizedClient {
+            client.files.listFolder(path: "").response { response, error in
+                if let _ = response {
+                    let fileData = FavoriteComics.getFavoritePlistData()!
+                    let _ = client.files.upload(path: "/MyFavoritesComics.plist", mode: .overwrite , input: fileData).response { response, error in
+                        if let response = response {
+                            print("Dropbox 上傳完成 \(response)")
+                        } else if let error = error {
+                            print("Dropbox 上傳失敗 \(error)")
+                        }
+                        }
+                        .progress { progressData in
+                            print(progressData)
+                    }
+                } else {
+                    print("Dropbox 上傳失敗 Error: \(error!)")
+                }
+            }
+        }
+    }
+    
     func insertNewObject(_ sender: Any) {
         let indexPath = IndexPath(row: 0, section: 0)
         tableView.insertRows(at: [indexPath], with: .automatic)
@@ -298,6 +323,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             }else {
                 FavoriteComics.removeComicFromMyFavorite(comic)
             }
+            self.uploadDropboxPlsit()
             self.tableView.reloadRows(at: [indexPath], with: .none)
         }
         return cell
