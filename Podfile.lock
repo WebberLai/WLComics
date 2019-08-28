@@ -1,10 +1,10 @@
 PODS:
-  - Alamofire (4.7.3)
+  - Alamofire (4.8.2)
   - HUD (2.0.1)
   - Kingfisher (4.10.1)
   - Swift8ComicSDK (2.0.6)
-  - SwiftyDropbox (5.0.0):
-    - Alamofire (~> 4.7.3)
+  - SwiftyDropbox (5.1.0):
+    - Alamofire (~> 4.8.2)
 
 DEPENDENCIES:
   - HUD (~> 2.0.1)
@@ -29,11 +29,11 @@ CHECKOUT OPTIONS:
     :git: https://github.com/RayTW/Swift8ComicSDK.git
 
 SPEC CHECKSUMS:
-  Alamofire: c7287b6e5d7da964a70935e5db17046b7fde6568
+  Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   HUD: 08e61fa44e2573dd88407ade83a526b9e95e7284
   Kingfisher: c148cd7b47ebde9989f6bc7c27dcaa79d81279a0
   Swift8ComicSDK: 2a09eb1cd6e162e562df47c291bef4c1fdee20a7
-  SwiftyDropbox: 378b4425a2e8d0cb24c7b0f2e3af72bfbaaf1e73
+  SwiftyDropbox: 7ca4961e0340c62c8d6d1ece91d67badfe4c0380
 
 PODFILE CHECKSUM: 733dd3126b1ff543caf5aaeb0edd00305483013d
 

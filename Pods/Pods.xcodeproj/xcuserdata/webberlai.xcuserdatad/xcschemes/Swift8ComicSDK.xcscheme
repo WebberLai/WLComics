@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '1365250A468053C2763EADFE11DA6B94'
-               BlueprintName = 'Swift8ComicSDK'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'Swift8ComicSDK.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "32B2B53FB3C21427A7DAFEE2F7EB2F60"
+               BlueprintName = "Swift8ComicSDK"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "Swift8ComicSDK.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

@@ -7,7 +7,7 @@
 //
 
 open class Config {
-    open static let mComicHost : String = "https://www.comicbus.com/"
+    open static let mComicHost : String = "http://www.comicbus.com/"
     open let mAllUrl : String = mComicHost + "comic/all.html"
     open let mCviewJSUrl : String = mComicHost + "js/comicview.js"
     private let mSmallIconUrl : String = mComicHost + "pics/0/%@s.jpg"
