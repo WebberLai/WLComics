@@ -218,7 +218,7 @@ class FavoriteTableViewController: UITableViewController {
         let url = URL(string: comicDict.object(forKey: "icon_url") as! String)!
         
         cell.coverImageView!.kf.setImage(with: url,
-                                         placeholder: Image.init(named:"comic_place_holder"),
+                                         placeholder: UIImage.init(named:"comic_place_holder"),
                                          options: [.transition(ImageTransition.fade(1))],
                                          progressBlock: { receivedSize, totalSize in
         },

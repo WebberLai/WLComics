@@ -182,7 +182,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 if index == 0 {
                     let url = URL(string:images.last!)!
                     imageV.kf.setImage(with: url,
-                                       placeholder: Image.init(named:"comic_place_holder"),
+                                       placeholder: UIImage.init(named:"comic_place_holder"),
                                        options: [.transition(ImageTransition.fade(1)),
                                                  .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
                                        progressBlock: { receivedSize, totalSize in
@@ -196,7 +196,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 {
                     let url = URL(string:images.first!)!
                     imageV.kf.setImage(with: url,
-                                       placeholder: Image.init(named:"comic_place_holder"),
+                                       placeholder: UIImage.init(named:"comic_place_holder"),
                                        options: [.transition(ImageTransition.fade(1)),
                                                  .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
                                        progressBlock: { receivedSize, totalSize in
@@ -210,7 +210,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 {
                     let url = URL(string:images[index - 1])!
                     imageV.kf.setImage(with: url,
-                                       placeholder: Image.init(named:"comic_place_holder"),
+                                       placeholder: UIImage.init(named:"comic_place_holder"),
                                        options: [.transition(ImageTransition.fade(1)),
                                                  .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
                                        progressBlock: { receivedSize, totalSize in
@@ -228,7 +228,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 let url = URL(string:images[index])!
                 
                 imageV.kf.setImage(with: url,
-                                   placeholder: Image.init(named:"comic_place_holder"),
+                                   placeholder: UIImage.init(named:"comic_place_holder"),
                                    options: [.transition(ImageTransition.fade(1)),
                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
                                    progressBlock: { receivedSize, totalSize in

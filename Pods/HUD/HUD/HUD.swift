@@ -9,7 +9,7 @@
 import UIKit
 
 
-public typealias HUDCompletedBlock = (Void) -> Void
+public typealias HUDCompletedBlock = () -> Void
 
 public enum HUDType {
     case loading
@@ -151,7 +151,11 @@ open class HUD: NSObject {
                                                queue: DispatchQueue.main)// as! DispatchSource
         timer!.scheduleRepeating(wallDeadline: .now(), interval: .seconds(1))
 
-        timer!.setEventHandler { _ in
+        timer!.setEventHandler {
+            
+        }
+        
+        timer!.setEventHandler {
             if timeout <= 0 {
                 DispatchQueue.main.async {
                     dismiss()

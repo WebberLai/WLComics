@@ -93,7 +93,7 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
         cell.textLabel?.text = episode.getName()
         let url = URL(string:currentComic.getSmallIconUrl()!)!
         cell.imageView!.kf.setImage(with: url,
-                                    placeholder: Image.init(named:"comic_place_holder"),
+                                    placeholder: UIImage.init(named:"comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1))],
                                     progressBlock: { receivedSize, totalSize in
         },

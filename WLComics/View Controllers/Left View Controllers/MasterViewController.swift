@@ -303,7 +303,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         let url = URL(string:comic.getSmallIconUrl()!)!
         
         cell.coverImageView!.kf.setImage(with: url,
-                                    placeholder: Image.init(named:"comic_place_holder"),
+                                    placeholder: UIImage.init(named:"comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1))],
                                     progressBlock: { receivedSize, totalSize in
         },
