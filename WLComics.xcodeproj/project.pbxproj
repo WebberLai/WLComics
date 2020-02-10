@@ -304,7 +304,6 @@
 				TargetAttributes = {
 					6056EE191F28233F007BBE67 = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = 7T4QCGLNFF;
 						ProvisioningStyle = Automatic;
 					};
 					60A561971F82264B004C71C1 = {
@@ -569,7 +568,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 7T4QCGLNFF;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
