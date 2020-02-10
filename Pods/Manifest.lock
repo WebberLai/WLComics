@@ -1,9 +1,9 @@
 PODS:
   - Alamofire (4.8.2)
   - HUD (2.0.1)
-  - Kingfisher (5.8.1):
-    - Kingfisher/Core (= 5.8.1)
-  - Kingfisher/Core (5.8.1)
+  - Kingfisher (5.13.0):
+    - Kingfisher/Core (= 5.13.0)
+  - Kingfisher/Core (5.13.0)
   - Swift8ComicSDK (2.0.6)
   - SwiftyDropbox (5.1.0):
     - Alamofire (~> 4.8.2)
@@ -33,7 +33,7 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   HUD: 08e61fa44e2573dd88407ade83a526b9e95e7284
-  Kingfisher: de969e451c81ca6c07a454bc36fea84b8b08c3c7
+  Kingfisher: 0d334cada987fcddbe9b5cec516406e1ee9d4748
   Swift8ComicSDK: 2a09eb1cd6e162e562df47c291bef4c1fdee20a7
   SwiftyDropbox: 7ca4961e0340c62c8d6d1ece91d67badfe4c0380
 
