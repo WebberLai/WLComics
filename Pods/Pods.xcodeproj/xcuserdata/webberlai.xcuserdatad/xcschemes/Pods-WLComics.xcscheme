@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3BCAA4CB5F8F0E826F01499278FAC6AB"
+               BlueprintIdentifier = "5718CF0AC2F773EBC4E27E9CBB8234E5"
                BuildableName = "Pods_WLComics.framework"
                BlueprintName = "Pods-WLComics"
                ReferencedContainer = "container:Pods.xcodeproj">
@@ -26,7 +26,6 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      language = ""
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
       </Testables>
@@ -37,7 +36,6 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      language = ""
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
@@ -47,7 +45,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3BCAA4CB5F8F0E826F01499278FAC6AB"
+            BlueprintIdentifier = "5718CF0AC2F773EBC4E27E9CBB8234E5"
             BuildableName = "Pods_WLComics.framework"
             BlueprintName = "Pods-WLComics"
             ReferencedContainer = "container:Pods.xcodeproj">

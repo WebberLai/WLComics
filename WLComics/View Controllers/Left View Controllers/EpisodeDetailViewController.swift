@@ -37,10 +37,10 @@ class EpisodeDetailViewController: UIViewController {
         WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
             episode.setUpPages()
             self.pages = episode.getImageUrlList()
+            self.detailViewController?.setEpisodeUrl(episode.getUrl())
+            self.detailViewController?.updateImages(imgs: self.pages)
             DispatchQueue.main.async {
                 self.tableView.reloadData()
-                self.detailViewController?.setEpisodeUrl(episode.getUrl())
-                self.detailViewController?.updateImages(imgs: self.pages)
             }
         })
         self.tableView.tableHeaderView = nil
@@ -83,8 +83,7 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
         let url = URL(string:pages[indexPath.row])
         cell.imageView!.kf.setImage(with: url,
                                     placeholder: Image.init(named:"comic_place_holder"),
-                                    options: [.transition(ImageTransition.fade(1)),
-                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))],
+                                    options: [.transition(ImageTransition.fade(1)),.requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))],
                                     progressBlock: { receivedSize, totalSize in
         },
                                     completionHandler: { image, error, cacheType, imageURL in

@@ -9,8 +9,8 @@
 import UIKit
 import Swift8ComicSDK
 import Kingfisher
-import HUD
 import SwiftyDropbox
+import SVProgressHUD
 
 class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate {
     
@@ -44,7 +44,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
         self.initSearchController()
         
-        HUD.show(.loading, text: "漫畫載入中...")
+        SVProgressHUD.show(withStatus: "漫畫載入中...")
        
         DispatchQueue.global(qos: .default).async {
             
@@ -81,7 +81,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                     }
                 }
                 DispatchQueue.main.async {
-                    HUD.dismiss()
+                    SVProgressHUD.dismiss()
                     self.tableView.reloadData()
                 }
             }
@@ -131,7 +131,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                 self.sortedComicLib.addEntries(from: (comicDict as NSCopying) as! [AnyHashable : Any])
             }
             DispatchQueue.main.async {
-                HUD.dismiss()
+                SVProgressHUD.dismiss()
                 self.tableView.reloadData()
             }
         }

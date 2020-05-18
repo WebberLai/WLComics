@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "32B2B53FB3C21427A7DAFEE2F7EB2F60"
+               BlueprintIdentifier = "A237C0C404ACE6A7A8F2EA1A9E315FE5"
                BlueprintName = "Swift8ComicSDK"
                ReferencedContainer = "container:Pods.xcodeproj"
                BuildableName = "Swift8ComicSDK.framework">
