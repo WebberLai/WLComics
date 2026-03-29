@@ -53,7 +53,12 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             }
             
             if self.currentComic.getId() == "-1" {
-                let myAllComics = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as! [NSMutableDictionary]
+                guard let myAllComics = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as? [NSMutableDictionary] else {
+                    DispatchQueue.main.async {
+                        SVProgressHUD.dismiss()
+                    }
+                    return
+                }
                 for comic:NSMutableDictionary in myAllComics {
                     let s : String = self.translateChineseStringToPyinyin(chineseStr:comic.object(forKey:"name") as! String)
                     let c = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
@@ -180,7 +185,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
+        clearsSelectionOnViewWillAppear = splitViewController?.isCollapsed ?? true
         super.viewWillAppear(animated)
         self.tableView.reloadData()
     }
@@ -226,12 +231,14 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEpisodes" {
             if shouldShowSearchResults {
-                currentComic = filterComics [selectIntexPath.row]
+                guard selectIntexPath.row < filterComics.count else { return }
+                currentComic = filterComics[selectIntexPath.row]
             }
             else {
-                let comics : [Comic] = self.sortedComicLib.object(forKey:comicSectionTitles[selectIntexPath.section]) as! [Comic]
-                let comic = comics[selectIntexPath.row]
-                currentComic = comic
+                guard selectIntexPath.section < comicSectionTitles.count,
+                      let comics = self.sortedComicLib.object(forKey:comicSectionTitles[selectIntexPath.section]) as? [Comic],
+                      selectIntexPath.row < comics.count else { return }
+                currentComic = comics[selectIntexPath.row]
             }
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
             comicEpisodesViewController.currentComic = currentComic
@@ -265,6 +272,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard section < comicSectionTitles.count else { return nil }
         return comicSectionTitles[section]
     }
 
@@ -273,7 +281,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             return filterComics.count
         }
         else {
-            let comics : [Comic] = self.sortedComicLib.object(forKey:comicSectionTitles[section]) as! [Comic]
+            guard section < comicSectionTitles.count,
+                  let comics = self.sortedComicLib.object(forKey:comicSectionTitles[section]) as? [Comic] else { return 0 }
             return comics.count
         }
     }
@@ -286,13 +295,16 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "ComicTableViewCell") as! ComicTableViewCell
   
-        let comics : [Comic] = self.sortedComicLib.object(forKey:comicSectionTitles[indexPath.section]) as! [Comic]
-        
+        let comics = (indexPath.section < comicSectionTitles.count) ?
+            self.sortedComicLib.object(forKey:comicSectionTitles[indexPath.section]) as? [Comic] ?? [] : []
+
         var comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
-        
+
         if shouldShowSearchResults {
-            comic = filterComics [indexPath.row]
-        }else {
+            guard indexPath.row < filterComics.count else { return cell }
+            comic = filterComics[indexPath.row]
+        } else {
+            guard indexPath.row < comics.count else { return cell }
             comic = comics[indexPath.row]
         }
         
@@ -301,10 +313,15 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         cell.comicNametextLabel.text = comicName
         
         let url = URL(string:comic.getSmallIconUrl()!)!
-        
+        let modifier = AnyModifier { request in
+            var r = request
+            r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
+            return r
+        }
         cell.coverImageView!.kf.setImage(with: url,
                                     placeholder: Image.init(named:"comic_place_holder"),
-                                    options: [.transition(ImageTransition.fade(1))],
+                                    options: [.transition(ImageTransition.fade(1)),
+                                              .requestModifier(modifier)],
                                     progressBlock: { receivedSize, totalSize in
         },
                                     completionHandler: { image, error, cacheType, imageURL in

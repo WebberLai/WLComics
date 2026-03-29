@@ -91,4 +91,8 @@ open class Episode{
     open func setTi(_ ti : Int) -> Void{
         mJSnview.setTi(ti)
     }
+
+    open func setChunkSize(_ size : Int) -> Void{
+        mJSnview.setChunkSize(size)
+    }
 }

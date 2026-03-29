@@ -42,64 +42,73 @@ open class WLComics{
     }
     
     open func loadAllComics(_ onLoadedComics: @escaping ([Comic]) -> Void) {
-        mAllComics = restoreComics()
-        
-        if(mAllComics == nil){
+        // 1. 先嘗試從 cache 載入，立即回傳
+        if let cached = restoreComics(), !cached.isEmpty {
+            mAllComics = cached
+            onLoadedComics(cached)
+
+            // 2. 背景更新 cache（不阻塞 UI）
+            mR8Comic.getAll { (comics:[Comic]) in
+                guard !comics.isEmpty else { return }
+                self.mAllComics = comics
+                self.storeComics(comics: comics)
+            }
+        } else {
+            // 無 cache，從網路載入
             mR8Comic.getAll { (comics:[Comic]) in
                 self.mAllComics = comics
-                self.storeComics(comics: comics);
-                
-                onLoadedComics(self.mAllComics!)
+                self.storeComics(comics: comics)
+                onLoadedComics(comics)
             }
-        }else{
-            onLoadedComics(mAllComics!)
         }
     }
     
     //從UserDefaults將全部漫畫列表取出
     fileprivate func restoreComics() -> [Comic]?{
-        var comics = [Comic]()
-        let comicsData = UserDefaults.standard.object(forKey: WLComics.KEY_ALL_COMICS) as! [[String : String]]?
-        
-        guard comicsData == nil else {
-            var comic : Comic? = nil
-            
-            for comicDic in comicsData! {
-                let comicId = comicDic[ComicMemberNames.ID.rawValue]!
-                let comicName = comicDic[ComicMemberNames.NAME.rawValue]!
-                
-                comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicId, name: comicName)
-                comic?.setIconUrl(comicDic[ComicMemberNames.ICON_URL.rawValue]!)
-                comic?.setSmallIconUrl(comicDic[ComicMemberNames.SMALL_ICON_URL.rawValue]!)
-                comics.append(comic!)
-            }
-            
-            return comics
+        guard let comicsData = UserDefaults.standard.object(forKey: WLComics.KEY_ALL_COMICS) as? [[String : String]] else {
+            return nil
         }
-        
-        return nil
+
+        var comics = [Comic]()
+        for comicDic in comicsData {
+            guard let comicId = comicDic[ComicMemberNames.ID.rawValue],
+                  let comicName = comicDic[ComicMemberNames.NAME.rawValue] else { continue }
+
+            let comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicId, name: comicName)
+            if let iconUrl = comicDic[ComicMemberNames.ICON_URL.rawValue] {
+                comic.setIconUrl(iconUrl)
+            }
+            if let smallIconUrl = comicDic[ComicMemberNames.SMALL_ICON_URL.rawValue] {
+                comic.setSmallIconUrl(smallIconUrl)
+            }
+            comics.append(comic)
+        }
+
+        return comics.isEmpty ? nil : comics
     }
     
     //將全部漫畫列表儲存到UserDefaults
     fileprivate func storeComics(comics : [Comic]){
         var comicsData = [[String : String]]()
-        
+
         for comic in comics {
-            comicsData.append([ComicMemberNames.ID.rawValue : comic.getId(),
-                               ComicMemberNames.NAME.rawValue : comic.getName(),
-                               ComicMemberNames.ICON_URL.rawValue : comic.getIconUrl()!,
-                               ComicMemberNames.SMALL_ICON_URL.rawValue : comic.getSmallIconUrl()!])
+            var dict = [String : String]()
+            dict[ComicMemberNames.ID.rawValue] = comic.getId()
+            dict[ComicMemberNames.NAME.rawValue] = comic.getName()
+            if let iconUrl = comic.getIconUrl() { dict[ComicMemberNames.ICON_URL.rawValue] = iconUrl }
+            if let smallIconUrl = comic.getSmallIconUrl() { dict[ComicMemberNames.SMALL_ICON_URL.rawValue] = smallIconUrl }
+            comicsData.append(dict)
         }
-        
+
         UserDefaults.standard.set(comicsData, forKey: WLComics.KEY_ALL_COMICS)
     }
     
     open func loadEpisodeDetail(_ episode : Episode, onLoadDetail: @escaping (Episode) -> Void){
         //檢查此漫畫集數是否已有串過完整url，若未有完成url則將url重組
-        if(!episode.getUrl().hasPrefix("http")){
-            episode.setUrl((mHostMap?[episode.getCatid()]!)! + episode.getUrl())
+        if(!episode.getUrl().hasPrefix("https")){
+//            episode.setUrl((mHostMap?[episode.getCatid()]!)! + episode.getUrl())
+            episode.setUrl("https://www.8comic.com/view/" + episode.getUrl())
         }
-
         mR8Comic.loadEpisodeDetail(episode, onLoadDetail: onLoadDetail)
     }
     

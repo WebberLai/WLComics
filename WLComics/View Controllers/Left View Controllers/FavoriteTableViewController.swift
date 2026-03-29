@@ -53,7 +53,7 @@ class FavoriteTableViewController: UITableViewController {
         if let client = DropboxClientsManager.authorizedClient {
             client.files.listFolder(path: "").response { response, error in
                 if let result = response {
-                    print("Folder contents: \(result)")
+                    //print("Folder contents: \(result)")
                     if result.entries.count == 0 {
                         //上傳本地的
                         print("上傳本地的")
@@ -106,7 +106,7 @@ class FavoriteTableViewController: UITableViewController {
                     client.files.download(path: "/MyFavoritesComics.plist", overwrite: true, destination: destination)
                         .response { response, error in
                             if let response = response {
-                                print("Dropbox 下載完成 \(response)")
+                                //print("Dropbox 下載完成 \(response)")
                                 self.reloadFavoriteComics()
                             } else if let error = error {
                                 print("Dropbox 下載失敗 \(error)")
