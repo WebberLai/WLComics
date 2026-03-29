@@ -38,7 +38,9 @@
       "Bash(curl -s -L --max-time 15 -b CKID=test https://www.8comic.com/view/103.html?ch=1)",
       "Read(//tmp/**)",
       "Bash(grep -oE \"\\(TheImg|img_src|src=\\)[^;]{0,200}\" /tmp/view103.html)",
-      "Bash(grep -oE \"\\(loadingpage|\\\\.src|img_ele\\)[^;]{0,300}\" /tmp/view103.html)"
+      "Bash(grep -oE \"\\(loadingpage|\\\\.src|img_ele\\)[^;]{0,300}\" /tmp/view103.html)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

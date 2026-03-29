@@ -39,29 +39,46 @@ open class Parser{
     public init() {
     }
 
-    // MARK: - 漫畫列表（新版 HTML: <a href="/html/ID.html" data-url="ID">名稱</a>）
+    // MARK: - 漫畫列表（從 /comic/ 頁面解析）
+    // HTML 格式: <a href="/html/ID.html" title="名稱"><img src="/pics/0/ID.jpg"><span>N集</span><span>名稱</span></a>
     open func allComics(_ htmlString : String, _ config: Config) -> [Comic]{
         var comicAry = [Comic]()
-        let lines = htmlString.components(separatedBy: "\n")
         var addedIds = Set<String>()
 
-        for line in lines {
-            // 匹配 <a href="/html/ID.html" data-url="ID" ...>漫畫名
-            guard line.contains("data-url=\"") && line.contains("/html/") else { continue }
+        // 用正則匹配 <a href="/html/ID.html" title="NAME">
+        var searchFrom = htmlString.startIndex
+        let hrefPattern = "href=\"/html/"
+        let hrefEnd = ".html\""
 
-            // 取出 comic ID: data-url="12345"
-            guard let idStart = line.range(of: "data-url=\""),
-                  let idEnd = line.range(of: "\"", range: idStart.upperBound..<line.endIndex) else { continue }
-            let comicId = String(line[idStart.upperBound..<idEnd.lowerBound])
+        while let hrefStart = htmlString.range(of: hrefPattern, range: searchFrom..<htmlString.endIndex) {
+            // 取出 ID
+            let idStart = hrefStart.upperBound
+            guard let idEndRange = htmlString.range(of: hrefEnd, range: idStart..<htmlString.endIndex) else { break }
+            let comicId = String(htmlString[idStart..<idEndRange.lowerBound])
 
-            guard !comicId.isEmpty, !addedIds.contains(comicId) else { continue }
+            // 移動搜尋位置
+            searchFrom = idEndRange.upperBound
 
-            // 取出漫畫名: target="_top">名稱\n 或 >名稱</a>
+            // 驗證 ID 是數字
+            guard !comicId.isEmpty, comicId.allSatisfy({ $0.isNumber }), !addedIds.contains(comicId) else { continue }
+
+            // 取出 title="NAME"
+            let searchEnd = htmlString.index(searchFrom, offsetBy: min(500, htmlString.distance(from: searchFrom, to: htmlString.endIndex)))
             var comicName = ""
-            if let nameStart = line.range(of: "target=\"_top\">") {
-                let afterTag = String(line[nameStart.upperBound...])
-                comicName = afterTag.replacingOccurrences(of: "</a>", with: "")
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            if let titleStart = htmlString.range(of: "title=\"", range: searchFrom..<searchEnd) {
+                let nameStart = titleStart.upperBound
+                if let titleEnd = htmlString.range(of: "\"", range: nameStart..<searchEnd) {
+                    comicName = String(htmlString[nameStart..<titleEnd.lowerBound])
+                }
+            }
+
+            // fallback: 從第二個 <span> 取名稱
+            if comicName.isEmpty {
+                if let firstSpanEnd = htmlString.range(of: "</span>", range: searchFrom..<searchEnd),
+                   let secondSpanStart = htmlString.range(of: "<span>", range: firstSpanEnd.upperBound..<searchEnd),
+                   let secondSpanEnd = htmlString.range(of: "</span>", range: secondSpanStart.upperBound..<searchEnd) {
+                    comicName = String(htmlString[secondSpanStart.upperBound..<secondSpanEnd.lowerBound])
+                }
             }
 
             guard !comicName.isEmpty else { continue }
@@ -75,6 +92,7 @@ open class Parser{
             comicAry.append(comic)
         }
 
+        print("Parser.allComics: parsed \(comicAry.count) comics from /comic/ page")
         return comicAry
     }
 

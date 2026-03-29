@@ -312,20 +312,23 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         
         cell.comicNametextLabel.text = comicName
         
-        let url = URL(string:comic.getSmallIconUrl()!)!
         let modifier = AnyModifier { request in
             var r = request
             r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
             return r
         }
-        cell.coverImageView!.kf.setImage(with: url,
-                                    placeholder: Image.init(named:"comic_place_holder"),
-                                    options: [.transition(ImageTransition.fade(1)),
-                                              .requestModifier(modifier)],
-                                    progressBlock: { receivedSize, totalSize in
-        },
-                                    completionHandler: { image, error, cacheType, imageURL in
-        })
+        if let urlStr = comic.getSmallIconUrl(), let url = URL(string: urlStr) {
+            cell.coverImageView?.kf.setImage(with: url,
+                                        placeholder: UIImage(named: "comic_place_holder"),
+                                        options: [.transition(ImageTransition.fade(1)),
+                                                  .requestModifier(modifier)],
+                                        progressBlock: { receivedSize, totalSize in
+            },
+                                        completionHandler: { image, error, cacheType, imageURL in
+            })
+        } else {
+            cell.coverImageView?.image = UIImage(named: "comic_place_holder")
+        }
         
         let isFavorite : Bool = FavoriteComics.checkComicIsMyFavorite(comic)
         if isFavorite == false {
