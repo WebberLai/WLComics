@@ -182,43 +182,25 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 if index == 0 {
                     let url = URL(string:images.last!)!
                     imageV.kf.setImage(with: url,
-                                       placeholder: Image.init(named:"comic_place_holder"),
+                                       placeholder: UIImage(named: "comic_place_holder"),
                                        options: [.transition(ImageTransition.fade(1)),
-                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
-                                       progressBlock: { receivedSize, totalSize in
-                                        
-                    },
-                                       completionHandler: { image, error, cacheType, imageURL in
-                                        
-                    })
+                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
                 }
                 else if index > images.count
                 {
                     let url = URL(string:images.first!)!
                     imageV.kf.setImage(with: url,
-                                       placeholder: Image.init(named:"comic_place_holder"),
+                                       placeholder: UIImage(named: "comic_place_holder"),
                                        options: [.transition(ImageTransition.fade(1)),
-                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
-                                       progressBlock: { receivedSize, totalSize in
-                                        
-                    },
-                                       completionHandler: { image, error, cacheType, imageURL in
-                                        
-                    })
+                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
                 }
                 else
                 {
                     let url = URL(string:images[index - 1])!
                     imageV.kf.setImage(with: url,
-                                       placeholder: Image.init(named:"comic_place_holder"),
+                                       placeholder: UIImage(named: "comic_place_holder"),
                                        options: [.transition(ImageTransition.fade(1)),
-                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
-                                       progressBlock: { receivedSize, totalSize in
-                                        
-                    },
-                                       completionHandler: { image, error, cacheType, imageURL in
-                                        
-                    })
+                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
                     
                 }
             }
@@ -228,15 +210,9 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 let url = URL(string:images[index])!
                 
                 imageV.kf.setImage(with: url,
-                                   placeholder: Image.init(named:"comic_place_holder"),
+                                   placeholder: UIImage(named: "comic_place_holder"),
                                    options: [.transition(ImageTransition.fade(1)),
-                                             .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))],
-                                   progressBlock: { receivedSize, totalSize in
-                                    
-                },
-                                   completionHandler: { image, error, cacheType, imageURL in
-                                    
-                })
+                                             .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
             }
             myScrollView.addSubview(imageV)
         }

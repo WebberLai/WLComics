@@ -40,7 +40,16 @@
       "Bash(grep -oE \"\\(TheImg|img_src|src=\\)[^;]{0,200}\" /tmp/view103.html)",
       "Bash(grep -oE \"\\(loadingpage|\\\\.src|img_ele\\)[^;]{0,300}\" /tmp/view103.html)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(ls -la /Users/rocadeveloper/Documents/GitHub/WLComics/WLComics/*.plist)",
+      "Bash(ls /Users/rocadeveloper/Documents/GitHub/WLComics/*.xcworkspace)",
+      "Bash(ls /Users/rocadeveloper/Documents/GitHub/WLComics/*.xcodeproj)",
+      "Bash(curl -s -H \"Referer: https://www.8comic.com/\" \"https://www.8comic.com/html/12027.html\")",
+      "Bash(curl -s -H \"Referer: https://www.8comic.com/\" \"https://www.8comic.com/view/12027.html?ch=1\")",
+      "Bash(curl -s \"https://www.8comic.com/js/nview.js\")",
+      "Bash(curl -s \"https://www.8comic.com/view/12027.html?ch=1\")",
+      "Bash(tr ';' '\\\\n')",
+      "Bash(curl -s \"https://www.8comic.com/view/3099.html?ch=1\")"
     ]
   }
 }

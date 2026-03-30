@@ -15,92 +15,65 @@ open class WLComics{
     fileprivate let mR8Comic : R8Comic = R8Comic.get()
     fileprivate var mHostMap : [String : String]?
     fileprivate var mAllComics :[Comic]?
-    fileprivate static let KEY_ALL_COMICS : String = "allComics";
-    
-    enum ComicMemberNames: String {
-        case ID = "mId"
-        case NAME = "mName"
-        case ICON_URL = "mIconUrl"
-        case SMALL_ICON_URL = "mSmallIconUrl"
-    }
-    
+
     init() {
     }
-    
+
     open class func sharedInstance() -> WLComics{
         return sInstance
     }
-    
+
     open func getR8Comic() -> R8Comic{
         return mR8Comic;
     }
-    
+
     open func setUp() -> Void{
         mR8Comic.loadSiteUrlList { (hostMap : [String : String]) in
             self.mHostMap = hostMap
         }
     }
-    
+
     open func loadAllComics(_ onLoadedComics: @escaping ([Comic]) -> Void) {
-        // 1. 先嘗試從 cache 載入，立即回傳
-        if let cached = restoreComics(), !cached.isEmpty {
+        // 先從 plist 快取讀取，立即顯示
+        if let cached = restoreComicsFromPlist(), !cached.isEmpty {
             mAllComics = cached
             onLoadedComics(cached)
-
-            // 2. 背景更新 cache（不阻塞 UI）
+            // 背景更新
             mR8Comic.getAll { (comics:[Comic]) in
                 guard !comics.isEmpty else { return }
                 self.mAllComics = comics
-                self.storeComics(comics: comics)
+                self.storeComicsToPlist(comics: comics)
             }
         } else {
-            // 無 cache，從網路載入
+            // 無快取，從網路載入
             mR8Comic.getAll { (comics:[Comic]) in
                 self.mAllComics = comics
-                self.storeComics(comics: comics)
+                self.storeComicsToPlist(comics: comics)
                 onLoadedComics(comics)
             }
         }
     }
-    
-    //從UserDefaults將全部漫畫列表取出
-    fileprivate func restoreComics() -> [Comic]?{
-        guard let comicsData = UserDefaults.standard.object(forKey: WLComics.KEY_ALL_COMICS) as? [[String : String]] else {
-            return nil
+
+    fileprivate func restoreComicsFromPlist() -> [Comic]? {
+        guard let array = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as? [[String: String]],
+              !array.isEmpty else { return nil }
+        return array.compactMap { dict -> Comic? in
+            guard let id = dict["comic_id"], let name = dict["name"] else { return nil }
+            let comic = mR8Comic.generatorFakeComic(id, name: name)
+            // 用 ID 重新產生 URL，避免快取中殘留舊格式網址
+            comic.setIconUrl(mR8Comic.getComicIconUrl(id))
+            comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(id))
+            return comic
         }
-
-        var comics = [Comic]()
-        for comicDic in comicsData {
-            guard let comicId = comicDic[ComicMemberNames.ID.rawValue],
-                  let comicName = comicDic[ComicMemberNames.NAME.rawValue] else { continue }
-
-            let comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicId, name: comicName)
-            if let iconUrl = comicDic[ComicMemberNames.ICON_URL.rawValue] {
-                comic.setIconUrl(iconUrl)
-            }
-            if let smallIconUrl = comicDic[ComicMemberNames.SMALL_ICON_URL.rawValue] {
-                comic.setSmallIconUrl(smallIconUrl)
-            }
-            comics.append(comic)
-        }
-
-        return comics.isEmpty ? nil : comics
     }
-    
-    //將全部漫畫列表儲存到UserDefaults
-    fileprivate func storeComics(comics : [Comic]){
-        var comicsData = [[String : String]]()
 
-        for comic in comics {
-            var dict = [String : String]()
-            dict[ComicMemberNames.ID.rawValue] = comic.getId()
-            dict[ComicMemberNames.NAME.rawValue] = comic.getName()
-            if let iconUrl = comic.getIconUrl() { dict[ComicMemberNames.ICON_URL.rawValue] = iconUrl }
-            if let smallIconUrl = comic.getSmallIconUrl() { dict[ComicMemberNames.SMALL_ICON_URL.rawValue] = smallIconUrl }
-            comicsData.append(dict)
+    fileprivate func storeComicsToPlist(comics: [Comic]) {
+        let array = comics.map { comic -> [String: String] in
+            var dict = ["comic_id": comic.getId(), "name": comic.getName()]
+            if let url = comic.getIconUrl() { dict["icon_url"] = url }
+            return dict
         }
-
-        UserDefaults.standard.set(comicsData, forKey: WLComics.KEY_ALL_COMICS)
+        SwiftyPlistManager.shared.save(array, forKey: "comics", toPlistWithName: "AllComics") { _ in }
     }
     
     open func loadEpisodeDetail(_ episode : Episode, onLoadDetail: @escaping (Episode) -> Void){

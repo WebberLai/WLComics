@@ -26,23 +26,28 @@
 
 import Foundation
 
-/// Represents an image setting source for Kingfisher methods.
+
+/// Represents an image source setting for Kingfisher methods.
 ///
-/// A `Source` value indicates the way how the target image can be retrieved and cached.
+/// A ``Source`` value indicates the way in which the target image can be retrieved and cached.
 ///
-/// - network: The target image should be got from network remotely. The associated `Resource`
-///            value defines detail information like image URL and cache key.
-/// - provider: The target image should be provided in a data format. Normally, it can be an image
+/// - `network`: The target image should be retrieved from the network remotely. The associated ``Resource``
+///            value defines detailed information like image URL and cache key.
+/// - `provider`: The target image should be provided in a data format. Normally, it can be an image
 ///             from local storage or in any other encoding format (like Base64).
-public enum Source {
+///
+public enum Source: Sendable {
 
     /// Represents the source task identifier when setting an image to a view with extension methods.
     public enum Identifier {
 
         /// The underlying value type of source identifier.
         public typealias Value = UInt
-        static var current: Value = 0
-        static func next() -> Value {
+        
+        @MainActor static private(set) var current: Value = 0
+        
+        // Not thread safe. Expected to be always called on the main thread.
+        @MainActor static func next() -> Value {
             current += 1
             return current
         }
@@ -50,13 +55,13 @@ public enum Source {
 
     // MARK: Member Cases
 
-    /// The target image should be got from network remotely. The associated `Resource`
-    /// value defines detail information like image URL and cache key.
-    case network(Resource)
-    
-    /// The target image should be provided in a data format. Normally, it can be an image
-    /// from local storage or in any other encoding format (like Base64).
-    case provider(ImageDataProvider)
+    /// The target image should be fetched from the network remotely. The associated `Resource`
+    /// value defines detailed information such as the image URL and cache key.
+    case network(any Resource)
+
+    /// The target image should be provided in a data format, typically as an image
+    /// from local storage or in any other encoding format, such as Base64.
+    case provider(any ImageDataProvider)
 
     // MARK: Getting Properties
 
@@ -70,29 +75,47 @@ public enum Source {
 
     /// The URL defined for this source value.
     ///
-    /// For a `.network` source, it is the `downloadURL` of associated `Resource` instance.
-    /// For a `.provider` value, it is always `nil`.
+    /// For a ``Source/network(_:)`` source, it is the ``Resource/downloadURL`` of associated ``Resource`` instance.
+    /// For a ``Source/provider(_:)`` value, it is always `nil`.
     public var url: URL? {
         switch self {
         case .network(let resource): return resource.downloadURL
-        // `ImageDataProvider` does not provide a URL. All it cares is how to get the data back.
-        case .provider(_): return nil
+        case .provider(let provider): return provider.contentURL
+        }
+    }
+}
+
+extension Source: Hashable {
+    public static func == (lhs: Source, rhs: Source) -> Bool {
+        switch (lhs, rhs) {
+        case (.network(let r1), .network(let r2)):
+            return r1.cacheKey == r2.cacheKey && r1.downloadURL == r2.downloadURL
+        case (.provider(let p1), .provider(let p2)):
+            return p1.cacheKey == p2.cacheKey && p1.contentURL == p2.contentURL
+        case (.provider(_), .network(_)):
+            return false
+        case (.network(_), .provider(_)):
+            return false
+        }
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+        case .network(let r):
+            hasher.combine(r.cacheKey)
+            hasher.combine(r.downloadURL)
+        case .provider(let p):
+            hasher.combine(p.cacheKey)
+            hasher.combine(p.contentURL)
         }
     }
 }
 
 extension Source {
-    var asResource: Resource? {
+    var asResource: (any Resource)? {
         guard case .network(let resource) = self else {
             return nil
         }
         return resource
-    }
-
-    var asProvider: ImageDataProvider? {
-        guard case .provider(let provider) = self else {
-            return nil
-        }
-        return provider
     }
 }

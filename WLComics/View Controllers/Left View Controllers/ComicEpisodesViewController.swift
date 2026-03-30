@@ -91,14 +91,13 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
         let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
         let episode = allEpisodes[indexPath.row]
         cell.textLabel?.text = episode.getName()
-        let url = URL(string:currentComic.getSmallIconUrl()!)!
-        cell.imageView!.kf.setImage(with: url,
-                                    placeholder: Image.init(named:"comic_place_holder"),
-                                    options: [.transition(ImageTransition.fade(1))],
-                                    progressBlock: { receivedSize, totalSize in
-        },
-                                    completionHandler: { image, error, cacheType, imageURL in
-        })
+        if let urlStr = currentComic.getSmallIconUrl(), let url = URL(string: urlStr) {
+            cell.imageView?.kf.setImage(with: url,
+                                        placeholder: UIImage(named: "comic_place_holder"),
+                                        options: [.transition(ImageTransition.fade(1))])
+        } else {
+            cell.imageView?.image = UIImage(named: "comic_place_holder")
+        }
         return cell
     }
     

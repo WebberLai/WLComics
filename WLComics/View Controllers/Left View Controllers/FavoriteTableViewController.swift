@@ -100,10 +100,7 @@ class FavoriteTableViewController: UITableViewController {
                     let fileManager = FileManager.default
                     let directoryURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
                     let destURL = directoryURL.appendingPathComponent("MyFavoritesComics.plist")
-                    let destination: (URL, HTTPURLResponse) -> URL = { temporaryURL, response in
-                        return destURL
-                    }
-                    client.files.download(path: "/MyFavoritesComics.plist", overwrite: true, destination: destination)
+                    client.files.download(path: "/MyFavoritesComics.plist", overwrite: true, destination: destURL)
                         .response { response, error in
                             if let response = response {
                                 //print("Dropbox 下載完成 \(response)")
@@ -218,13 +215,8 @@ class FavoriteTableViewController: UITableViewController {
         let url = URL(string: comicDict.object(forKey: "icon_url") as! String)!
         
         cell.coverImageView!.kf.setImage(with: url,
-                                         placeholder: Image.init(named:"comic_place_holder"),
-                                         options: [.transition(ImageTransition.fade(1))],
-                                         progressBlock: { receivedSize, totalSize in
-        },
-                                         completionHandler: { image, error, cacheType, imageURL in
-                                            
-        })
+                                         placeholder: UIImage(named: "comic_place_holder"),
+                                         options: [.transition(ImageTransition.fade(1))])
 
         cell.comicNametextLabel.text = comicDict.object(forKey: "name") as? String
         return cell

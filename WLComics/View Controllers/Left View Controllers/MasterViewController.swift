@@ -45,50 +45,13 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.initSearchController()
         
         SVProgressHUD.show(withStatus: "漫畫載入中...")
-       
-        DispatchQueue.global(qos: .default).async {
-            
-            WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
+
+        WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
+            DispatchQueue.main.async {
                 self.allComics = comics
-            }
-            
-            if self.currentComic.getId() == "-1" {
-                guard let myAllComics = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as? [NSMutableDictionary] else {
-                    DispatchQueue.main.async {
-                        SVProgressHUD.dismiss()
-                    }
-                    return
-                }
-                for comic:NSMutableDictionary in myAllComics {
-                    let s : String = self.translateChineseStringToPyinyin(chineseStr:comic.object(forKey:"name") as! String)
-                    let c = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
-                    c.setId(comic.object(forKey:"comic_id") as! String)
-                    c.setSmallIconUrl(comic.object(forKey:"icon_url") as! String)
-                    c.setName(comic.object(forKey:"name") as! String)
-                    
-                    let comicKey = String(s.prefix(1))
-                    if var comicValues = self.comicLibrary[comicKey] {
-                        comicValues.append(c)
-                        self.comicLibrary[comicKey] = comicValues
-                    } else {
-                        self.comicLibrary[comicKey] = [c]
-                    }
-                    self.comicSectionTitles = [String](self.comicLibrary.keys)
-                    self.comicSectionTitles = self.comicSectionTitles.sorted(by: { $0 < $1 })
-                    
-                    let sortedByKeyLibrary = self.comicLibrary.sorted { firstDictionary, secondDictionary in
-                        return firstDictionary.0 < secondDictionary.0
-                    }
-                    for (index, title) in self.comicSectionTitles.enumerated(){
-                        let comics = sortedByKeyLibrary[index].value
-                        let comicDict : NSDictionary = NSDictionary.init(object: comics, forKey: title as NSCopying)
-                        self.sortedComicLib.addEntries(from: (comicDict as NSCopying) as! [AnyHashable : Any])
-                    }
-                }
-                DispatchQueue.main.async {
-                    SVProgressHUD.dismiss()
-                    self.tableView.reloadData()
-                }
+                self.buildComicLibrary(from: comics)
+                SVProgressHUD.dismiss()
+                self.tableView.reloadData()
             }
         }
     
@@ -97,47 +60,26 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
     }
     
-    func updateAllComicsPlist(){
-        let ary  : NSMutableArray = NSMutableArray()
+    func buildComicLibrary(from comics: [Comic]) {
+        comicLibrary.removeAll()
+        sortedComicLib.removeAllObjects()
 
-        WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
-            for comic in comics {
-                let dict  = NSMutableDictionary.init(object: comic.getName() , forKey: "name" as NSCopying)
-                let iconDict = NSDictionary.init(object: comic.getSmallIconUrl() as Any , forKey: "icon_url" as NSCopying)
-                let idDict = NSDictionary.init(object: comic.getId() , forKey: "comic_id" as NSCopying)
-                dict.addEntries(from: iconDict as! [AnyHashable : Any])
-                dict.addEntries(from: idDict as! [AnyHashable : Any])
-                
-                ary.add(dict)
-                
-                let s : String = self.translateChineseStringToPyinyin(chineseStr:comic.getName())
-                let comicKey = String(s.prefix(1))
-                if var comicValues = self.comicLibrary[comicKey] {
-                    comicValues.append(comic)
-                    self.comicLibrary[comicKey] = comicValues
-                } else {
-                    self.comicLibrary[comicKey] = [comic]
-                }
+        for comic in comics {
+            let s = translateChineseStringToPyinyin(chineseStr: comic.getName())
+            let comicKey = String(s.prefix(1))
+            if var comicValues = comicLibrary[comicKey] {
+                comicValues.append(comic)
+                comicLibrary[comicKey] = comicValues
+            } else {
+                comicLibrary[comicKey] = [comic]
             }
-            
-            SwiftyPlistManager.shared.save(ary, forKey:"comics", toPlistWithName: "AllComics", completion: { (error) in
-                
-            })
-            
-            self.comicSectionTitles = [String](self.comicLibrary.keys)
-            self.comicSectionTitles = self.comicSectionTitles.sorted(by: { $0 < $1 })
-            
-            let sortedByKeyLibrary = self.comicLibrary.sorted { firstDictionary, secondDictionary in
-                return firstDictionary.0 < secondDictionary.0
-            }
-            for (index, title) in self.comicSectionTitles.enumerated(){
-                let comics = sortedByKeyLibrary[index].value
-                let comicDict : NSDictionary = NSDictionary.init(object: comics, forKey: title as NSCopying)
-                self.sortedComicLib.addEntries(from: (comicDict as NSCopying) as! [AnyHashable : Any])
-            }
-            DispatchQueue.main.async {
-                SVProgressHUD.dismiss()
-                self.tableView.reloadData()
+        }
+
+        comicSectionTitles = comicLibrary.keys.sorted()
+
+        for title in comicSectionTitles {
+            if let comicsInSection = comicLibrary[title] {
+                sortedComicLib.setObject(comicsInSection, forKey: title as NSCopying)
             }
         }
     }
@@ -229,20 +171,25 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        print("[DEBUG] prepare segue=\(segue.identifier ?? "nil"), selectIntexPath=\(selectIntexPath)")
         if segue.identifier == "showEpisodes" {
             if shouldShowSearchResults {
+                print("[DEBUG] search mode: row=\(selectIntexPath.row), filterComics.count=\(filterComics.count)")
                 guard selectIntexPath.row < filterComics.count else { return }
                 currentComic = filterComics[selectIntexPath.row]
             }
             else {
+                print("[DEBUG] normal mode: section=\(selectIntexPath.section), comicSectionTitles.count=\(comicSectionTitles.count)")
                 guard selectIntexPath.section < comicSectionTitles.count,
                       let comics = self.sortedComicLib.object(forKey:comicSectionTitles[selectIntexPath.section]) as? [Comic],
                       selectIntexPath.row < comics.count else { return }
+                print("[DEBUG] comics.count=\(comics.count), row=\(selectIntexPath.row)")
                 currentComic = comics[selectIntexPath.row]
             }
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
             comicEpisodesViewController.currentComic = currentComic
             comicEpisodesViewController.title = currentComic.getName()
+            print("[DEBUG] navigate to episodes: \(currentComic.getName())")
         }
     }
 
@@ -318,14 +265,11 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             return r
         }
         if let urlStr = comic.getSmallIconUrl(), let url = URL(string: urlStr) {
+            print("urlStr : \(urlStr)")
             cell.coverImageView?.kf.setImage(with: url,
                                         placeholder: UIImage(named: "comic_place_holder"),
                                         options: [.transition(ImageTransition.fade(1)),
-                                                  .requestModifier(modifier)],
-                                        progressBlock: { receivedSize, totalSize in
-            },
-                                        completionHandler: { image, error, cacheType, imageURL in
-            })
+                                                  .requestModifier(modifier)])
         } else {
             cell.coverImageView?.image = UIImage(named: "comic_place_holder")
         }

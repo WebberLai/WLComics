@@ -13,7 +13,6 @@
 		6034C2FF1F73456200D2B861 /* FavoriteComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */; };
 		6034C3011F73463600D2B861 /* SwiftyPlistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */; };
 		6034C3031F73479900D2B861 /* MyFavoritesComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6034C3021F73479900D2B861 /* MyFavoritesComics.plist */; };
-		AA000001AAAA000100000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001AAAA000100000000 /* SceneDelegate.swift */; };
 		6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1D1F28233F007BBE67 /* AppDelegate.swift */; };
 		6056EE201F28233F007BBE67 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1F1F28233F007BBE67 /* MasterViewController.swift */; };
 		6056EE221F28233F007BBE67 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE211F28233F007BBE67 /* DetailViewController.swift */; };
@@ -33,6 +32,7 @@
 		60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */; };
 		71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
+		AA000001AAAA000100000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001AAAA000100000000 /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,7 +50,6 @@
 		6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftyPlistManager.swift; sourceTree = "<group>"; };
 		6034C3021F73479900D2B861 /* MyFavoritesComics.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = MyFavoritesComics.plist; sourceTree = "<group>"; };
 		6056EE1A1F28233F007BBE67 /* 看漫畫.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "看漫畫.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA000001AAAA000100000000 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		6056EE1D1F28233F007BBE67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6056EE1F1F28233F007BBE67 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
 		6056EE211F28233F007BBE67 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
@@ -75,6 +74,7 @@
 		60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeDetailViewController.swift; sourceTree = "<group>"; };
 		71BB3F481F2DBAF000EBED7D /* WLComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WLComics.swift; sourceTree = "<group>"; };
 		7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA000001AAAA000100000000 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		BA128D022324A59500EE12B4 /* WLComics-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WLComics-Bridging-Header.h"; sourceTree = "<group>"; };
 		EBCC57C77576999D43679021 /* Pods-WLComics.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -374,8 +374,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
 				"${BUILT_PRODUCTS_DIR}/SVProgressHUD/SVProgressHUD.framework",
 				"${BUILT_PRODUCTS_DIR}/Swift8ComicSDK/Swift8ComicSDK.framework",
@@ -383,7 +382,6 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SVProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Swift8ComicSDK.framework",
@@ -391,7 +389,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E5019BE780296B63622675AE /* [CP] Check Pods Manifest.lock */ = {

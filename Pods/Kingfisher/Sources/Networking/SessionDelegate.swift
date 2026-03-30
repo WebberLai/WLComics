@@ -26,31 +26,33 @@
 
 import Foundation
 
-// Represents the delegate object of downloader session. It also behave like a task manager for downloading.
-class SessionDelegate: NSObject {
+/// Represents the delegate object of the downloader session.
+///
+/// It also behaves like a task manager for downloading.
+@objc(KFSessionDelegate) // Fix for ObjC header name conflicting. https://github.com/onevcat/Kingfisher/issues/1530
+open class SessionDelegate: NSObject, @unchecked Sendable {
 
     typealias SessionChallengeFunc = (
         URLSession,
-        URLAuthenticationChallenge,
-        (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+        URLAuthenticationChallenge
     )
 
     typealias SessionTaskChallengeFunc = (
         URLSession,
         URLSessionTask,
-        URLAuthenticationChallenge,
-        (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+        URLAuthenticationChallenge
     )
 
     private var tasks: [URL: SessionDataTask] = [:]
     private let lock = NSLock()
 
     let onValidStatusCode = Delegate<Int, Bool>()
+    let onResponseReceived = Delegate<URLResponse, URLSession.ResponseDisposition>()
     let onDownloadingFinished = Delegate<(URL, Result<URLResponse, KingfisherError>), Void>()
     let onDidDownloadData = Delegate<SessionDataTask, Data?>()
 
-    let onReceiveSessionChallenge = Delegate<SessionChallengeFunc, Void>()
-    let onReceiveSessionTaskChallenge = Delegate<SessionTaskChallengeFunc, Void>()
+    let onReceiveSessionChallenge = Delegate<SessionChallengeFunc, (URLSession.AuthChallengeDisposition, URLCredential?)>()
+    let onReceiveSessionTaskChallenge = Delegate<SessionTaskChallengeFunc, (URLSession.AuthChallengeDisposition, URLCredential?)>()
 
     func add(
         _ dataTask: URLSessionDataTask,
@@ -62,7 +64,9 @@ class SessionDelegate: NSObject {
 
         // Create a new task if necessary.
         let task = SessionDataTask(task: dataTask)
-        task.onCallbackCancelled.delegate(on: self) { [unowned task] (self, value) in
+        task.onCallbackCancelled.delegate(on: self) { [weak task] (self, value) in
+            guard let task = task else { return }
+
             let (token, callback) = value
 
             let error = KingfisherError.requestError(reason: .taskCancelled(task: task, token: token))
@@ -70,7 +74,9 @@ class SessionDelegate: NSObject {
             // No other callbacks waiting, we can clear the task now.
             if !task.containsCallbacks {
                 let dataTask = task.task
-                self.remove(dataTask)
+
+                self.cancelTask(dataTask)
+                self.remove(task)
             }
         }
         let token = task.addCallback(callback)
@@ -78,32 +84,38 @@ class SessionDelegate: NSObject {
         return DownloadTask(sessionTask: task, cancelToken: token)
     }
 
+    private func cancelTask(_ dataTask: URLSessionDataTask) {
+        lock.lock()
+        defer { lock.unlock() }
+        dataTask.cancel()
+    }
+
     func append(
         _ task: SessionDataTask,
-        url: URL,
         callback: SessionDataTask.TaskCallback) -> DownloadTask
     {
         let token = task.addCallback(callback)
         return DownloadTask(sessionTask: task, cancelToken: token)
     }
 
-    private func remove(_ task: URLSessionTask) {
-        guard let url = task.originalRequest?.url else {
+    private func remove(_ task: SessionDataTask) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let url = task.originalURL else {
             return
         }
-        lock.lock()
-        defer {lock.unlock()}
+        task.removeAllCallbacks()
         tasks[url] = nil
     }
 
     private func task(for task: URLSessionTask) -> SessionDataTask? {
+        lock.lock()
+        defer { lock.unlock() }
 
         guard let url = task.originalRequest?.url else {
             return nil
         }
-
-        lock.lock()
-        defer { lock.unlock() }
         guard let sessionTask = tasks[url] else {
             return nil
         }
@@ -138,30 +150,37 @@ class SessionDelegate: NSObject {
 
 extension SessionDelegate: URLSessionDataDelegate {
 
-    func urlSession(
+    open func urlSession(
         _ session: URLSession,
         dataTask: URLSessionDataTask,
-        didReceive response: URLResponse,
-        completionHandler: @escaping (URLSession.ResponseDisposition) -> Void)
-    {
+        didReceive response: URLResponse
+    ) async -> URLSession.ResponseDisposition {
         guard let httpResponse = response as? HTTPURLResponse else {
             let error = KingfisherError.responseError(reason: .invalidURLResponse(response: response))
             onCompleted(task: dataTask, result: .failure(error))
-            completionHandler(.cancel)
-            return
+            return .cancel
         }
-
+        
         let httpStatusCode = httpResponse.statusCode
         guard onValidStatusCode.call(httpStatusCode) == true else {
             let error = KingfisherError.responseError(reason: .invalidHTTPStatusCode(response: httpResponse))
             onCompleted(task: dataTask, result: .failure(error))
-            completionHandler(.cancel)
-            return
+            return .cancel
         }
-        completionHandler(.allow)
+        
+        guard let disposition = await onResponseReceived.callAsync(response) else {
+            return .cancel
+        }
+        
+        if disposition == .cancel {
+            let error = KingfisherError.responseError(reason: .cancelledByDelegate(response: response))
+            self.onCompleted(task: dataTask, result: .failure(error))
+        }
+        
+        return disposition
     }
 
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    open func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         guard let task = self.task(for: dataTask) else {
             return
         }
@@ -175,10 +194,10 @@ extension SessionDelegate: URLSessionDataDelegate {
         }
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+    open func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
         guard let sessionTask = self.task(for: task) else { return }
 
-        if let url = task.originalRequest?.url {
+        if let url = sessionTask.originalURL {
             let result: Result<URLResponse, KingfisherError>
             if let error = error {
                 result = .failure(KingfisherError.responseError(reason: .URLSessionError(error: error)))
@@ -194,8 +213,8 @@ extension SessionDelegate: URLSessionDataDelegate {
         if let error = error {
             result = .failure(KingfisherError.responseError(reason: .URLSessionError(error: error)))
         } else {
-            if let data = onDidDownloadData.call(sessionTask), let finalData = data {
-                result = .success((finalData, task.response))
+            if let data = onDidDownloadData.call(sessionTask) {
+                result = .success((data, task.response))
             } else {
                 result = .failure(KingfisherError.responseError(reason: .dataModifyingFailed(task: sessionTask)))
             }
@@ -203,49 +222,58 @@ extension SessionDelegate: URLSessionDataDelegate {
         onCompleted(task: task, result: result)
     }
 
-    func urlSession(
+    open func urlSession(
         _ session: URLSession,
-        didReceive challenge: URLAuthenticationChallenge,
-        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
+        didReceive challenge: URLAuthenticationChallenge
+    ) async -> (URLSession.AuthChallengeDisposition, URLCredential?)
     {
-        onReceiveSessionChallenge.call((session, challenge, completionHandler))
-    }
-
-    func urlSession(
-        _ session: URLSession,
-        task: URLSessionTask,
-        didReceive challenge: URLAuthenticationChallenge,
-        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
-    {
-        onReceiveSessionTaskChallenge.call((session, task, challenge, completionHandler))
+        await onReceiveSessionChallenge.callAsync((session, challenge)) ?? (.performDefaultHandling, nil)
     }
     
-    func urlSession(
+    open func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        didReceive challenge: URLAuthenticationChallenge
+    ) async -> (URLSession.AuthChallengeDisposition, URLCredential?)
+    {
+        await onReceiveSessionTaskChallenge.callAsync((session, task, challenge)) ?? (.performDefaultHandling, nil)
+    }
+    
+    
+    open func urlSession(
         _ session: URLSession,
         task: URLSessionTask,
         willPerformHTTPRedirection response: HTTPURLResponse,
-        newRequest request: URLRequest,
-        completionHandler: @escaping (URLRequest?) -> Void)
+        newRequest request: URLRequest
+    ) async -> URLRequest?
     {
         guard let sessionDataTask = self.task(for: task),
               let redirectHandler = Array(sessionDataTask.callbacks).last?.options.redirectHandler else
         {
-            completionHandler(request)
-            return
+            return request
         }
-        
-        redirectHandler.handleHTTPRedirection(
+        return await redirectHandler.handleHTTPRedirection(
             for: sessionDataTask,
             response: response,
-            newRequest: request,
-            completionHandler: completionHandler)
+            newRequest: request
+        )
+    }
+    
+    open func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+        guard let sessionTask = self.task(for: task) else { return }
+        
+        // Collect network metrics for the completed task
+        if let networkMetrics = NetworkMetrics(from: metrics) {
+            sessionTask.didCollectMetrics(networkMetrics)
+        }
     }
 
     private func onCompleted(task: URLSessionTask, result: Result<(Data, URLResponse?), KingfisherError>) {
         guard let sessionTask = self.task(for: task) else {
             return
         }
-        remove(task)
-        sessionTask.onTaskDone.call((result, sessionTask.callbacks))
+        let callbacks = sessionTask.removeAllCallbacks()
+        sessionTask.onTaskDone.call((result, callbacks))
+        remove(sessionTask)
     }
 }

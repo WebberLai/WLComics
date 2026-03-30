@@ -26,11 +26,13 @@
 
 import Foundation
 
-/// Represents a session data task in `ImageDownloader`. It consists of an underlying `URLSessionDataTask` and
-/// an array of `TaskCallback`. Multiple `TaskCallback`s could be added for a single downloading data task.
-public class SessionDataTask {
+/// Represents a session data task in ``ImageDownloader``.
+///
+/// Essentially, a ``SessionDataTask`` wraps a `URLSessionDataTask` and manages the download data.
+/// It uses a ``SessionDataTask/CancelToken`` to track the task and manage its cancellation.
+public class SessionDataTask: @unchecked Sendable {
 
-    /// Represents the type of token which used for cancelling a task.
+    /// Represents the type of token used for canceling a task.
     public typealias CancelToken = Int
 
     struct TaskCallback {
@@ -38,12 +40,24 @@ public class SessionDataTask {
         let options: KingfisherParsedOptionsInfo
     }
 
-    /// Downloaded raw data of current task.
-    public private(set) var mutableData: Data
+    private var _mutableData: Data
+    /// The downloaded raw data of the current task.
+    public var mutableData: Data {
+        lock.lock()
+        defer { lock.unlock() }
+        return _mutableData
+    }
 
-    /// The underlying download task. It is only for debugging purpose when you encountered an error. You should not
-    /// modify the content of this task or start it yourself.
+    // This is a copy of `task.originalRequest?.url`. It is for obtaining race-safe behavior for a pitfall on iOS 13.
+    // Ref: https://github.com/onevcat/Kingfisher/issues/1511
+    public let originalURL: URL?
+
+    /// The underlying download task. 
+    ///
+    /// It is only for debugging purposes when you encounter an error. You should not modify the content of this task
+    /// or start it yourself.
     public let task: URLSessionDataTask
+    
     private var callbacksStore = [CancelToken: TaskCallback]()
 
     var callbacks: [SessionDataTask.TaskCallback] {
@@ -54,6 +68,14 @@ public class SessionDataTask {
 
     private var currentToken = 0
     private let lock = NSLock()
+    
+    private var _metrics: NetworkMetrics?
+    /// The network metrics collected during the download task.
+    public var metrics: NetworkMetrics? {
+        lock.lock()
+        defer { lock.unlock() }
+        return _metrics
+    }
 
     let onTaskDone = Delegate<(Result<(Data, URLResponse?), KingfisherError>, [TaskCallback]), Void>()
     let onCallbackCancelled = Delegate<(CancelToken, TaskCallback), Void>()
@@ -70,7 +92,8 @@ public class SessionDataTask {
 
     init(task: URLSessionDataTask) {
         self.task = task
-        mutableData = Data()
+        self.originalURL = task.originalRequest?.url
+        _mutableData = Data()
     }
 
     func addCallback(_ callback: TaskCallback) -> CancelToken {
@@ -90,6 +113,15 @@ public class SessionDataTask {
         }
         return nil
     }
+    
+    @discardableResult
+    func removeAllCallbacks() -> [TaskCallback] {
+        lock.lock()
+        defer { lock.unlock() }
+        let callbacks = callbacksStore.values
+        callbacksStore.removeAll()
+        return Array(callbacks)
+    }
 
     func resume() {
         guard !started else { return }
@@ -101,9 +133,6 @@ public class SessionDataTask {
         guard let callback = removeCallback(token) else {
             return
         }
-        if callbacksStore.count == 0 {
-            task.cancel()
-        }
         onCallbackCancelled.call((token, callback))
     }
 
@@ -114,6 +143,14 @@ public class SessionDataTask {
     }
 
     func didReceiveData(_ data: Data) {
-        mutableData.append(data)
+        lock.lock()
+        defer { lock.unlock() }
+        _mutableData.append(data)
+    }
+    
+    func didCollectMetrics(_ metrics: NetworkMetrics) {
+        lock.lock()
+        defer { lock.unlock() }
+        _metrics = metrics
     }
 }

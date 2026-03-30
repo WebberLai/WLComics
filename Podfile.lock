@@ -1,10 +1,10 @@
 PODS:
-  - Alamofire (4.8.2)
-  - Kingfisher (5.7.1)
-  - SVProgressHUD (2.2.5)
+  - Kingfisher (8.8.0)
+  - SVProgressHUD (2.3.1):
+    - SVProgressHUD/Core (= 2.3.1)
+  - SVProgressHUD/Core (2.3.1)
   - Swift8ComicSDK (2.0.6)
-  - SwiftyDropbox (5.1.0):
-    - Alamofire (~> 4.8.2)
+  - SwiftyDropbox (10.2.4)
 
 DEPENDENCIES:
   - Kingfisher
@@ -13,8 +13,7 @@ DEPENDENCIES:
   - SwiftyDropbox
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
-    - Alamofire
+  trunk:
     - Kingfisher
     - SVProgressHUD
     - SwiftyDropbox
@@ -29,12 +28,11 @@ CHECKOUT OPTIONS:
     :git: https://github.com/RayTW/Swift8ComicSDK.git
 
 SPEC CHECKSUMS:
-  Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
-  Kingfisher: 176d377ad339113c99ad4980cbae687f807e20fe
-  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+  Kingfisher: beeaf65ed57dfa710d416aea4093277e8a9b1968
+  SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
   Swift8ComicSDK: 2a09eb1cd6e162e562df47c291bef4c1fdee20a7
-  SwiftyDropbox: 7ca4961e0340c62c8d6d1ece91d67badfe4c0380
+  SwiftyDropbox: 3dbb9cb3dc28220e6b7b492d97b9160730e5ca81
 
-PODFILE CHECKSUM: b96be647f7be6bc380a8e7a2fea334349fabf8ea
+PODFILE CHECKSUM: d469c3d5605c51b51ee470becc66f2273c6778b7
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.16.2

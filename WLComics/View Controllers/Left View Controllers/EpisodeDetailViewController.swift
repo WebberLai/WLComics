@@ -82,12 +82,14 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
         cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")
         let url = URL(string:pages[indexPath.row])
         cell.imageView!.kf.setImage(with: url,
-                                    placeholder: Image.init(named:"comic_place_holder"),
+                                    placeholder: UIImage(named: "comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1)),.requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))],
-                                    progressBlock: { receivedSize, totalSize in
-        },
-                                    completionHandler: { image, error, cacheType, imageURL in
-                                        self.detailViewController?.imgSlider.imageViewArray[indexPath.row].image = image
+                                    completionHandler: { result in
+                                        if case .success(let value) = result,
+                                           let slider = self.detailViewController?.imgSlider,
+                                           indexPath.row < slider.imageViewArray.count {
+                                            slider.imageViewArray[indexPath.row].image = value.image
+                                        }
         })
         return cell
     }

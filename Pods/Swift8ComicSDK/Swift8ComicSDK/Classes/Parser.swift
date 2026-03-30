@@ -3,87 +3,84 @@
 //  Pods
 //
 //  Created by ray.lee on 2017/6/8.
-//  Updated: 2026/03 - 適配 8comic.com 新版 HTML 結構
+//
 //
 
 import Foundation
 
 
 open class Parser{
-    // comicDetail - cview 解析
+    //allComics
+    let mCommicIdBegin = "showthumb("
+    let mCommicIdEnd = ",this);"
+    let mCommicNameBegin = "hidethumb();'>"
+    let mCommicNameEnd = "</a></td>"
     let mFindCview = "cview("
+    let mFindDeaitlTag = "style=\"line-height:25px\">"
+    let mFinishTag = "class=\"hide\"";
+    
+    //comicDetail
+    let mAuthorTag = "作者：</td>"
+    let mUpdateTag = "更新：</td>"
     let mNameTag = ");return"
-
-    // episodeDetail
-    let mStartTagChs = "var chs="
-    let mEndTagChs = ";var ti="
-    let mStartTagTi = "var ti="
-    let mEndTagTi = ";"
-    let mStartTagCs = "var cs='"
-    let mEndTagCs = "';for(var"
-    let mEndTagCsAlt = "';var"
-
-    // cviewJS
+    
+    //cviewJS
     let mStartTag = "if(catid"
     let mEndTag = "baseurl=\""
     let mUrlEndTag = "\";"
-
-    // searchComic
+    
+    //episodeDetail
+    let mStartTagChs = "var chs="
+    let mEndTagChs = ";var ti="
+    let mStartTagTi = "var ti="
+    let mEndTagTi = ";var cs="
+    let mStartTagCs = "var cs='"
+    let mEndTagCs = "';for(var"
+    
+    //searchComic
     let mComidIdBegin = "<a href=\"/html/"
     let mComidIdEnd = ".html\">"
     let mComidNameBegin = "<b><font color=\"#0099CC\">"
     let mComidNameEnd = "</font></b>"
     let mPageBegin = "&page="
     let mPageEnd = "\"><img src=/images/pagelast.gif"
-
+    
     public init() {
     }
-
-    // MARK: - 漫畫列表（從 /comic/ 頁面解析）
-    // HTML 格式: <a href="/html/ID.html" title="名稱"><img src="/pics/0/ID.jpg"><span>N集</span><span>名稱</span></a>
+    
     open func allComics(_ htmlString : String, _ config: Config) -> [Comic]{
+        var html : String = htmlString
+        var comicIdBeginIndex :String.Index?;
+        var comicIdEndIndex :Range<String.Index>?;
+        var comicId : String = "";
+        var comicNameBeginIndex :String.Index?;
+        var comicNameEndIndex :Range<String.Index>?;
+        var comicName : String = "";
+        
+        
         var comicAry = [Comic]()
-        var addedIds = Set<String>()
-
-        // 用正則匹配 <a href="/html/ID.html" title="NAME">
-        var searchFrom = htmlString.startIndex
-        let hrefPattern = "href=\"/html/"
-        let hrefEnd = ".html\""
-
-        while let hrefStart = htmlString.range(of: hrefPattern, range: searchFrom..<htmlString.endIndex) {
-            // 取出 ID
-            let idStart = hrefStart.upperBound
-            guard let idEndRange = htmlString.range(of: hrefEnd, range: idStart..<htmlString.endIndex) else { break }
-            let comicId = String(htmlString[idStart..<idEndRange.lowerBound])
-
-            // 移動搜尋位置
-            searchFrom = idEndRange.upperBound
-
-            // 驗證 ID 是數字
-            guard !comicId.isEmpty, comicId.allSatisfy({ $0.isNumber }), !addedIds.contains(comicId) else { continue }
-
-            // 取出 title="NAME"
-            let searchEnd = htmlString.index(searchFrom, offsetBy: min(500, htmlString.distance(from: searchFrom, to: htmlString.endIndex)))
-            var comicName = ""
-            if let titleStart = htmlString.range(of: "title=\"", range: searchFrom..<searchEnd) {
-                let nameStart = titleStart.upperBound
-                if let titleEnd = htmlString.range(of: "\"", range: nameStart..<searchEnd) {
-                    comicName = String(htmlString[nameStart..<titleEnd.lowerBound])
-                }
+        
+        while(true){
+            comicIdBeginIndex = StringUtility.indexOfUpper(source: html, search: mCommicIdBegin)
+            comicIdEndIndex = StringUtility.indexOf(source: html, search: mCommicIdEnd)
+            
+            if(comicIdBeginIndex == nil || comicIdEndIndex == nil){
+                break
             }
-
-            // fallback: 從第二個 <span> 取名稱
-            if comicName.isEmpty {
-                if let firstSpanEnd = htmlString.range(of: "</span>", range: searchFrom..<searchEnd),
-                   let secondSpanStart = htmlString.range(of: "<span>", range: firstSpanEnd.upperBound..<searchEnd),
-                   let secondSpanEnd = htmlString.range(of: "</span>", range: secondSpanStart.upperBound..<searchEnd) {
-                    comicName = String(htmlString[secondSpanStart.upperBound..<secondSpanEnd.lowerBound])
-                }
+            
+            comicId = StringUtility.substring(source: html, upper: comicIdBeginIndex!, lower: comicIdEndIndex!.lowerBound)
+            
+            html = StringUtility.substring(source: html, beginIndex: comicIdEndIndex!.upperBound)
+            comicNameBeginIndex = StringUtility.indexOfUpper(source: html, search: mCommicNameBegin)
+            comicNameEndIndex = StringUtility.indexOf(source: html, search: mCommicNameEnd)
+            
+            if(comicNameBeginIndex == nil || comicNameEndIndex == nil){
+                break
             }
-
-            guard !comicName.isEmpty else { continue }
-
-            addedIds.insert(comicId)
+            
+            comicName = StringUtility.substring(source: html, upper: comicNameBeginIndex!, lower: comicNameEndIndex!.lowerBound)
+            
+            
             let comic = Comic()
             comic.setId(comicId)
             comic.setName(comicName)
@@ -91,242 +88,205 @@ open class Parser{
             comic.setSmallIconUrl(config.getComicSmallIconUrl(comicId))
             comicAry.append(comic)
         }
-
-        print("Parser.allComics: parsed \(comicAry.count) comics from /comic/ page")
+        
+        
         return comicAry
     }
-
-    // MARK: - 漫畫詳情（用 <meta> 標籤 + cview() 解析章節）
+    
     open func comicDetail(htmlString : String, comic : Comic) -> Comic{
         let html : [String] = StringUtility.split(htmlString, separatedBy: "\n")
-
-        var episodes = [Episode]()
-
-        // 先從 <meta> 標籤取得漫畫資訊
-        for txt in html {
-            if comic.getAuthor() == nil {
-                // <meta name="author" content="尾田榮一郎" />
-                if let author = extractMetaContent(txt, name: "author") {
-                    comic.setAuthor(author)
-                }
-                // 舊格式 fallback: 作者: XXX
-                if let range = txt.range(of: "item-info-author") {
-                    let after = String(txt[range.upperBound...])
-                    let cleaned = self.replaceTag(after).replacingOccurrences(of: "作者: ", with: "")
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !cleaned.isEmpty {
-                        comic.setAuthor(cleaned)
-                    }
-                }
-            }
-            if comic.getLatestUpdateDateTime() == nil {
-                // <meta name="date" content="2026-03-28" />
-                if let date = extractMetaContent(txt, name: "date") {
-                    comic.setLatestUpdateDateTime(date)
-                }
-                // 舊格式 fallback
-                if let range = txt.range(of: "item-info-date") {
-                    let after = String(txt[range.upperBound...])
-                    let cleaned = self.replaceTag(after).trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !cleaned.isEmpty {
-                        comic.setLatestUpdateDateTime(cleaned)
-                    }
-                }
-            }
-        }
-
-        // 解析 cview() 取得章節列表
-        // 格式: onclick="cview('103-1.html',6,1);return false;"
+        
+        var findCviewRange :Range<String.Index>?
+        var findDetailTagRange :Range<String.Index>?;
+        var findAuthorRange :Range<String.Index>?
+        var latestUpdateTimeRange :Range<String.Index>?
+        var nameTagRange :Range<String.Index>?
+        var episodes = [Episode]() //建立集數物件
+        var isFinishEpisode : Bool = false
+        
         for i in 0..<html.count {
-            let txt = html[i]
-
-            // 用 StringUtility 安全取出 cview(...) 之間的內容
-            guard let data_raw = StringUtility.substring(txt, "cview(", ");return") else { continue }
-            var data = data_raw.replacingOccurrences(of: "'", with: "")
-            let dataAry = data.components(separatedBy: ",")
-
-            guard dataAry.count >= 3 else { continue }
-
-            let parts = dataAry[0].components(separatedBy: "-")
-            guard parts.count >= 2 else { continue }
-
-            let ch = parts[1].replacingOccurrences(of: ".html", with: "")
-            let url = dataAry[0]
-                .replacingOccurrences(of: ".html", with: "")
-                .replacingOccurrences(of: "-", with: ".html?ch=")
-            let catid = dataAry[1].trimmingCharacters(in: .whitespaces)
-            let copyright = dataAry[2].trimmingCharacters(in: .whitespaces)
-
-            // 取得章節名稱（在下一行的 </a> 前）
-            var episodeName = ""
-            if i + 1 < html.count {
-                episodeName = html[i + 1]
-                episodeName = self.removeScriptsTag(episodeName)
-                episodeName = self.replaceTag(episodeName)
-                episodeName = episodeName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let txt : String = html[i]
+            
+            if(!isFinishEpisode) {
+                isFinishEpisode = (txt.range(of: mFinishTag) != nil)
             }
+            findCviewRange = StringUtility.indexOf(source: txt, search: mFindCview)
+            
+            //解析集數
+            if(findCviewRange != nil){
+                nameTagRange = StringUtility.indexOf(source: txt, search: mNameTag)
+                
+                var data = StringUtility.substring(source: txt, upper: (findCviewRange?.upperBound)!, lower: (nameTagRange?.lowerBound)!)
+                data = data.replacingOccurrences(of: "'", with: "")
+                let dataAry = StringUtility.split(data, separatedBy: ",") //集數圖片總張數參數
 
-            if !episodeName.isEmpty {
-                let episode = Episode()
-                episode.setName(episodeName)
-                episode.setUrl(url)
-                episode.setCatid(catid)
-                episode.setCopyright(copyright)
-                episode.setCh(ch)
-                episodes.append(episode)
+                // 確保 dataAry 有足夠元素，否則跳過此筆資料
+                guard dataAry.count >= 3 else {
+                    print("[DEBUG] Parser: dataAry 元素不足, data=\(data), count=\(dataAry.count)")
+                    continue
+                }
+
+                let splitByDash = StringUtility.split(dataAry[0], separatedBy: "-")
+                guard splitByDash.count >= 2 else {
+                    print("[DEBUG] Parser: splitByDash 元素不足, dataAry[0]=\(dataAry[0])")
+                    continue
+                }
+
+                let ch : String = splitByDash[1].replacingOccurrences(of: ".html", with: "")
+                let url : String = dataAry[0]
+                    .replacingOccurrences(of: ".html", with: "")
+                    .replacingOccurrences(of: "-", with: ".html?ch=")
+                let catid : String = dataAry[1]
+                let copyright : String = dataAry[2]
+                
+                if(isFinishEpisode){
+                    continue;
+                }
+                
+                if(nameTagRange == nil){
+                    nameTagRange = StringUtility.indexOf(source: txt, search: mNameTag)
+                    
+                    if(nameTagRange != nil){
+                        continue
+                    }
+                }
+                
+                
+                //解析集數名稱
+                if(nameTagRange != nil){
+                    var episodeName = html[i + 1]
+                    
+                    episodeName = self.removeScriptsTag(episodeName)
+                    episodeName = self.replaceTag(episodeName)
+                    episodeName = episodeName.replacingOccurrences(of: ":", with: ":")
+                    episodeName = episodeName.replacingOccurrences(of: "\u{9}", with: "")
+                    
+                    if(!episodeName.isEmpty){
+                        let episode = Episode()
+                        episode.setName(episodeName)
+                        episode.setUrl(url)
+                        episode.setCatid(catid)
+                        episode.setCopyright(copyright)
+                        episode.setCh(ch)
+                        
+                        episodes.append(episode)
+                    }
+                }
+            }else{
+                //解析漫畫簡介
+                if(comic.getDescription() == nil){
+                    findDetailTagRange = StringUtility.indexOf(source: txt, search: mFindDeaitlTag)
+                    
+                    if(findDetailTagRange != nil){
+                        let lower = StringUtility.indexOfLower(source: txt, search: "</td>")
+                        comic.setDescription(StringUtility.substring(source: txt, upper: (findDetailTagRange?.upperBound)!, lower: lower!))
+                    }
+                }
+                //解析作者
+                if(comic.getAuthor() == nil){
+                    if(findAuthorRange == nil){
+                        findAuthorRange = StringUtility.indexOf(source: txt, search: mAuthorTag)
+                        
+                        if(findAuthorRange != nil){
+                            continue
+                        }
+                    }
+                    if(findAuthorRange != nil){
+                        comic.setAuthor(self.replaceTag(txt))
+                    }
+                } else if(comic.getLatestUpdateDateTime() == nil){
+                    //解析最新更新日期
+                    if(latestUpdateTimeRange == nil){
+                        latestUpdateTimeRange = StringUtility.indexOf(source: txt, search: mUpdateTag)
+                        
+                        if(latestUpdateTimeRange != nil){
+                            continue
+                        }
+                    }
+                    if(latestUpdateTimeRange != nil){
+                        comic.setLatestUpdateDateTime(self.replaceTag(txt))
+                    }
+                }
             }
         }
-
         comic.setEpisode(episodes)
+        
         return comic
     }
-
-    // MARK: - 從 <meta> 標籤取值
-    private func extractMetaContent(_ line: String, name: String) -> String? {
-        let pattern = "name=\"\(name)\" content=\""
-        guard let start = line.range(of: pattern) else { return nil }
-        let after = String(line[start.upperBound...])
-        guard let end = after.range(of: "\"") else { return nil }
-        let value = String(after[..<end.lowerBound])
-        return value.isEmpty ? nil : value
-    }
-
-    // MARK: - comicview.js 解析
+    
     open func cviewJS(_ htmlString : String) -> [String: String]{
         let html : [String] = StringUtility.split(htmlString, separatedBy: "\n")
-
+        
+        var startTagUpper : String.Index?
+        var endTagLower : String.Index?
+        let urlStratTag = mEndTag
+        var urlStartTagUpper : String.Index?
+        var urlEndTagLower : String.Index?
+        
         var cviewMap = [String: String]()
-
+        var tempText = ""
+        
         for txt in html {
-            let tempText = txt.replacingOccurrences(of: ")", with: "")
-
-            guard !tempText.isEmpty else { continue }
-
-            guard let startTagUpper = StringUtility.indexOfUpper(source: tempText, search: mStartTag),
-                  let endTagLower = StringUtility.indexOfLower(source: tempText, search: mEndTag),
-                  startTagUpper < endTagLower else { continue }
-
-            let numCode = StringUtility.substring(source: tempText, upper: startTagUpper, lower: endTagLower)
-            let numCodeAry = StringUtility.split(numCode, separatedBy: "||")
-
-            guard let urlStartTagUpper = StringUtility.indexOfUpper(source: tempText, search: mEndTag),
-                  let urlEndTagLower = StringUtility.indexOfLower(source: tempText, search: mUrlEndTag),
-                  urlStartTagUpper < urlEndTagLower else { continue }
-
-            let cviewUrl = StringUtility.trim(
-                StringUtility.substring(source: tempText, upper: urlStartTagUpper, lower: urlEndTagLower)
-            )
-
-            for num in numCodeAry {
-                let tempNum = StringUtility.split(num, separatedBy: "==")
-                guard tempNum.count >= 2 else { continue }
-                cviewMap.updateValue(cviewUrl, forKey: StringUtility.trim(tempNum[1]))
+            tempText = txt.replacingOccurrences(of: ")", with: "")
+            
+            if(!tempText.isEmpty){
+                startTagUpper = StringUtility.indexOfUpper(source: tempText, search: mStartTag)
+                endTagLower = StringUtility.indexOfLower(source: tempText, search: mEndTag)
+                
+                if(startTagUpper != nil && endTagLower != nil){
+                    let numCode : String = StringUtility.substring(source: tempText, upper: startTagUpper!, lower: endTagLower!)
+                    let numCodeAry : [String] = StringUtility.split(numCode, separatedBy: "||")
+                    urlStartTagUpper = StringUtility.indexOfUpper(source: tempText, search: urlStratTag)
+                    urlEndTagLower = StringUtility.indexOfLower(source: tempText, search: mUrlEndTag)
+                    var cviewUrl : String = StringUtility.substring(source: tempText, upper: urlStartTagUpper!, lower: urlEndTagLower!)
+                    
+                    cviewUrl = StringUtility.trim(cviewUrl)
+                    
+                    for num in numCodeAry{
+                        let tempNum = StringUtility.split(num, separatedBy: "==")
+                        cviewMap.updateValue(cviewUrl, forKey: StringUtility.trim(tempNum[1]))
+                    }
+                }
             }
         }
-
+        
+        
         return cviewMap
     }
-
-    // MARK: - 章節圖片頁面解析
-    // 新版網站 var cs= 已被混淆（如 var m66z11='...'），需動態尋找最長字串變數
+    
     open func episodeDetail(_ htmlString : String, episode : Episode) -> Episode{
         let html : [String] = StringUtility.split(htmlString, separatedBy: "\n")
 
-        print("Parser.episodeDetail: total lines=\(html.count)")
-
-        var foundSource = false
-
         for txt in html {
-            // 找含有 var chs= 的行 — 這是包含所有解碼邏輯的 inline JS
-            guard txt.contains("var chs=") else { continue }
+            // 新格式：chs 和 ti 在同一行，且該行包含完整的圖片解碼 JS
+            let chs = StringUtility.substring(txt, mStartTagChs, mEndTagChs)
+            let ti = StringUtility.substring(txt, mStartTagTi, mEndTagTi)
 
-            print("Parser.episodeDetail: found JS source line, length=\(txt.count)")
-
-            // 用 regex 取 chs
-            if let chsMatch = txt.range(of: "var chs=\\d+", options: .regularExpression) {
-                let numStr = String(txt[chsMatch]).replacingOccurrences(of: "var chs=", with: "")
-                if let chsInt = Int(numStr) {
-                    episode.setChs(chsInt)
-                    print("Parser.episodeDetail: chs=\(chsInt)")
-                }
+            if let chs = chs, let chsInt = Int(chs) {
+                episode.setChs(chsInt)
+            }
+            if let ti = ti, let tiInt = Int(ti) {
+                episode.setTi(tiInt)
             }
 
-            // 用 regex 取 ti
-            if let tiMatch = txt.range(of: "var ti=\\d+", options: .regularExpression) {
-                let numStr = String(txt[tiMatch]).replacingOccurrences(of: "var ti=", with: "")
-                if let tiInt = Int(numStr) {
-                    episode.setTi(tiInt)
-                    print("Parser.episodeDetail: ti=\(tiInt)")
-                }
+            // 舊格式：var cs='...';for(var
+            let cs = StringUtility.substring(txt, mStartTagCs, mEndTagCs)
+            if cs != nil {
+                episode.setCs(cs!)
+                episode.setSource(txt)
+                break
             }
 
-            // 整行 JS 傳給 JSnview，由 JSContext 執行
-            episode.setSource(txt)
-            foundSource = true
-            print("Parser.episodeDetail: source set, ready for JSContext execution")
-            break
-        }
-
-        if !foundSource {
-            print("Parser.episodeDetail: WARNING - JS source line with 'var chs=' not found!")
+            // 新格式：沒有 var cs，但有 .src=unescape( 表示這行包含圖片 URL 解碼邏輯
+            if chs != nil && txt.range(of: ".src=unescape(") != nil {
+                episode.setSource(txt)
+                break
+            }
         }
 
         return episode
     }
-
-    /// 從 JS 中找出最長的字串變數值（即被混淆的 cs）
-    /// cs 值的特徵：全部是英數字，無空格、括號、運算子等
-    private func findLongestStringVar(_ js: String) -> String? {
-        var longestValue: String? = nil
-        var maxLen = 30 // 最少要 30 字元（一個 chunk 約 46~50 字元）
-
-        // 掃描所有 var NAME='VALUE'; 模式（確保 =' 前面是變數名字元，避免匹配 ==''）
-        var searchFrom = js.startIndex
-        while let start = js.range(of: "='", range: searchFrom..<js.endIndex) {
-            // 確保 =' 前面不是另一個 = （排除 =='）
-            if start.lowerBound > js.startIndex {
-                let before = js.index(before: start.lowerBound)
-                if js[before] == "=" {
-                    searchFrom = start.upperBound
-                    continue
-                }
-            }
-
-            let valueStart = start.upperBound
-            guard let end = js.range(of: "';", range: valueStart..<js.endIndex) else { break }
-            let value = String(js[valueStart..<end.lowerBound])
-
-            // cs 值只包含英數字，不含空格、括號、分號、運算子等
-            let isAlphanumeric = value.allSatisfy { $0.isLetter || $0.isNumber }
-            if isAlphanumeric && value.count > maxLen {
-                maxLen = value.count
-                longestValue = value
-                print("Parser.findLongestStringVar: candidate length=\(value.count), first20=\(String(value.prefix(20)))")
-            }
-            searchFrom = end.upperBound
-        }
-
-        return longestValue
-    }
-
-    /// 從 JS 中找出 chunk size（40~60 之間的整數變數）
-    private func findChunkSize(_ js: String) -> Int? {
-        // 尋找類似 var XXXXX=48; 的模式
-        var searchFrom = js.startIndex
-        let pattern = "var "
-        while let start = js.range(of: pattern, range: searchFrom..<js.endIndex) {
-            guard let eqSign = js.range(of: "=", range: start.upperBound..<js.endIndex),
-                  let semicolon = js.range(of: ";", range: eqSign.upperBound..<js.endIndex) else { break }
-            let value = String(js[eqSign.upperBound..<semicolon.lowerBound])
-            if let num = Int(value), num >= 40 && num <= 60 {
-                return num
-            }
-            searchFrom = semicolon.upperBound
-        }
-        return nil
-    }
-
-    // MARK: - 搜尋漫畫
+    
     open func searchComic(_ htmlString : String, onLoadComics: @escaping ([Comic]) -> Void, _ config: Config) -> Int{
         let html : [String] = StringUtility.split(htmlString, separatedBy: "\n")
         var comics = [Comic]()
@@ -334,17 +294,15 @@ open class Parser{
         var comicId : String?
         var comicName : String?
         var maxPage = 1
-
+        
         for i in 0..<html.count {
             text = html[i]
-
+            
             comicId = StringUtility.substring(text, mComidIdBegin, mComidIdEnd)
 
-            if comicId != nil {
-                guard i + 9 < html.count else { continue }
+            if(comicId != nil){
                 text = html[i + 9]
                 comicName = StringUtility.substring(text, mComidNameBegin, mComidNameEnd)
-                guard comicName != nil else { continue }
                 comicName = self.replaceTag(comicName!)
                 let comic = Comic()
                 comic.setId(comicId!)
@@ -352,58 +310,71 @@ open class Parser{
                 comic.setIconUrl(config.getComicIconUrl(comicId!))
                 comic.setSmallIconUrl(config.getComicSmallIconUrl(comicId!))
                 comics.append(comic)
-            } else {
+            }else{
                 comicName = nil
-
-                if StringUtility.lastIndexOf(source: text, target: mPageBegin) != -1 {
+                
+                if(StringUtility.lastIndexOf(source: text, target: mPageBegin) != -1){
+                    
                     let p = StringUtility.lastSubstring(text, mPageBegin, mPageEnd)
-                    if let pVal = p, let tempPage = Int(pVal) {
-                        maxPage = tempPage
+                    
+                    if(p != nil){
+                        if let tempPage = Int(p!){
+                            maxPage = tempPage
+                        }
                     }
                 }
             }
         }
-
+        
         onLoadComics(comics)
+        
         return maxPage
     }
-
+    
     open func quickSearchComic(_ htmlString : String) -> [String]{
         return StringUtility.split(htmlString, separatedBy: "|")
     }
-
-    // MARK: - HTML Tag 處理
-
+    
     open func replaceTag(_ txt : String) -> String{
         var ret = ""
-        var insideTag = false
-
-        for c in txt {
-            if c == "<" {
-                insideTag = true
-            } else if c == ">" {
-                insideTag = false
+        let st = "<"
+        let ed = ">"
+        let charAry = txt.characters
+        var check = false
+        
+        for c in charAry {
+            if(c == st.characters.first){
+                check = true
+            }else if(c == ed.characters.first){
+                check = false
                 continue
             }
-            if insideTag { continue }
-            if c == "\r" || c == "\n" { continue }
+            if(check){
+                continue
+            }
+            if(c == "\r" || c == "\n"){
+                continue
+            }
             ret.append(c)
         }
-
+        
         return ret
     }
-
+    
     open func removeScriptsTag(_ st : String) -> String{
         var ret = st
         let beginStr = "<script>"
         let endStr = "</script>"
-        let lower = StringUtility.indexOfLower(source: st, search: beginStr)
-        let upper = StringUtility.indexOfUpper(source: st, search: endStr)
-
-        if upper != nil && lower != nil {
-            ret = String(st[..<lower!]) + String(st[upper!...])
+        let lower : String.Index? = StringUtility.indexOfLower(source: st, search: beginStr)
+        let upper : String.Index? = StringUtility.indexOfUpper(source: st, search: endStr)
+        
+        if(upper != nil && lower != nil){
+            ret =  String(st[..<lower!]) + String(st[upper!...])
+            //ret = st.substring(to: lower!) + st.substring(from: upper!)
         }
-
+        
         return ret
     }
 }
+
+
