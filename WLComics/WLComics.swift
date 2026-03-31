@@ -33,19 +33,14 @@ open class WLComics{
         }
     }
 
+    // MARK: - 載入所有漫畫（從 bundle plist）
+
     open func loadAllComics(_ onLoadedComics: @escaping ([Comic]) -> Void) {
-        // 先從 plist 快取讀取，立即顯示
         if let cached = restoreComicsFromPlist(), !cached.isEmpty {
             mAllComics = cached
             onLoadedComics(cached)
-            // 背景更新
-            mR8Comic.getAll { (comics:[Comic]) in
-                guard !comics.isEmpty else { return }
-                self.mAllComics = comics
-                self.storeComicsToPlist(comics: comics)
-            }
         } else {
-            // 無快取，從網路載入
+            // plist 不存在時才從網路載入
             mR8Comic.getAll { (comics:[Comic]) in
                 self.mAllComics = comics
                 self.storeComicsToPlist(comics: comics)
@@ -60,7 +55,6 @@ open class WLComics{
         return array.compactMap { dict -> Comic? in
             guard let id = dict["comic_id"], let name = dict["name"] else { return nil }
             let comic = mR8Comic.generatorFakeComic(id, name: name)
-            // 用 ID 重新產生 URL，避免快取中殘留舊格式網址
             comic.setIconUrl(mR8Comic.getComicIconUrl(id))
             comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(id))
             return comic
@@ -69,21 +63,116 @@ open class WLComics{
 
     fileprivate func storeComicsToPlist(comics: [Comic]) {
         let array = comics.map { comic -> [String: String] in
-            var dict = ["comic_id": comic.getId(), "name": comic.getName()]
-            if let url = comic.getIconUrl() { dict["icon_url"] = url }
-            return dict
+            return ["comic_id": comic.getId(), "name": comic.getName()]
         }
         SwiftyPlistManager.shared.save(array, forKey: "comics", toPlistWithName: "AllComics") { _ in }
     }
-    
+
+    // MARK: - 搜尋漫畫（新 API）
+
+    open func searchComics(keyword: String, _ onLoadedComics: @escaping ([Comic]) -> Void) {
+        guard let encoded = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://www.8comic.com/search/?key=\(encoded)") else {
+            onLoadedComics([])
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil,
+                  let html = String(data: data, encoding: .utf8) else {
+                onLoadedComics([])
+                return
+            }
+
+            let comics = self.parseSearchResults(html)
+            // 將搜尋到的新漫畫合併到 plist
+            if !comics.isEmpty {
+                self.mergeComicsToPlist(newComics: comics)
+            }
+            onLoadedComics(comics)
+        }.resume()
+    }
+
+    /// 解析搜尋結果 HTML，提取漫畫 ID 和名稱
+    fileprivate func parseSearchResults(_ html: String) -> [Comic] {
+        var comics = [Comic]()
+        var seen = Set<String>()
+
+        // 格式: href="/html/10660.html" data-url="10660" target="_top">刃牙道
+        // 或:   href="/html/103.html" target="_top" style="...">海賊王 (登入觀看)
+        let lines = html.components(separatedBy: "\n")
+        for line in lines {
+            guard line.contains("href=\"/html/") && line.contains(".html\"") else { continue }
+
+            // 提取 comic_id
+            guard let hrefStart = line.range(of: "href=\"/html/"),
+                  let hrefEnd = line.range(of: ".html\"", range: hrefStart.upperBound..<line.endIndex) else { continue }
+            let comicId = String(line[hrefStart.upperBound..<hrefEnd.lowerBound])
+            guard !comicId.isEmpty, comicId.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil else { continue }
+            guard !seen.contains(comicId) else { continue }
+            seen.insert(comicId)
+
+            // 提取名稱：最後一個 > 之後到 < 或行尾
+            guard let nameStart = line.range(of: ">", options: .backwards) else { continue }
+            var name = String(line[nameStart.upperBound...])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            // 移除 HTML 尾標籤
+            if let tagStart = name.range(of: "<") {
+                name = String(name[name.startIndex..<tagStart.lowerBound])
+            }
+            // 移除 (登入觀看)
+            name = name.replacingOccurrences(of: " (登入觀看)", with: "")
+            guard !name.isEmpty else { continue }
+
+            let comic = mR8Comic.generatorFakeComic(comicId, name: name)
+            comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
+            comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
+            comics.append(comic)
+        }
+        return comics
+    }
+
+    /// 將新搜尋到的漫畫合併到 plist（不重複）
+    fileprivate func mergeComicsToPlist(newComics: [Comic]) {
+        guard let existingArray = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as? [[String: String]] else { return }
+
+        var existingIds = Set(existingArray.compactMap { $0["comic_id"] })
+        var updatedArray = existingArray
+
+        for comic in newComics {
+            let id = comic.getId()
+            if !existingIds.contains(id) {
+                existingIds.insert(id)
+                updatedArray.append(["comic_id": id, "name": comic.getName()])
+            }
+        }
+
+        if updatedArray.count > existingArray.count {
+            SwiftyPlistManager.shared.save(updatedArray, forKey: "comics", toPlistWithName: "AllComics") { _ in }
+            // 更新記憶體中的列表
+            if var all = mAllComics {
+                for comic in newComics {
+                    if !all.contains(where: { $0.getId() == comic.getId() }) {
+                        all.append(comic)
+                    }
+                }
+                mAllComics = all
+            }
+        }
+    }
+
+    // MARK: - 集數詳情
+
     open func loadEpisodeDetail(_ episode : Episode, onLoadDetail: @escaping (Episode) -> Void){
-        //檢查此漫畫集數是否已有串過完整url，若未有完成url則將url重組
         if(!episode.getUrl().hasPrefix("https")){
             episode.setUrl("https://www.8comic.com/view/" + episode.getUrl())
         }
         mR8Comic.loadEpisodeDetail(episode, onLoadDetail: onLoadDetail)
     }
-    
+
     //部份漫畫下載時，若client未帶Referer上去會被伺服器檔，造成無法正確下載圖片。 by Ray
     open func buildDownloadEpisodeHeader(_ episodeUrl : String) -> ImageDownloadRequestModifier{
         let modifier = AnyModifier { request in
@@ -91,15 +180,7 @@ open class WLComics{
             r.setValue(episodeUrl, forHTTPHeaderField: "Referer")
             return r
         }
-        
+
         return modifier
-    }
-    
-    //搜尋漫畫
-    
-    open func searchComics( keyword : String , _ onLoadedComics: @escaping ([Comic]) -> Void) {
-        mR8Comic.searchComic(keyword) { (comics:[Comic]) in
-            onLoadedComics(comics)
-        }
     }
 }

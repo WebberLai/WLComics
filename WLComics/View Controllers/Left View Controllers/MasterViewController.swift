@@ -112,7 +112,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     @objc func startSearch() {
         searchController.searchBar.becomeFirstResponder()
-        scrollRecordTop = self.tableView.indexPathsForVisibleRows![0]
+        if let visibleRows = self.tableView.indexPathsForVisibleRows, !visibleRows.isEmpty {
+            scrollRecordTop = visibleRows[0]
+        }
     }
     
     func initSearchController() {
@@ -223,6 +225,13 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         return comicSectionTitles[section]
     }
 
+    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let header = view as? UITableViewHeaderFooterView else { return }
+        header.contentView.backgroundColor = UIColor.white
+        header.textLabel?.textColor = UIColor.darkGray
+        header.textLabel?.font = UIFont.boldSystemFont(ofSize: 15)
+    }
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if shouldShowSearchResults {
             return filterComics.count
@@ -322,25 +331,51 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         shouldShowSearchResults = false
+        self.tableView.reloadData()
         DispatchQueue.main.async {
+            guard self.scrollRecordTop.section < self.comicSectionTitles.count,
+                  let comics = self.sortedComicLib.object(forKey: self.comicSectionTitles[self.scrollRecordTop.section]) as? [Comic],
+                  self.scrollRecordTop.row < comics.count else { return }
             self.tableView.scrollToRow(at: self.scrollRecordTop, at: .top, animated: false)
         }
     }
     
-    //按下搜尋按鈕之後才會顯示搜尋結果
+    //按下搜尋按鈕之後，先顯示本地結果，再呼叫搜尋 API 補充
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let searchString = searchController.searchBar.text else {
+        guard let searchString = searchController.searchBar.text, !searchString.isEmpty else {
             return
         }
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
         }
+
+        // 先顯示本地過濾結果
         filterComics = allComics.filter({ (comic) -> Bool in
             let comicName = comic.getName() as NSString
             return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound
         })
         self.tableView.reloadData()
         searchController.searchBar.resignFirstResponder()
+
+        // 呼叫搜尋 API 找更多結果
+        WLComics.sharedInstance().searchComics(keyword: searchString) { (comics:[Comic]) in
+            DispatchQueue.main.async {
+                // 合併 API 結果（排除已有的）
+                let existingIds = Set(self.filterComics.map { $0.getId() })
+                let newComics = comics.filter { !existingIds.contains($0.getId()) }
+                if !newComics.isEmpty {
+                    self.filterComics.append(contentsOf: newComics)
+                    // 同時更新 allComics 以供後續本地搜尋
+                    let allIds = Set(self.allComics.map { $0.getId() })
+                    for comic in newComics {
+                        if !allIds.contains(comic.getId()) {
+                            self.allComics.append(comic)
+                        }
+                    }
+                    self.tableView.reloadData()
+                }
+            }
+        }
     }
     
 }
