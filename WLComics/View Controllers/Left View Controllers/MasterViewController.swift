@@ -265,7 +265,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             return r
         }
         if let urlStr = comic.getSmallIconUrl(), let url = URL(string: urlStr) {
-            print("urlStr : \(urlStr)")
             cell.coverImageView?.kf.setImage(with: url,
                                         placeholder: UIImage(named: "comic_place_holder"),
                                         options: [.transition(ImageTransition.fade(1)),
