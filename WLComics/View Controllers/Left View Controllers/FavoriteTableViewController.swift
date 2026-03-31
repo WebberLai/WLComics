@@ -29,6 +29,7 @@ class FavoriteTableViewController: UITableViewController {
         super.viewDidLoad()
         self.title = "收藏列表"
         tableView.register(UINib(nibName: "ComicTableViewCell", bundle: nil), forCellReuseIdentifier: "ComicTableViewCell")
+        tableView.backgroundColor = UIColor.white
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .bookmarks , target: self, action: #selector(loginDropbox))
     }
     
@@ -205,20 +206,46 @@ class FavoriteTableViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+
         let cell = tableView.dequeueReusableCell(withIdentifier: "ComicTableViewCell") as! ComicTableViewCell
         cell.favoriteBtn.isHidden = true
-        let comics : [NSMutableDictionary] = self.sortedComicLib.object(forKey:comicSectionTitles[indexPath.section]) as! [NSMutableDictionary]
-        
-        let comicDict : NSMutableDictionary = comics[indexPath.row]
 
-        let url = URL(string: comicDict.object(forKey: "icon_url") as! String)!
-        
-        cell.coverImageView!.kf.setImage(with: url,
-                                         placeholder: UIImage(named: "comic_place_holder"),
-                                         options: [.transition(ImageTransition.fade(1))])
+        guard indexPath.section < comicSectionTitles.count,
+              let comics = self.sortedComicLib.object(forKey: comicSectionTitles[indexPath.section]) as? [NSMutableDictionary],
+              indexPath.row < comics.count else { return cell }
 
+        let comicDict = comics[indexPath.row]
         cell.comicNametextLabel.text = comicDict.object(forKey: "name") as? String
+
+        // 先取消之前的圖片下載，避免 cell 重用時殘留舊圖
+        cell.coverImageView?.kf.cancelDownloadTask()
+
+        let modifier = AnyModifier { request in
+            var r = request
+            r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
+            return r
+        }
+
+        // icon_url 可能不存在，改用 comic_id 產生 URL
+        let urlStr: String
+        if let iconUrl = comicDict.object(forKey: "icon_url") as? String, !iconUrl.isEmpty {
+            urlStr = iconUrl
+        } else if let comicId = comicDict.object(forKey: "comic_id") as? String {
+            urlStr = WLComics.sharedInstance().getR8Comic().getComicSmallIconUrl(comicId)
+        } else {
+            cell.coverImageView?.image = UIImage(named: "comic_place_holder")
+            return cell
+        }
+
+        if let url = URL(string: urlStr) {
+            cell.coverImageView?.kf.setImage(with: url,
+                                             placeholder: UIImage(named: "comic_place_holder"),
+                                             options: [.transition(ImageTransition.fade(1)),
+                                                       .requestModifier(modifier)])
+        } else {
+            cell.coverImageView?.image = UIImage(named: "comic_place_holder")
+        }
+
         return cell
     }
     
@@ -288,11 +315,15 @@ class FavoriteTableViewController: UITableViewController {
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEpisodes" {
-            let comics : [NSMutableDictionary] = sortedComicLib.object(forKey:comicSectionTitles[currentSection]) as! [NSMutableDictionary]
-            let comicDict  : NSMutableDictionary = comics[currentIndex]
-            let currentComic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicDict.object(forKey: "comic_id") as! String ,
-                                                                                         name: comicDict.object(forKey: "name") as! String)
-            currentComic.setSmallIconUrl(comicDict.object(forKey: "icon_url") as! String)
+            guard currentSection < comicSectionTitles.count,
+                  let comics = sortedComicLib.object(forKey: comicSectionTitles[currentSection]) as? [NSMutableDictionary],
+                  currentIndex < comics.count else { return }
+            let comicDict = comics[currentIndex]
+            guard let comicId = comicDict.object(forKey: "comic_id") as? String,
+                  let comicName = comicDict.object(forKey: "name") as? String else { return }
+            let currentComic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicId, name: comicName)
+            let r8comic = WLComics.sharedInstance().getR8Comic()
+            currentComic.setSmallIconUrl(comicDict.object(forKey: "icon_url") as? String ?? r8comic.getComicSmallIconUrl(comicId))
             let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
             comicEpisodesViewController.currentComic = currentComic
             comicEpisodesViewController.title = currentComic.getName()

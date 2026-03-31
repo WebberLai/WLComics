@@ -12,90 +12,96 @@ import Kingfisher
 import SwiftyDropbox
 import SVProgressHUD
 
-class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate {
-    
+class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate, UITableViewDataSourcePrefetching {
+
     var allComics = [Comic]()
-    
+
     //搜尋過濾之後的找到的漫畫
     var filterComics = [Comic]()
-    
+
     var shouldShowSearchResults = false
-    
+
     var searchController: UISearchController!
-    
+
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
-    
+
     var scrollRecordTop :  IndexPath = IndexPath.init(row: 0, section: 0)
-    
-    var comicLibrary  : Dictionary = [String: [Comic]]()
-    
+
+    // 改用 Swift Dictionary 取代 NSMutableDictionary，避免型別轉換開銷
+    var sortedComicLib = [String: [Comic]]()
+
     var comicSectionTitles = [String]()
-    
-    var sortedComicLib = NSMutableDictionary()
-    
+
     var selectIntexPath  : IndexPath = IndexPath()
-    
+
     let client = DropboxClientsManager.authorizedClient
-    
+
+    // 快取 placeholder 圖片和 Kingfisher modifier，避免每個 cell 重複建立
+    private lazy var placeholderImage = UIImage(named: "comic_place_holder")
+    private let refererModifier = AnyModifier { request in
+        var r = request
+        r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
+        return r
+    }
+
+    // 快取收藏狀態，避免每個 cell 都讀 plist
+    private var favoriteIds = Set<String>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.register(UINib(nibName: "ComicTableViewCell", bundle: nil), forCellReuseIdentifier: "ComicTableViewCell")
+        tableView.prefetchDataSource = self
 
         self.initSearchController()
-        
+
         SVProgressHUD.show(withStatus: "漫畫載入中...")
 
+        // 在背景執行拼音排序（10000+ 筆的 CFStringTransform 很慢）
         WLComics.sharedInstance().loadAllComics { (comics:[Comic]) in
-            DispatchQueue.main.async {
-                self.allComics = comics
-                self.buildComicLibrary(from: comics)
-                SVProgressHUD.dismiss()
-                self.tableView.reloadData()
+            DispatchQueue.global(qos: .userInitiated).async {
+                let library = self.buildComicLibrary(from: comics)
+                DispatchQueue.main.async {
+                    self.allComics = comics
+                    self.sortedComicLib = library.sorted
+                    self.comicSectionTitles = library.titles
+                    self.reloadFavoriteIds()
+                    SVProgressHUD.dismiss()
+                    self.tableView.reloadData()
+                }
             }
         }
-    
+
         self.title = "漫畫列表"
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
     }
-    
-    func buildComicLibrary(from comics: [Comic]) {
-        comicLibrary.removeAll()
-        sortedComicLib.removeAllObjects()
+
+    func reloadFavoriteIds() {
+        favoriteIds = Set(FavoriteComics.listAllFavorite().compactMap { $0.object(forKey: "comic_id") as? String })
+    }
+
+    func buildComicLibrary(from comics: [Comic]) -> (sorted: [String: [Comic]], titles: [String]) {
+        var library = [String: [Comic]]()
 
         for comic in comics {
             let s = translateChineseStringToPyinyin(chineseStr: comic.getName())
             let comicKey = String(s.prefix(1))
-            if var comicValues = comicLibrary[comicKey] {
-                comicValues.append(comic)
-                comicLibrary[comicKey] = comicValues
-            } else {
-                comicLibrary[comicKey] = [comic]
-            }
+            library[comicKey, default: []].append(comic)
         }
 
-        comicSectionTitles = comicLibrary.keys.sorted()
-
-        for title in comicSectionTitles {
-            if let comicsInSection = comicLibrary[title] {
-                sortedComicLib.setObject(comicsInSection, forKey: title as NSCopying)
-            }
-        }
+        let titles = library.keys.sorted()
+        return (sorted: library, titles: titles)
     }
 
     func translateChineseStringToPyinyin(chineseStr:String) -> String {
-        var translatedPinyinStr:String = ""
         let zhcnStrToTranslate:CFMutableString = NSMutableString(string: chineseStr)
-        var translatedOk:Bool = CFStringTransform(zhcnStrToTranslate, nil, kCFStringTransformMandarinLatin, false)
-        if translatedOk {
-            let translatedPinyinWithAccents = zhcnStrToTranslate
-            translatedOk = CFStringTransform(translatedPinyinWithAccents, nil, kCFStringTransformStripCombiningMarks, false)
-            if translatedOk {
-                translatedPinyinStr = translatedPinyinWithAccents as String
+        if CFStringTransform(zhcnStrToTranslate, nil, kCFStringTransformMandarinLatin, false) {
+            if CFStringTransform(zhcnStrToTranslate, nil, kCFStringTransformStripCombiningMarks, false) {
+                return (zhcnStrToTranslate as String).uppercased()
             }
         }
-        return translatedPinyinStr.uppercased()
+        return chineseStr.uppercased()
     }
     
     
@@ -131,6 +137,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     override func viewWillAppear(_ animated: Bool) {
         clearsSelectionOnViewWillAppear = splitViewController?.isCollapsed ?? true
         super.viewWillAppear(animated)
+        // 重新載入收藏狀態（從其他頁面返回時可能已變更）
+        reloadFavoriteIds()
         self.tableView.reloadData()
     }
     
@@ -183,7 +191,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             else {
                 print("[DEBUG] normal mode: section=\(selectIntexPath.section), comicSectionTitles.count=\(comicSectionTitles.count)")
                 guard selectIntexPath.section < comicSectionTitles.count,
-                      let comics = self.sortedComicLib.object(forKey:comicSectionTitles[selectIntexPath.section]) as? [Comic],
+                      let comics = self.sortedComicLib[comicSectionTitles[selectIntexPath.section]],
                       selectIntexPath.row < comics.count else { return }
                 print("[DEBUG] comics.count=\(comics.count), row=\(selectIntexPath.row)")
                 currentComic = comics[selectIntexPath.row]
@@ -238,7 +246,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         }
         else {
             guard section < comicSectionTitles.count,
-                  let comics = self.sortedComicLib.object(forKey:comicSectionTitles[section]) as? [Comic] else { return 0 }
+                  let comics = self.sortedComicLib[comicSectionTitles[section]] else { return 0 }
             return comics.count
         }
     }
@@ -250,50 +258,42 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "ComicTableViewCell") as! ComicTableViewCell
-  
-        let comics = (indexPath.section < comicSectionTitles.count) ?
-            self.sortedComicLib.object(forKey:comicSectionTitles[indexPath.section]) as? [Comic] ?? [] : []
 
-        var comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
-
+        let comic: Comic
         if shouldShowSearchResults {
             guard indexPath.row < filterComics.count else { return cell }
             comic = filterComics[indexPath.row]
         } else {
-            guard indexPath.row < comics.count else { return cell }
+            guard indexPath.section < comicSectionTitles.count,
+                  let comics = sortedComicLib[comicSectionTitles[indexPath.section]],
+                  indexPath.row < comics.count else { return cell }
             comic = comics[indexPath.row]
         }
-        
-        let comicName = comic.getName()
-        
-        cell.comicNametextLabel.text = comicName
-        
-        let modifier = AnyModifier { request in
-            var r = request
-            r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
-            return r
-        }
+
+        cell.comicNametextLabel.text = comic.getName()
+
+        // 使用快取的 modifier 和 placeholder，不再每次建立新物件
         if let urlStr = comic.getSmallIconUrl(), let url = URL(string: urlStr) {
             cell.coverImageView?.kf.setImage(with: url,
-                                        placeholder: UIImage(named: "comic_place_holder"),
+                                        placeholder: placeholderImage,
                                         options: [.transition(ImageTransition.fade(1)),
-                                                  .requestModifier(modifier)])
+                                                  .requestModifier(refererModifier)])
         } else {
-            cell.coverImageView?.image = UIImage(named: "comic_place_holder")
+            cell.coverImageView?.image = placeholderImage
         }
-        
-        let isFavorite : Bool = FavoriteComics.checkComicIsMyFavorite(comic)
-        if isFavorite == false {
-            cell.favoriteBtn.setImage(UIImage.init(named: "dislike"), for: .normal)
-        }else {
-            cell.favoriteBtn.setImage(UIImage.init(named: "like"), for: .normal)
-        }
-        
-        cell.favoriteButtonPress = { (button) in
-            if isFavorite == false {
-               FavoriteComics.addComicToMyFavorite(comic)
-            }else {
+
+        // 用記憶體中的 Set 查詢收藏狀態，不再每個 cell 都讀 plist
+        let isFavorite = favoriteIds.contains(comic.getId())
+        cell.favoriteBtn.setImage(UIImage(named: isFavorite ? "like" : "dislike"), for: .normal)
+
+        cell.favoriteButtonPress = { [weak self] (button) in
+            guard let self = self else { return }
+            if isFavorite {
                 FavoriteComics.removeComicFromMyFavorite(comic)
+                self.favoriteIds.remove(comic.getId())
+            } else {
+                FavoriteComics.addComicToMyFavorite(comic)
+                self.favoriteIds.insert(comic.getId())
             }
             self.uploadDropboxPlsit()
             self.tableView.reloadRows(at: [indexPath], with: .none)
@@ -310,7 +310,28 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         selectIntexPath = indexPath
         self.performSegue(withIdentifier: "showEpisodes", sender: self)
     }
-    
+
+    // MARK: - Prefetch（預先載入即將出現的封面圖片）
+
+    private func comicForIndexPath(_ indexPath: IndexPath) -> Comic? {
+        if shouldShowSearchResults {
+            guard indexPath.row < filterComics.count else { return nil }
+            return filterComics[indexPath.row]
+        } else {
+            guard indexPath.section < comicSectionTitles.count,
+                  let comics = sortedComicLib[comicSectionTitles[indexPath.section]],
+                  indexPath.row < comics.count else { return nil }
+            return comics[indexPath.row]
+        }
+    }
+
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        let urls = indexPaths.compactMap { comicForIndexPath($0) }
+            .compactMap { $0.getSmallIconUrl() }
+            .compactMap { URL(string: $0) }
+        ImagePrefetcher(urls: urls, options: [.requestModifier(refererModifier)]).start()
+    }
+
     // MARK: - Search Bar
     
     func updateSearchResults(for searchController: UISearchController) {
@@ -334,7 +355,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.tableView.reloadData()
         DispatchQueue.main.async {
             guard self.scrollRecordTop.section < self.comicSectionTitles.count,
-                  let comics = self.sortedComicLib.object(forKey: self.comicSectionTitles[self.scrollRecordTop.section]) as? [Comic],
+                  let comics = self.sortedComicLib[self.comicSectionTitles[self.scrollRecordTop.section]],
                   self.scrollRecordTop.row < comics.count else { return }
             self.tableView.scrollToRow(at: self.scrollRecordTop, at: .top, animated: false)
         }

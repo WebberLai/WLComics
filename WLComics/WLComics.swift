@@ -36,15 +36,18 @@ open class WLComics{
     // MARK: - 載入所有漫畫（從 bundle plist）
 
     open func loadAllComics(_ onLoadedComics: @escaping ([Comic]) -> Void) {
-        if let cached = restoreComicsFromPlist(), !cached.isEmpty {
-            mAllComics = cached
-            onLoadedComics(cached)
-        } else {
-            // plist 不存在時才從網路載入
-            mR8Comic.getAll { (comics:[Comic]) in
-                self.mAllComics = comics
-                self.storeComicsToPlist(comics: comics)
-                onLoadedComics(comics)
+        // 在背景讀取 plist，避免阻塞主線程
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let cached = self.restoreComicsFromPlist(), !cached.isEmpty {
+                self.mAllComics = cached
+                onLoadedComics(cached)
+            } else {
+                // plist 不存在時才從網路載入
+                self.mR8Comic.getAll { (comics:[Comic]) in
+                    self.mAllComics = comics
+                    self.storeComicsToPlist(comics: comics)
+                    onLoadedComics(comics)
+                }
             }
         }
     }
