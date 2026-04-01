@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Swift8ComicSDK
 
 @objc protocol DetailViewControllerDelegate: NSObjectProtocol {
     func sliderImageTapped(index: Int)
@@ -33,6 +34,10 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         }
     }
     
+    // iPhone 用：集數列表和當前 index（用於自動切換上下話）
+    var allEpisodes = [Episode]()
+    var episodeIndex: Int = 0
+
     override func viewDidLoad() {
         super.viewDidLoad()
         imgSlider.delegate = self
@@ -45,6 +50,50 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         NotificationCenter.default.addObserver(forName:Notification.Name(rawValue:"BLEClickNotification"),
                                                object:nil, queue:nil,
                                                using:catchNotification(notification:))
+
+        // 滑動超過邊界時自動切換上下話
+        imgSlider.onSwipePastLastPage = { [weak self] in
+            self?.loadNextEpisode()
+        }
+        imgSlider.onSwipePastFirstPage = { [weak self] in
+            self?.loadPreviousEpisode()
+        }
+    }
+
+    /// iPhone 模式下載入下一話
+    private func loadNextEpisode() {
+        // iPad 模式透過 delegate 處理
+        if delegate != nil {
+            delegate?.showNextEpisode()
+            return
+        }
+        // iPhone 模式自行處理
+        guard episodeIndex < allEpisodes.count - 1 else { return }
+        episodeIndex += 1
+        loadEpisode(at: episodeIndex)
+    }
+
+    /// iPhone 模式下載入上一話
+    private func loadPreviousEpisode() {
+        if delegate != nil {
+            delegate?.showPreviousEpisode()
+            return
+        }
+        guard episodeIndex > 0 else { return }
+        episodeIndex -= 1
+        loadEpisode(at: episodeIndex)
+    }
+
+    private func loadEpisode(at index: Int) {
+        let episode = allEpisodes[index]
+        imgSlider.currentIndex = 0
+        self.title = episode.getName()
+        WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
+            episode.setUpPages()
+            let pages = episode.getImageUrlList()
+            self.setEpisodeUrl(episode.getUrl())
+            self.updateImages(imgs: pages)
+        })
     }
     
     func catchNotification(notification:Notification) -> Void {
@@ -62,20 +111,18 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         var pageIndex = imgSlider.currentIndex
 
         if action == UIKeyInputRightArrow {
-            
             pageIndex += 1
-            
             if pageIndex < imgSlider.images.count {
                 imgSlider.nextButtonPressed()
-            }else if (pageIndex == imgSlider.images.count){
-                self.delegate?.showNextEpisode()
+            } else if pageIndex == imgSlider.images.count {
+                loadNextEpisode()
             }
-        } else if action == UIKeyInputLeftArrow{
+        } else if action == UIKeyInputLeftArrow {
             pageIndex -= 1
             if pageIndex < 0 {
                 pageIndex = 0
-                self.delegate?.showPreviousEpisode()
-            }else {
+                loadPreviousEpisode()
+            } else {
                 imgSlider.previousButtonPressed()
             }
         }

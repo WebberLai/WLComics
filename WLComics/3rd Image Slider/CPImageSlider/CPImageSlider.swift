@@ -274,6 +274,19 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         let index = getCurrentIndex(x: targetContentOffset.pointee.x)
+
+        // 非循環模式：在邊界頁面滑動時，UIScrollView 會 clamp offset 導致 index == lastIndex
+        // 所以需要在 index != lastIndex 判斷之外額外檢查邊界滑動
+        if !allowCircular && index == lastIndex && images.count > 0 {
+            if currentIndex == images.count - 1 && velocity.x > 0 {
+                onSwipePastLastPage?()
+                return
+            } else if currentIndex == 0 && velocity.x < 0 {
+                onSwipePastFirstPage?()
+                return
+            }
+        }
+
         if index != lastIndex
         {
             print("\(#function)")
@@ -288,9 +301,28 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                     currentIndex = 0
                 }
             }
+            else
+            {
+                // 非循環模式：滑過最後一頁往右 → 下一話，滑過第一頁往左 → 上一話
+                if currentIndex >= images.count && velocity.x > 0 {
+                    currentIndex = images.count - 1
+                    targetContentOffset.pointee.x = getActualOffsetFor(index: currentIndex)
+                    onSwipePastLastPage?()
+                    return
+                } else if currentIndex < 0 && velocity.x < 0 {
+                    currentIndex = 0
+                    targetContentOffset.pointee.x = 0
+                    onSwipePastFirstPage?()
+                    return
+                }
+            }
             adjustContentOffsetFor(index: currentIndex, offsetIndex: index, animated: true)
         }
     }
+
+    // 滑過邊界時的 callback
+    var onSwipePastLastPage: (() -> Void)?
+    var onSwipePastFirstPage: (() -> Void)?
     
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         print(#function)

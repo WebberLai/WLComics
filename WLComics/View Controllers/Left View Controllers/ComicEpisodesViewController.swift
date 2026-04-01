@@ -59,10 +59,14 @@ class ComicEpisodesViewController: UIViewController {
         }else if segue.identifier == "showPageDetail" {
             let navController = segue.destination as! UINavigationController
             let pageDetailViewController = navController.viewControllers[0] as! DetailViewController
-            
+
+            // 傳入所有集數和當前 index，讓 DetailViewController 能自動切換上下話
+            pageDetailViewController.allEpisodes = self.allEpisodes
+            pageDetailViewController.episodeIndex = index
+
             let episode = allEpisodes[index]
             pageDetailViewController.title = episode.getName()
-            
+
             WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
                 episode.setUpPages()
                 let pages = episode.getImageUrlList()
