@@ -37,8 +37,7 @@ class EpisodeDetailViewController: UIViewController {
         WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
             episode.setUpPages()
             self.pages = episode.getImageUrlList()
-            self.detailViewController?.setEpisodeUrl(episode.getUrl())
-            self.detailViewController?.updateImages(imgs: self.pages)
+            self.detailViewController?.updateEpisode(url: episode.getUrl(), images: self.pages)
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
@@ -80,17 +79,12 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
         cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")
+        guard indexPath.row < pages.count else { return cell }
         let url = URL(string:pages[indexPath.row])
         cell.imageView!.kf.setImage(with: url,
                                     placeholder: UIImage(named: "comic_place_holder"),
-                                    options: [.transition(ImageTransition.fade(1)),.requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))],
-                                    completionHandler: { result in
-                                        if case .success(let value) = result,
-                                           let slider = self.detailViewController?.imgSlider,
-                                           indexPath.row < slider.imageViewArray.count {
-                                            slider.imageViewArray[indexPath.row].image = value.image
-                                        }
-        })
+                                    options: [.transition(ImageTransition.fade(1)),
+                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))])
         return cell
     }
     
@@ -113,13 +107,12 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.title = self.currentEpisode.getName()
-                    self.detailViewController?.setEpisodeUrl(episode.getUrl())
-                    self.detailViewController?.updateImages(imgs: self.pages)
+                    self.detailViewController?.updateEpisode(url: episode.getUrl(), images: self.pages)
                 }
             })
         }
     }
-    
+
     func showPreviousEpisode() {
         if episodeIndex > 0{
             episodeIndex -= 1
@@ -131,8 +124,7 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.title = self.currentEpisode.getName()
-                    self.detailViewController?.setEpisodeUrl(episode.getUrl())
-                    self.detailViewController?.updateImages(imgs: self.pages)
+                    self.detailViewController?.updateEpisode(url: episode.getUrl(), images: self.pages)
                 }
             })
         }

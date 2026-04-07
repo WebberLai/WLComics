@@ -70,8 +70,7 @@ class ComicEpisodesViewController: UIViewController {
             WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
                 episode.setUpPages()
                 let pages = episode.getImageUrlList()
-                pageDetailViewController.setEpisodeUrl(episode.getUrl())
-                pageDetailViewController.updateImages(imgs: pages)
+                pageDetailViewController.updateEpisode(url: episode.getUrl(), images: pages)
             })
         }
     }

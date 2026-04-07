@@ -43,12 +43,16 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     
     var images = [String](){
         didSet{
+            loadedIndices.removeAll()
             myPageControl.numberOfPages = images.count
             addImagesOnScrollView()
         }
     }
-    
+
     var episodeUrl : String?;//一集(話)的漫畫網址，例如http://v.comicbus.com/online/comic-3099.html?ch=2
+
+    // lazy loading：預先載入當前頁面前後各幾頁
+    private let prefetchRange = 2
     
     var enableSwipe : Bool = false{
         didSet{
@@ -156,10 +160,21 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         myPageControl.currentPage = index
         checkButtonsIfNeedsDisable()
         checkForAutoScrolled()
+        loadVisibleImages()
     }
     
+    func cancelAllDownloads()
+    {
+        for imageV in imageViewArray {
+            imageV.kf.cancelDownloadTask()
+        }
+    }
+
     func addImagesOnScrollView()
     {
+        // 取消所有舊的下載任務
+        cancelAllDownloads()
+
         for sub in myScrollView.subviews
         {
             sub.removeFromSuperview()
@@ -173,55 +188,74 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         {
             count += 2
         }
+        let placeholder = UIImage(named: "comic_place_holder")
         for index in 0..<count
         {
             let imageV = getImageView(index: index)
             imageV.frame = CGRect(x: CGFloat(index)*bounds.width, y: 0, width: bounds.width, height: bounds.height)
-            if allowCircular && images.count != 0
-            {
-                if index == 0 {
-                    let url = URL(string:images.last!)!
-                    imageV.kf.setImage(with: url,
-                                       placeholder: UIImage(named: "comic_place_holder"),
-                                       options: [.transition(ImageTransition.fade(1)),
-                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
-                }
-                else if index > images.count
-                {
-                    let url = URL(string:images.first!)!
-                    imageV.kf.setImage(with: url,
-                                       placeholder: UIImage(named: "comic_place_holder"),
-                                       options: [.transition(ImageTransition.fade(1)),
-                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
-                }
-                else
-                {
-                    let url = URL(string:images[index - 1])!
-                    imageV.kf.setImage(with: url,
-                                       placeholder: UIImage(named: "comic_place_holder"),
-                                       options: [.transition(ImageTransition.fade(1)),
-                                                 .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
-                    
-                }
-            }
-            else
-            {
-                
-                let url = URL(string:images[index])!
-                
-                imageV.kf.setImage(with: url,
-                                   placeholder: UIImage(named: "comic_place_holder"),
-                                   options: [.transition(ImageTransition.fade(1)),
-                                             .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(self.episodeUrl!))])
-            }
+            // 先設定 placeholder，實際圖片由 loadVisibleImages 按需載入
+            imageV.image = placeholder
             myScrollView.addSubview(imageV)
         }
-        
+
         if count < imageViewArray.count {
             imageViewArray.removeSubrange(count..<imageViewArray.count)
         }
         myScrollView.contentSize = CGSize(width: bounds.width*CGFloat(count), height: bounds.height)
         adjustContentOffsetFor(index: currentIndex, offsetIndex: convertIndex(), animated: false)
+
+        // 載入當前頁面附近的圖片
+        loadVisibleImages()
+    }
+
+    /// 根據 currentIndex 載入前後 prefetchRange 頁的圖片（lazy loading）
+    private var loadedIndices = Set<Int>()
+
+    func loadVisibleImages()
+    {
+        guard images.count > 0 else { return }
+        guard let referer = episodeUrl else { return }
+
+        let modifier = WLComics.sharedInstance().buildDownloadEpisodeHeader(referer)
+        let options: KingfisherOptionsInfo = [.transition(ImageTransition.fade(1)), .requestModifier(modifier)]
+        let placeholder = UIImage(named: "comic_place_holder")
+
+        let start = max(0, currentIndex - prefetchRange)
+        let end = min(images.count - 1, currentIndex + prefetchRange)
+
+        for imageIndex in start...end {
+            if loadedIndices.contains(imageIndex) { continue }
+            loadedIndices.insert(imageIndex)
+
+            if allowCircular {
+                let viewIndex = imageIndex + 1
+                guard viewIndex < imageViewArray.count else { continue }
+                let imageV = imageViewArray[viewIndex]
+                if let url = URL(string: images[imageIndex]) {
+                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options)
+                }
+                // 循環模式的首尾複製頁
+                if imageIndex == 0 {
+                    // 第一個 view（index 0）顯示最後一張圖
+                    if let url = URL(string: images.last!) {
+                        imageViewArray[0].kf.setImage(with: url, placeholder: placeholder, options: options)
+                    }
+                }
+                if imageIndex == images.count - 1 {
+                    // 最後一個 view 顯示第一張圖
+                    let lastViewIndex = images.count + 1
+                    if lastViewIndex < imageViewArray.count, let url = URL(string: images.first!) {
+                        imageViewArray[lastViewIndex].kf.setImage(with: url, placeholder: placeholder, options: options)
+                    }
+                }
+            } else {
+                guard imageIndex < imageViewArray.count else { continue }
+                let imageV = imageViewArray[imageIndex]
+                if let url = URL(string: images[imageIndex]) {
+                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options)
+                }
+            }
+        }
     }
     
     func getImageView(index : Int)-> UIImageView
@@ -324,6 +358,18 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     var onSwipePastLastPage: (() -> Void)?
     var onSwipePastFirstPage: (() -> Void)?
     
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let index = getCurrentIndex()
+        if allowCircular {
+            currentIndex = index - 1
+            if currentIndex < 0 { currentIndex = images.count - 1 }
+            else if currentIndex > images.count - 1 { currentIndex = 0 }
+        } else {
+            currentIndex = index
+        }
+        loadVisibleImages()
+    }
+
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         print(#function)
         if allowCircular && images.count != 0

@@ -91,8 +91,7 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
             episode.setUpPages()
             let pages = episode.getImageUrlList()
-            self.setEpisodeUrl(episode.getUrl())
-            self.updateImages(imgs: pages)
+            self.updateEpisode(url: episode.getUrl(), images: pages)
         })
     }
     
@@ -146,10 +145,19 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     func setEpisodeUrl(_ url : String){
         self.imgSlider.episodeUrl = url
     }
-    
+
     func updateImages(imgs : Array<String>){
         DispatchQueue.main.async {
             self.imgSlider.images = imgs
+        }
+    }
+
+    /// 確保 episodeUrl 和 images 在同一個 main queue 週期設定，避免 race condition
+    func updateEpisode(url: String, images: [String]) {
+        DispatchQueue.main.async {
+            self.imgSlider.cancelAllDownloads()
+            self.imgSlider.episodeUrl = url
+            self.imgSlider.images = images
         }
     }
     
