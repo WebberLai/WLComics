@@ -236,13 +236,11 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 }
                 // 循環模式的首尾複製頁
                 if imageIndex == 0 {
-                    // 第一個 view（index 0）顯示最後一張圖
                     if let url = URL(string: images.last!) {
                         imageViewArray[0].kf.setImage(with: url, placeholder: placeholder, options: options)
                     }
                 }
                 if imageIndex == images.count - 1 {
-                    // 最後一個 view 顯示第一張圖
                     let lastViewIndex = images.count + 1
                     if lastViewIndex < imageViewArray.count, let url = URL(string: images.first!) {
                         imageViewArray[lastViewIndex].kf.setImage(with: url, placeholder: placeholder, options: options)
