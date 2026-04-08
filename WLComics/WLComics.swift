@@ -20,6 +20,7 @@ open class WLComics{
         // 限制同時下載數，避免 8comic 伺服器因並發過多而斷開連線 (Connection reset by peer)
         let config = ImageDownloader.default.sessionConfiguration
         config.httpMaximumConnectionsPerHost = 2
+        config.timeoutIntervalForRequest = 30
         ImageDownloader.default.sessionConfiguration = config
     }
 

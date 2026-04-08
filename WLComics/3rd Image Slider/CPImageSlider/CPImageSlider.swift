@@ -217,7 +217,9 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         guard let referer = episodeUrl else { return }
 
         let modifier = WLComics.sharedInstance().buildDownloadEpisodeHeader(referer)
-        let options: KingfisherOptionsInfo = [.transition(ImageTransition.fade(1)), .requestModifier(modifier)]
+        let options: KingfisherOptionsInfo = [.transition(ImageTransition.fade(1)),
+                                              .requestModifier(modifier),
+                                              .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))]
         let placeholder = UIImage(named: "comic_place_holder")
 
         let start = max(0, currentIndex - prefetchRange)
@@ -232,7 +234,9 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 guard viewIndex < imageViewArray.count else { continue }
                 let imageV = imageViewArray[viewIndex]
                 if let url = URL(string: images[imageIndex]) {
-                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options)
+                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options) { [weak self] result in
+                        if case .failure = result { self?.loadedIndices.remove(imageIndex) }
+                    }
                 }
                 // 循環模式的首尾複製頁
                 if imageIndex == 0 {
@@ -250,7 +254,9 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 guard imageIndex < imageViewArray.count else { continue }
                 let imageV = imageViewArray[imageIndex]
                 if let url = URL(string: images[imageIndex]) {
-                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options)
+                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options) { [weak self] result in
+                        if case .failure = result { self?.loadedIndices.remove(imageIndex) }
+                    }
                 }
             }
         }
