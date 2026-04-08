@@ -17,6 +17,10 @@ open class WLComics{
     fileprivate var mAllComics :[Comic]?
 
     init() {
+        // 限制同時下載數，避免 8comic 伺服器因並發過多而斷開連線 (Connection reset by peer)
+        let config = ImageDownloader.default.sessionConfiguration
+        config.httpMaximumConnectionsPerHost = 2
+        ImageDownloader.default.sessionConfiguration = config
     }
 
     open class func sharedInstance() -> WLComics{

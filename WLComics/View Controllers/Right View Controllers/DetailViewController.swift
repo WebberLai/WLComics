@@ -156,6 +156,7 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     func updateEpisode(url: String, images: [String]) {
         DispatchQueue.main.async {
             self.imgSlider.cancelAllDownloads()
+            self.imgSlider.currentIndex = 0
             self.imgSlider.episodeUrl = url
             self.imgSlider.images = images
         }
