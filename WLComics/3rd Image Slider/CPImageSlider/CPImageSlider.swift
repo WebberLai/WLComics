@@ -175,12 +175,20 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         // 取消所有舊的下載任務
         cancelAllDownloads()
 
+        // 先鎖住目標 index，並停止任何進行中的減速動畫，
+        // 避免接下來修改 contentSize 時 scroll view clamp offset
+        // 觸發 delegate callback，把 currentIndex 改成舊的最後一頁
+        let targetIndex = currentIndex
+        isRebuildingScrollView = true
+        myScrollView.setContentOffset(myScrollView.contentOffset, animated: false)
+
         for sub in myScrollView.subviews
         {
             sub.removeFromSuperview()
         }
         if images.count == 0
         {
+            isRebuildingScrollView = false
             return
         }
         var count = images.count
@@ -202,7 +210,9 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
             imageViewArray.removeSubrange(count..<imageViewArray.count)
         }
         myScrollView.contentSize = CGSize(width: bounds.width*CGFloat(count), height: bounds.height)
-        adjustContentOffsetFor(index: currentIndex, offsetIndex: convertIndex(), animated: false)
+        currentIndex = targetIndex
+        adjustContentOffsetFor(index: targetIndex, offsetIndex: convertIndex(), animated: false)
+        isRebuildingScrollView = false
 
         // 載入當前頁面附近的圖片
         loadVisibleImages()
@@ -210,6 +220,10 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
 
     /// 根據 currentIndex 載入前後 prefetchRange 頁的圖片（lazy loading）
     private var loadedIndices = Set<Int>()
+
+    /// 切換集數／重建 scrollView 時設為 true，忽略 scroll delegate callback
+    /// 避免 contentSize 變動時 scroll view 觸發的 callback 覆蓋 currentIndex
+    private var isRebuildingScrollView = false
 
     func loadVisibleImages()
     {
@@ -306,11 +320,13 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         print(#function)
+        if isRebuildingScrollView { return }
         lastIndex = getCurrentIndex()
         self.invalidateTimer()
     }
-    
+
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        if isRebuildingScrollView { return }
         let index = getCurrentIndex(x: targetContentOffset.pointee.x)
 
         // 非循環模式：在邊界頁面滑動時，UIScrollView 會 clamp offset 導致 index == lastIndex
@@ -363,6 +379,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     var onSwipePastFirstPage: (() -> Void)?
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        if isRebuildingScrollView { return }
         let index = getCurrentIndex()
         if allowCircular {
             currentIndex = index - 1
@@ -376,6 +393,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         print(#function)
+        if isRebuildingScrollView { return }
         if allowCircular && images.count != 0
         {
             if (currentIndex == 0 && myScrollView.contentOffset.x != getOffsetFor(index: 0)) || ((currentIndex == (images.count - 1)) && myScrollView.contentOffset.x != getOffsetFor(index: (images.count - 1)))
