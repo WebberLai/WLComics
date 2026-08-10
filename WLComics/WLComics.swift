@@ -105,40 +105,66 @@ open class WLComics{
     }
 
     /// 解析搜尋結果 HTML，提取漫畫 ID 和名稱
+    /// 新版網站格式為多行結構：
+    ///   <a href="/html/21673.html" class="...">
+    ///     <li class="comicpic_col6_name ..."><font color=red>漫畫名稱</font></li>
+    ///   </a>
     fileprivate func parseSearchResults(_ html: String) -> [Comic] {
         var comics = [Comic]()
         var seen = Set<String>()
 
-        // 格式: href="/html/10660.html" data-url="10660" target="_top">刃牙道
-        // 或:   href="/html/103.html" target="_top" style="...">海賊王 (登入觀看)
+        // 策略：先用 regex 找出所有 <a href="/html/ID.html"...>...</a> 區塊
+        // 然後從區塊內的 comicpic_col6_name 行提取名稱
         let lines = html.components(separatedBy: "\n")
+        var currentComicId: String? = nil
+
         for line in lines {
-            guard line.contains("href=\"/html/") && line.contains(".html\"") else { continue }
-
-            // 提取 comic_id
-            guard let hrefStart = line.range(of: "href=\"/html/"),
-                  let hrefEnd = line.range(of: ".html\"", range: hrefStart.upperBound..<line.endIndex) else { continue }
-            let comicId = String(line[hrefStart.upperBound..<hrefEnd.lowerBound])
-            guard !comicId.isEmpty, comicId.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil else { continue }
-            guard !seen.contains(comicId) else { continue }
-            seen.insert(comicId)
-
-            // 提取名稱：最後一個 > 之後到 < 或行尾
-            guard let nameStart = line.range(of: ">", options: .backwards) else { continue }
-            var name = String(line[nameStart.upperBound...])
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            // 移除 HTML 尾標籤
-            if let tagStart = name.range(of: "<") {
-                name = String(name[name.startIndex..<tagStart.lowerBound])
+            // 檢查是否為包含漫畫連結的行
+            if line.contains("href=\"/html/") && line.contains(".html\"") {
+                // 提取 comic_id
+                if let hrefStart = line.range(of: "href=\"/html/"),
+                   let hrefEnd = line.range(of: ".html\"", range: hrefStart.upperBound..<line.endIndex) {
+                    let comicId = String(line[hrefStart.upperBound..<hrefEnd.lowerBound])
+                    if !comicId.isEmpty,
+                       comicId.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil,
+                       !seen.contains(comicId) {
+                        // 嘗試舊格式：名稱在同一行最後一個 > 之後
+                        if let nameStart = line.range(of: ">", options: .backwards) {
+                            var name = String(line[nameStart.upperBound...])
+                                .trimmingCharacters(in: .whitespacesAndNewlines)
+                            if let tagStart = name.range(of: "<") {
+                                name = String(name[name.startIndex..<tagStart.lowerBound])
+                            }
+                            if !name.isEmpty {
+                                // 舊格式：名稱在同一行
+                                seen.insert(comicId)
+                                let comic = mR8Comic.generatorFakeComic(comicId, name: name)
+                                comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
+                                comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
+                                comics.append(comic)
+                                currentComicId = nil
+                                continue
+                            }
+                        }
+                        // 新格式：名稱在後續行，記下 ID 等後面的行來補名稱
+                        currentComicId = comicId
+                    }
+                }
             }
-            // 移除 (登入觀看)
-            name = name.replacingOccurrences(of: " (登入觀看)", with: "")
-            guard !name.isEmpty else { continue }
-
-            let comic = mR8Comic.generatorFakeComic(comicId, name: name)
-            comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
-            comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
-            comics.append(comic)
+            // 新格式：從 comicpic_col6_name 行提取名稱
+            else if let comicId = currentComicId, line.contains("comicpic_col6_name") {
+                // 移除所有 HTML 標籤取得純文字名稱
+                var name = line.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if !name.isEmpty {
+                    seen.insert(comicId)
+                    let comic = mR8Comic.generatorFakeComic(comicId, name: name)
+                    comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
+                    comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
+                    comics.append(comic)
+                }
+                currentComicId = nil
+            }
         }
         return comics
     }

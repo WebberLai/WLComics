@@ -55,7 +55,11 @@
       "Bash(find /Users/rocadeveloper/Documents/GitHub/WLComics -maxdepth 3 -type f -name *.md -o -name *.yml -o -name *.yaml -o -name Podfile -o -name *.pbxproj -o -name *.xcworkspace)",
       "Bash(find /Users/rocadeveloper/Documents/GitHub/WLComics -type f -name *Test* -o -name *test*)",
       "Bash(find /Users/rocadeveloper/Documents/GitHub/WLComics -name *.pbxproj -exec cat {})",
-      "Bash(2)"
+      "Bash(2)",
+      "Bash(curl -s -H \"Referer: https://www.8comic.com/\" \"https://www.8comic.com/search/?key=%E8%A2%AB%E8%BF%BD%E6%94%BE%E7%9A%84%E8%BD%89%E7%94%9F%E9%87%8D%E9%A8%8E%E5%A3%AB%E7%94%A8%E6%B8%B8%E6%88%B2%E7%9F%A5%E8%AD%98%E9%96%8B%E7%84%A1%E9%9B%99\")",
+      "Bash(curl -s -H \"Referer: https://www.8comic.com/\" \"https://www.8comic.com/\")",
+      "Bash(curl -s -H \"Referer: https://www.8comic.com/\" \"https://www.8comic.com/comic/all.html\")",
+      "Bash(curl *)"
     ]
   }
 }
