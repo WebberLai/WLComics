@@ -21,6 +21,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     var shouldShowSearchResults = false
 
+    /// 正在等待搜尋 API 回應時，防止 updateSearchResults 覆蓋結果
+    private var isWaitingForAPISearch = false
+
     var searchController: UISearchController!
 
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
@@ -68,6 +71,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                     self.reloadFavoriteIds()
                     SVProgressHUD.dismiss()
                     self.tableView.reloadData()
+
+                    // 背景從網站分類頁面更新漫畫列表
+                    self.refreshComicsFromWeb()
                 }
             }
         }
@@ -75,6 +81,22 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.title = "漫畫列表"
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
+    }
+
+    /// 背景從網站分類頁面抓取最新漫畫列表，有新增時更新 UI
+    private func refreshComicsFromWeb() {
+        WLComics.sharedInstance().refreshComicsFromWeb { (updatedComics:[Comic]) in
+            DispatchQueue.global(qos: .userInitiated).async {
+                guard updatedComics.count > self.allComics.count else { return }
+                let library = self.buildComicLibrary(from: updatedComics)
+                DispatchQueue.main.async {
+                    self.allComics = updatedComics
+                    self.sortedComicLib = library.sorted
+                    self.comicSectionTitles = library.titles
+                    self.tableView.reloadData()
+                }
+            }
+        }
     }
 
     func reloadFavoriteIds() {
@@ -335,14 +357,15 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     // MARK: - Search Bar
     
     func updateSearchResults(for searchController: UISearchController) {
-        guard let searchString = searchController.searchBar.text else {
+        guard !isWaitingForAPISearch,
+              let searchString = searchController.searchBar.text else {
             return
         }
         filterComics = allComics.filter({ (comic) -> Bool in
             let comicName = comic.getName() as NSString
             return (comicName.range(of: searchString, options: NSString.CompareOptions.caseInsensitive).location) != NSNotFound
         })
-        
+
         self.tableView.reloadData()
     }
     
@@ -352,6 +375,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         shouldShowSearchResults = false
+        isWaitingForAPISearch = false
         self.tableView.reloadData()
         DispatchQueue.main.async {
             guard self.scrollRecordTop.section < self.comicSectionTitles.count,
@@ -379,8 +403,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         searchController.searchBar.resignFirstResponder()
 
         // 呼叫搜尋 API 找更多結果
+        isWaitingForAPISearch = true
         WLComics.sharedInstance().searchComics(keyword: searchString) { (comics:[Comic]) in
             DispatchQueue.main.async {
+                self.isWaitingForAPISearch = false
                 // 合併 API 結果（排除已有的）
                 let existingIds = Set(self.filterComics.map { $0.getId() })
                 let newComics = comics.filter { !existingIds.contains($0.getId()) }
@@ -393,8 +419,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                             self.allComics.append(comic)
                         }
                     }
-                    self.tableView.reloadData()
                 }
+                self.tableView.reloadData()
             }
         }
     }

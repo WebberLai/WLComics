@@ -198,6 +198,163 @@ open class WLComics{
         }
     }
 
+    // MARK: - 從分類頁面更新漫畫列表
+
+    /// 背景爬取網站所有分類頁面，取得最新的完整漫畫列表，合併到 plist 後回傳更新後的全部漫畫
+    open func refreshComicsFromWeb(onUpdated: @escaping ([Comic]) -> Void) {
+        DispatchQueue.global(qos: .utility).async {
+            let baseUrl = "https://www.8comic.com"
+
+            // Step 1: 取得首頁上的所有分類 ID
+            guard let homepageData = self.fetchDataSync(url: baseUrl + "/"),
+                  let homepageHtml = String(data: homepageData, encoding: .utf8) else {
+                onUpdated(self.mAllComics ?? [])
+                return
+            }
+
+            let categoryIds = self.parseCategoryIds(from: homepageHtml)
+            guard !categoryIds.isEmpty else {
+                onUpdated(self.mAllComics ?? [])
+                return
+            }
+
+            // Step 2: 逐一爬取每個分類的所有頁面
+            var allNewComics = [Comic]()
+            var seen = Set<String>()
+
+            for catId in categoryIds {
+                guard let data = self.fetchDataSync(url: "\(baseUrl)/comic/\(catId)-1.html"),
+                      let html = String(data: data, encoding: .utf8) else { continue }
+
+                let maxPage = self.parseMaxPage(from: html, categoryId: catId)
+                self.parseCategoryPageComics(html, seen: &seen, into: &allNewComics)
+
+                var page = 2
+                while page <= maxPage {
+                    if let pageData = self.fetchDataSync(url: "\(baseUrl)/comic/\(catId)-\(page).html"),
+                       let pageHtml = String(data: pageData, encoding: .utf8) {
+                        self.parseCategoryPageComics(pageHtml, seen: &seen, into: &allNewComics)
+                    }
+                    page += 1
+                }
+            }
+
+            // Step 3: 合併到 plist
+            if !allNewComics.isEmpty {
+                self.mergeComicsToPlist(newComics: allNewComics)
+            }
+            onUpdated(self.mAllComics ?? [])
+        }
+    }
+
+    /// 同步抓取 URL 內容
+    private func fetchDataSync(url urlString: String) -> Data? {
+        guard let url = URL(string: urlString) else { return nil }
+        var request = URLRequest(url: url)
+        request.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
+        request.timeoutInterval = 15
+
+        let semaphore = DispatchSemaphore(value: 0)
+        var resultData: Data?
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data, error == nil,
+               let httpResponse = response as? HTTPURLResponse,
+               200...299 ~= httpResponse.statusCode {
+                resultData = data
+            }
+            semaphore.signal()
+        }.resume()
+
+        semaphore.wait()
+        return resultData
+    }
+
+    /// 從首頁 HTML 提取所有分類 ID（如 "4", "u", "65" 等）
+    private func parseCategoryIds(from html: String) -> [String] {
+        var ids = [String]()
+        var seen = Set<String>()
+        let lines = html.components(separatedBy: "\n")
+        for line in lines {
+            var searchStart = line.startIndex
+            while let start = line.range(of: "/comic/", range: searchStart..<line.endIndex),
+                  let end = line.range(of: "-1.html", range: start.upperBound..<line.endIndex) {
+                let catId = String(line[start.upperBound..<end.lowerBound])
+                if !catId.isEmpty && !seen.contains(catId) {
+                    seen.insert(catId)
+                    ids.append(catId)
+                }
+                searchStart = end.upperBound
+            }
+        }
+        return ids
+    }
+
+    /// 從分類頁面的分頁元件解析最大頁數
+    private func parseMaxPage(from html: String, categoryId: String) -> Int {
+        var maxPage = 1
+        let pattern = categoryId + "-"
+        let lines = html.components(separatedBy: "\n")
+        for line in lines {
+            guard line.contains("pager") || line.contains(pattern) else { continue }
+            var searchStart = line.startIndex
+            while let start = line.range(of: pattern, range: searchStart..<line.endIndex) {
+                guard let end = line.range(of: ".html", range: start.upperBound..<line.endIndex) else { break }
+                if let pageNum = Int(line[start.upperBound..<end.lowerBound]) {
+                    maxPage = max(maxPage, pageNum)
+                }
+                searchStart = end.upperBound
+            }
+        }
+        return maxPage
+    }
+
+    /// 解析分類頁面中的漫畫
+    /// 支援三種格式：
+    ///   1. 舊格式：<a href="/html/XXX.html" target="_top">漫畫名</a>
+    ///   2. 舊格式換行：<a href="/html/XXX.html" data-url="XXX" target="_top">漫畫名\n</a>
+    ///   3. 卡片格式：<a href="/html/XXX.html" title="漫畫名" class="comicpic_col6...">
+    private func parseCategoryPageComics(_ html: String, seen: inout Set<String>, into comics: inout [Comic]) {
+        let lines = html.components(separatedBy: "\n")
+        for line in lines {
+            guard line.contains("href=\"/html/") && line.contains(".html\"") else { continue }
+
+            guard let hrefStart = line.range(of: "href=\"/html/"),
+                  let hrefEnd = line.range(of: ".html\"", range: hrefStart.upperBound..<line.endIndex) else { continue }
+            let comicId = String(line[hrefStart.upperBound..<hrefEnd.lowerBound])
+            guard !comicId.isEmpty,
+                  comicId.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil,
+                  !seen.contains(comicId) else { continue }
+
+            var name = ""
+
+            // 優先從 title 屬性取名稱（卡片格式）
+            if let titleStart = line.range(of: "title=\""),
+               let titleEnd = line.range(of: "\"", range: titleStart.upperBound..<line.endIndex) {
+                name = String(line[titleStart.upperBound..<titleEnd.lowerBound])
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+
+            // 否則從最後一個 > 後面取名稱（舊格式）
+            if name.isEmpty, let nameStart = line.range(of: ">", options: .backwards) {
+                name = String(line[nameStart.upperBound...])
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if let tagStart = name.range(of: "<") {
+                    name = String(name[name.startIndex..<tagStart.lowerBound])
+                }
+                name = name.replacingOccurrences(of: " (登入觀看)", with: "")
+            }
+
+            guard !name.isEmpty else { continue }
+
+            seen.insert(comicId)
+            let comic = mR8Comic.generatorFakeComic(comicId, name: name)
+            comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
+            comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
+            comics.append(comic)
+        }
+    }
+
     // MARK: - 集數詳情
 
     open func loadEpisodeDetail(_ episode : Episode, onLoadDetail: @escaping (Episode) -> Void){
