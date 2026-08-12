@@ -46,6 +46,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
         return r
     }
+    private let coverRetryStrategy = DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2))
+
+    // 追蹤進行中的預抓取請求，滑過的 row 才能被正確取消，避免塞滿只有 2 條連線的下載佇列
+    private var activePrefetchers: [URL: ImagePrefetcher] = [:]
 
     // 快取收藏狀態，避免每個 cell 都讀 plist
     private var favoriteIds = Set<String>()
@@ -299,7 +303,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             cell.coverImageView?.kf.setImage(with: url,
                                         placeholder: placeholderImage,
                                         options: [.transition(ImageTransition.fade(1)),
-                                                  .requestModifier(refererModifier)])
+                                                  .requestModifier(refererModifier),
+                                                  .retryStrategy(coverRetryStrategy)])
         } else {
             cell.coverImageView?.image = placeholderImage
         }
@@ -351,7 +356,27 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         let urls = indexPaths.compactMap { comicForIndexPath($0) }
             .compactMap { $0.getSmallIconUrl() }
             .compactMap { URL(string: $0) }
-        ImagePrefetcher(urls: urls, options: [.requestModifier(refererModifier)]).start()
+        for url in urls {
+            guard activePrefetchers[url] == nil else { continue }
+            let prefetcher = ImagePrefetcher(urls: [url],
+                                              options: [.requestModifier(refererModifier),
+                                                        .retryStrategy(coverRetryStrategy)]) { [weak self] _, _, _ in
+                self?.activePrefetchers[url] = nil
+            }
+            activePrefetchers[url] = prefetcher
+            prefetcher.start()
+        }
+    }
+
+    // 滑過的 row 要取消預抓取，避免大量已不需要的請求塞滿下載佇列，讓可見的封面反而逾時
+    func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
+        let urls = indexPaths.compactMap { comicForIndexPath($0) }
+            .compactMap { $0.getSmallIconUrl() }
+            .compactMap { URL(string: $0) }
+        for url in urls {
+            activePrefetchers[url]?.stop()
+            activePrefetchers[url] = nil
+        }
     }
 
     // MARK: - Search Bar

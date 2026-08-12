@@ -97,7 +97,8 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
         if let urlStr = currentComic.getSmallIconUrl(), let url = URL(string: urlStr) {
             cell.imageView?.kf.setImage(with: url,
                                         placeholder: UIImage(named: "comic_place_holder"),
-                                        options: [.transition(ImageTransition.fade(1))])
+                                        options: [.transition(ImageTransition.fade(1)),
+                                                  .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))])
         } else {
             cell.imageView?.image = UIImage(named: "comic_place_holder")
         }

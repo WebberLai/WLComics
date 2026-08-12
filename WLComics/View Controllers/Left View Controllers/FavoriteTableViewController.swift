@@ -241,7 +241,8 @@ class FavoriteTableViewController: UITableViewController {
             cell.coverImageView?.kf.setImage(with: url,
                                              placeholder: UIImage(named: "comic_place_holder"),
                                              options: [.transition(ImageTransition.fade(1)),
-                                                       .requestModifier(modifier)])
+                                                       .requestModifier(modifier),
+                                                       .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))])
         } else {
             cell.coverImageView?.image = UIImage(named: "comic_place_holder")
         }

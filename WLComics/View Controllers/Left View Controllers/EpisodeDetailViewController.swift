@@ -84,7 +84,8 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
         cell.imageView!.kf.setImage(with: url,
                                     placeholder: UIImage(named: "comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1)),
-                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))])
+                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl())),
+                                              .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))])
         return cell
     }
     
