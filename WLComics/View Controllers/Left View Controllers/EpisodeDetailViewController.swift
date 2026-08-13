@@ -77,15 +77,23 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
+        // 重用 cell，避免每次捲動都新建並重新發出縮圖請求
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell")
+            ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell")
         cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")
+
+        // 重用時先取消舊請求，避免離開畫面的縮圖持續佔用連線
+        cell.imageView?.kf.cancelDownloadTask()
+
         guard indexPath.row < pages.count else { return cell }
         let url = URL(string:pages[indexPath.row])
-        cell.imageView!.kf.setImage(with: url,
+        // iPad 上這個清單會與右側閱讀器同時下載，縮圖優先度較低，
+        // 重試次數壓到 1 次以免搶走閱讀器的連線
+        cell.imageView?.kf.setImage(with: url,
                                     placeholder: UIImage(named: "comic_place_holder"),
                                     options: [.transition(ImageTransition.fade(1)),
                                               .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl())),
-                                              .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))])
+                                              .retryStrategy(DelayRetryStrategy(maxRetryCount: 1, retryInterval: .seconds(2)))])
         return cell
     }
     

@@ -48,8 +48,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     }
     private let coverRetryStrategy = DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2))
 
-    // 追蹤進行中的預抓取請求，滑過的 row 才能被正確取消，避免塞滿只有 2 條連線的下載佇列
-    private var activePrefetchers: [URL: ImagePrefetcher] = [:]
+    // 追蹤進行中的預抓取批次，超過上限時停掉最舊的，避免塞滿只有 2 條連線的下載佇列
+    private var inFlightPrefetchers: [(token: UUID, prefetcher: ImagePrefetcher)] = []
+    private let maxInFlightPrefetchBatches = 2
 
     // 快取收藏狀態，避免每個 cell 都讀 plist
     private var favoriteIds = Set<String>()
@@ -181,7 +182,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         if let client = DropboxClientsManager.authorizedClient {
             client.files.listFolder(path: "").response { response, error in
                 if let _ = response {
-                    let fileData = FavoriteComics.getFavoritePlistData()!
+                    guard let fileData = FavoriteComics.getFavoritePlistData() else {
+                        print("Dropbox 上傳略過：本地收藏檔尚未建立")
+                        return
+                    }
                     let _ = client.files.upload(path: "/MyFavoritesComics.plist", mode: .overwrite , input: fileData).response { response, error in
                         if let response = response {
                             print("Dropbox 上傳完成 \(response)")
@@ -298,6 +302,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
         cell.comicNametextLabel.text = comic.getName()
 
+        // 重用時先取消舊請求：setImage 只會讓舊任務失效但不會停止它，
+        // 加上重試策略後，已捲離畫面的請求最久會佔用連線約 2 分鐘
+        cell.coverImageView?.kf.cancelDownloadTask()
+
         // 使用快取的 modifier 和 placeholder，不再每次建立新物件
         if let urlStr = comic.getSmallIconUrl(), let url = URL(string: urlStr) {
             cell.coverImageView?.kf.setImage(with: url,
@@ -356,27 +364,27 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         let urls = indexPaths.compactMap { comicForIndexPath($0) }
             .compactMap { $0.getSmallIconUrl() }
             .compactMap { URL(string: $0) }
-        for url in urls {
-            guard activePrefetchers[url] == nil else { continue }
-            let prefetcher = ImagePrefetcher(urls: [url],
-                                              options: [.requestModifier(refererModifier),
-                                                        .retryStrategy(coverRetryStrategy)]) { [weak self] _, _, _ in
-                self?.activePrefetchers[url] = nil
-            }
-            activePrefetchers[url] = prefetcher
-            prefetcher.start()
-        }
-    }
+        guard !urls.isEmpty else { return }
 
-    // 滑過的 row 要取消預抓取，避免大量已不需要的請求塞滿下載佇列，讓可見的封面反而逾時
-    func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
-        let urls = indexPaths.compactMap { comicForIndexPath($0) }
-            .compactMap { $0.getSmallIconUrl() }
-            .compactMap { URL(string: $0) }
-        for url in urls {
-            activePrefetchers[url]?.stop()
-            activePrefetchers[url] = nil
+        // 每批用一個 ImagePrefetcher，保留 Kingfisher 的併發上限；
+        // 一個 URL 一個 prefetcher 會讓整批立刻全部 resume，塞爆只有 2 條連線的下載池。
+        // 用 token 而非物件比對來移除，避免舊批次的完成回呼誤刪新批次的紀錄。
+        let token = UUID()
+        let prefetcher = ImagePrefetcher(urls: urls,
+                                         options: [.requestModifier(refererModifier),
+                                                   .retryStrategy(coverRetryStrategy)]) { [weak self] _, _, _ in
+            self?.inFlightPrefetchers.removeAll { $0.token == token }
         }
+        // 對齊 httpMaximumConnectionsPerHost，多發的請求只會排隊等到逾時
+        prefetcher.maxConcurrentDownloads = 2
+
+        // 限制同時存在的批次數，捲過頭時停掉最舊的批次，
+        // 避免已離開畫面的預抓取持續佔用連線讓可見封面逾時
+        while inFlightPrefetchers.count >= maxInFlightPrefetchBatches {
+            inFlightPrefetchers.removeFirst().prefetcher.stop()
+        }
+        inFlightPrefetchers.append((token: token, prefetcher: prefetcher))
+        prefetcher.start()
     }
 
     // MARK: - Search Bar

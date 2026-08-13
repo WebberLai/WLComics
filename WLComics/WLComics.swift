@@ -14,7 +14,50 @@ open class WLComics{
     fileprivate static let sInstance : WLComics = WLComics()
     fileprivate let mR8Comic : R8Comic = R8Comic.get()
     fileprivate var mHostMap : [String : String]?
-    fileprivate var mAllComics :[Comic]?
+
+    /// 併發爬取上限。8comic 對大量並發會斷線，同時也避免佔滿執行緒。
+    fileprivate static let maxConcurrentCrawlRequests = 4
+    /// 單一分類最多爬幾頁，避免頁數解析出錯時無限爬下去
+    fileprivate static let maxPagesPerCategory = 50
+
+    /// mAllComics 會被多個背景執行緒讀寫（載入、搜尋、爬取），一律透過這個佇列存取
+    fileprivate let stateQueue = DispatchQueue(label: "com.webberlai.WLComics.state")
+    fileprivate var _mAllComics : [Comic]?
+    /// 與 _mAllComics 同步維護的 id 集合，避免合併時做 O(n×m) 的線性查找
+    fileprivate var _mAllComicIds = Set<String>()
+
+    /// 目前的漫畫列表快照（執行緒安全）
+    fileprivate func allComicsSnapshot() -> [Comic] {
+        return stateQueue.sync { _mAllComics ?? [] }
+    }
+
+    fileprivate func setAllComics(_ comics: [Comic]) {
+        stateQueue.sync {
+            _mAllComics = comics
+            _mAllComicIds = Set(comics.map { $0.getId() })
+        }
+    }
+
+    /// 只加入尚未存在的漫畫，回傳實際新增的筆數
+    @discardableResult
+    fileprivate func appendNewComics(_ comics: [Comic]) -> Int {
+        return stateQueue.sync {
+            if _mAllComics == nil { _mAllComics = [] }
+            var added = 0
+            for comic in comics where !_mAllComicIds.contains(comic.getId()) {
+                _mAllComicIds.insert(comic.getId())
+                // 就地 append，避免每筆都重建整個陣列
+                _mAllComics?.append(comic)
+                added += 1
+            }
+            return added
+        }
+    }
+
+    /// 統一在主執行緒回呼，呼叫端不必自己記得切執行緒
+    fileprivate func deliverOnMain(_ comics: [Comic], to callback: @escaping ([Comic]) -> Void) {
+        DispatchQueue.main.async { callback(comics) }
+    }
 
     init() {
         // 限制同時下載數，避免 8comic 伺服器因並發過多而斷開連線 (Connection reset by peer)
@@ -44,14 +87,14 @@ open class WLComics{
         // 在背景讀取 plist，避免阻塞主線程
         DispatchQueue.global(qos: .userInitiated).async {
             if let cached = self.restoreComicsFromPlist(), !cached.isEmpty {
-                self.mAllComics = cached
-                onLoadedComics(cached)
+                self.setAllComics(cached)
+                self.deliverOnMain(cached, to: onLoadedComics)
             } else {
                 // plist 不存在時才從網路載入
                 self.mR8Comic.getAll { (comics:[Comic]) in
-                    self.mAllComics = comics
+                    self.setAllComics(comics)
                     self.storeComicsToPlist(comics: comics)
-                    onLoadedComics(comics)
+                    self.deliverOnMain(comics, to: onLoadedComics)
                 }
             }
         }
@@ -81,7 +124,7 @@ open class WLComics{
     open func searchComics(keyword: String, _ onLoadedComics: @escaping ([Comic]) -> Void) {
         guard let encoded = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://www.8comic.com/search/?key=\(encoded)") else {
-            onLoadedComics([])
+            deliverOnMain([], to: onLoadedComics)
             return
         }
 
@@ -91,16 +134,16 @@ open class WLComics{
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil,
                   let html = String(data: data, encoding: .utf8) else {
-                onLoadedComics([])
+                self.deliverOnMain([], to: onLoadedComics)
                 return
             }
 
             let comics = self.parseSearchResults(html)
-            // 將搜尋到的新漫畫合併到 plist
+            // 將搜尋到的新漫畫合併到 plist（沒有新資料時不會寫檔）
             if !comics.isEmpty {
                 self.mergeComicsToPlist(newComics: comics)
             }
-            onLoadedComics(comics)
+            self.deliverOnMain(comics, to: onLoadedComics)
         }.resume()
     }
 

@@ -17,8 +17,15 @@ class ComicEpisodesViewController: UIViewController {
     var allEpisodes = Array<Any>() as! [Episode]
     
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
-    
+
     var index = 0
+
+    /// 8comic 會擋掉沒有 Referer 的圖片請求，快取一份避免每個 cell 重建
+    private let refererModifier = AnyModifier { request in
+        var r = request
+        r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
+        return r
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -91,13 +98,21 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell:UITableViewCell=UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell");
+        // 重用 cell，避免每次捲動都新建並重新發出封面請求
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell")
+            ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell")
         let episode = allEpisodes[indexPath.row]
         cell.textLabel?.text = episode.getName()
+
+        // 重用時先取消舊請求，避免已捲離畫面的下載持續佔用連線
+        cell.imageView?.kf.cancelDownloadTask()
+
         if let urlStr = currentComic.getSmallIconUrl(), let url = URL(string: urlStr) {
+            // 8comic 會擋掉沒有 Referer 的請求，缺少這個 modifier 會讓每次重試都必然失敗
             cell.imageView?.kf.setImage(with: url,
                                         placeholder: UIImage(named: "comic_place_holder"),
                                         options: [.transition(ImageTransition.fade(1)),
+                                                  .requestModifier(refererModifier),
                                                   .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))])
         } else {
             cell.imageView?.image = UIImage(named: "comic_place_holder")

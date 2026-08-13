@@ -75,8 +75,10 @@ class FavoriteTableViewController: UITableViewController {
         if let client = DropboxClientsManager.authorizedClient {
             client.files.listFolder(path: "").response { response, error in
                 if let _ = response {
-                    let fileData = FavoriteComics.getFavoritePlistData()!
-                    //let fileData = "testing data example".data(using: String.Encoding.utf8, allowLossyConversion: false)!
+                    guard let fileData = FavoriteComics.getFavoritePlistData() else {
+                        print("Dropbox 上傳略過：本地收藏檔尚未建立")
+                        return
+                    }
                     let _ = client.files.upload(path: "/MyFavoritesComics.plist", mode: .overwrite , input: fileData).response { response, error in
                         if let response = response {
                             print("Dropbox 上傳完成 \(response)")

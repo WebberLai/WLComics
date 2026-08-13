@@ -319,7 +319,6 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     //#pragma mark - UIScrollView delegate
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        print(#function)
         if isRebuildingScrollView { return }
         lastIndex = getCurrentIndex()
         self.invalidateTimer()
@@ -343,7 +342,6 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
 
         if index != lastIndex
         {
-            print("\(#function)")
             currentIndex = index
             if allowCircular
             {
@@ -388,11 +386,12 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         } else {
             currentIndex = index
         }
+        // 滑動換頁後也要更新箭頭按鈕的啟用狀態，否則會停留在上一頁的判斷結果
+        checkButtonsIfNeedsDisable()
         loadVisibleImages()
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        print(#function)
         if isRebuildingScrollView { return }
         if allowCircular && images.count != 0
         {
@@ -505,23 +504,49 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     @IBAction func nextButtonPressed()
     {
         invalidateTimer()
-        currentIndex = currentIndex + 1
-        let convertedIndex = convertIndex()
-        if currentIndex > images.count - 1 {
-            currentIndex = 0
+        guard images.count > 0 else { return }
+
+        if allowCircular {
+            // 循環模式：先捲到尾端的複製頁，再由 scrollViewDidEndScrollingAnimation 接回開頭，
+            // 所以 offsetIndex 要用夾限前的值
+            currentIndex += 1
+            let convertedIndex = convertIndex()
+            if currentIndex > images.count - 1 {
+                currentIndex = 0
+            }
+            adjustContentOffsetFor(index: currentIndex, offsetIndex: convertedIndex, animated: true)
+        } else {
+            // 非循環模式：已在最後一頁就換下一話，與滑動到底的行為一致，不繞回第一頁
+            guard currentIndex < images.count - 1 else {
+                onSwipePastLastPage?()
+                return
+            }
+            currentIndex += 1
+            adjustContentOffsetFor(index: currentIndex, offsetIndex: convertIndex(), animated: true)
         }
-        adjustContentOffsetFor(index: currentIndex, offsetIndex: convertedIndex, animated: true)
     }
-    
+
     @IBAction func previousButtonPressed()
     {
         invalidateTimer()
-        currentIndex = currentIndex - 1
-        let convertedIndex = convertIndex()
-        if currentIndex < 0 {
-            currentIndex = images.count - 1
+        guard images.count > 0 else { return }
+
+        if allowCircular {
+            currentIndex -= 1
+            let convertedIndex = convertIndex()
+            if currentIndex < 0 {
+                currentIndex = images.count - 1
+            }
+            adjustContentOffsetFor(index: currentIndex, offsetIndex: convertedIndex, animated: true)
+        } else {
+            // 非循環模式：已在第一頁就換上一話
+            guard currentIndex > 0 else {
+                onSwipePastFirstPage?()
+                return
+            }
+            currentIndex -= 1
+            adjustContentOffsetFor(index: currentIndex, offsetIndex: convertIndex(), animated: true)
         }
-        adjustContentOffsetFor(index: currentIndex, offsetIndex: convertedIndex, animated: true)
     }
 }
 
