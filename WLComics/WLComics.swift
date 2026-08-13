@@ -214,6 +214,13 @@ open class WLComics{
 
     /// 將新搜尋到的漫畫合併到 plist（不重複）
     fileprivate func mergeComicsToPlist(newComics: [Comic]) {
+        // 快速路徑：記憶體列表已載入且沒有任何新 id 時直接返回，
+        // 不必為了每次搜尋都讀取並解析一萬多筆的 plist
+        let hasNothingNew = stateQueue.sync {
+            _mAllComics != nil && newComics.allSatisfy { _mAllComicIds.contains($0.getId()) }
+        }
+        guard !hasNothingNew else { return }
+
         guard let existingArray = SwiftyPlistManager.shared.fetchValue(for: "comics", fromPlistWithName: "AllComics") as? [[String: String]] else { return }
 
         var existingIds = Set(existingArray.compactMap { $0["comic_id"] })
@@ -227,18 +234,11 @@ open class WLComics{
             }
         }
 
-        if updatedArray.count > existingArray.count {
-            SwiftyPlistManager.shared.save(updatedArray, forKey: "comics", toPlistWithName: "AllComics") { _ in }
-            // 更新記憶體中的列表
-            if var all = mAllComics {
-                for comic in newComics {
-                    if !all.contains(where: { $0.getId() == comic.getId() }) {
-                        all.append(comic)
-                    }
-                }
-                mAllComics = all
-            }
-        }
+        guard updatedArray.count > existingArray.count else { return }
+
+        SwiftyPlistManager.shared.save(updatedArray, forKey: "comics", toPlistWithName: "AllComics") { _ in }
+        // 更新記憶體中的列表：改用 id 集合比對，取代原本的 O(n×m) 線性查找
+        appendNewComics(newComics)
     }
 
     // MARK: - 從分類頁面更新漫畫列表
@@ -251,42 +251,63 @@ open class WLComics{
             // Step 1: 取得首頁上的所有分類 ID
             guard let homepageData = self.fetchDataSync(url: baseUrl + "/"),
                   let homepageHtml = String(data: homepageData, encoding: .utf8) else {
-                onUpdated(self.mAllComics ?? [])
+                self.deliverOnMain(self.allComicsSnapshot(), to: onUpdated)
                 return
             }
 
             let categoryIds = self.parseCategoryIds(from: homepageHtml)
             guard !categoryIds.isEmpty else {
-                onUpdated(self.mAllComics ?? [])
+                self.deliverOnMain(self.allComicsSnapshot(), to: onUpdated)
                 return
             }
 
-            // Step 2: 逐一爬取每個分類的所有頁面
+            // 原本是完全序列的爬取（分類 × 分頁，每個請求最久 15 秒），
+            // 分類數乘上分頁數後可能跑上好幾分鐘。改成兩階段的有限併發。
+            let queue = OperationQueue()
+            queue.maxConcurrentOperationCount = WLComics.maxConcurrentCrawlRequests
+
+            let lock = NSLock()
             var allNewComics = [Comic]()
             var seen = Set<String>()
+            var pendingPages = [(catId: String, page: Int)]()
 
+            // Step 2a: 併發抓每個分類的第一頁，同時取得該分類的總頁數
             for catId in categoryIds {
-                guard let data = self.fetchDataSync(url: "\(baseUrl)/comic/\(catId)-1.html"),
-                      let html = String(data: data, encoding: .utf8) else { continue }
+                queue.addOperation {
+                    guard let data = self.fetchDataSync(url: "\(baseUrl)/comic/\(catId)-1.html"),
+                          let html = String(data: data, encoding: .utf8) else { return }
 
-                let maxPage = self.parseMaxPage(from: html, categoryId: catId)
-                self.parseCategoryPageComics(html, seen: &seen, into: &allNewComics)
+                    // 夾住頁數上限，避免分頁解析出錯時無限爬下去
+                    let maxPage = min(self.parseMaxPage(from: html, categoryId: catId),
+                                      WLComics.maxPagesPerCategory)
 
-                var page = 2
-                while page <= maxPage {
-                    if let pageData = self.fetchDataSync(url: "\(baseUrl)/comic/\(catId)-\(page).html"),
-                       let pageHtml = String(data: pageData, encoding: .utf8) {
-                        self.parseCategoryPageComics(pageHtml, seen: &seen, into: &allNewComics)
+                    lock.lock()
+                    self.parseCategoryPageComics(html, seen: &seen, into: &allNewComics)
+                    if maxPage >= 2 {
+                        pendingPages.append(contentsOf: (2...maxPage).map { (catId: catId, page: $0) })
                     }
-                    page += 1
+                    lock.unlock()
                 }
             }
+            queue.waitUntilAllOperationsAreFinished()
+
+            // Step 2b: 併發抓剩下的所有分頁
+            for target in pendingPages {
+                queue.addOperation {
+                    guard let data = self.fetchDataSync(url: "\(baseUrl)/comic/\(target.catId)-\(target.page).html"),
+                          let html = String(data: data, encoding: .utf8) else { return }
+                    lock.lock()
+                    self.parseCategoryPageComics(html, seen: &seen, into: &allNewComics)
+                    lock.unlock()
+                }
+            }
+            queue.waitUntilAllOperationsAreFinished()
 
             // Step 3: 合併到 plist
             if !allNewComics.isEmpty {
                 self.mergeComicsToPlist(newComics: allNewComics)
             }
-            onUpdated(self.mAllComics ?? [])
+            self.deliverOnMain(self.allComicsSnapshot(), to: onUpdated)
         }
     }
 
@@ -298,18 +319,30 @@ open class WLComics{
         request.timeoutInterval = 15
 
         let semaphore = DispatchSemaphore(value: 0)
+        // callback 與呼叫端在不同執行緒，用 lock 保護寫入
+        let resultLock = NSLock()
         var resultData: Data?
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data, error == nil,
                let httpResponse = response as? HTTPURLResponse,
                200...299 ~= httpResponse.statusCode {
+                resultLock.lock()
                 resultData = data
+                resultLock.unlock()
             }
             semaphore.signal()
-        }.resume()
+        }
+        task.resume()
 
-        semaphore.wait()
+        // 加上逾時保險：callback 若因故沒被呼叫，不會讓這條執行緒永遠卡住
+        if semaphore.wait(timeout: .now() + request.timeoutInterval + 5) == .timedOut {
+            task.cancel()
+            return nil
+        }
+
+        resultLock.lock()
+        defer { resultLock.unlock() }
         return resultData
     }
 

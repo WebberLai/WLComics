@@ -211,26 +211,21 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        print("[DEBUG] prepare segue=\(segue.identifier ?? "nil"), selectIntexPath=\(selectIntexPath)")
-        if segue.identifier == "showEpisodes" {
-            if shouldShowSearchResults {
-                print("[DEBUG] search mode: row=\(selectIntexPath.row), filterComics.count=\(filterComics.count)")
-                guard selectIntexPath.row < filterComics.count else { return }
-                currentComic = filterComics[selectIntexPath.row]
-            }
-            else {
-                print("[DEBUG] normal mode: section=\(selectIntexPath.section), comicSectionTitles.count=\(comicSectionTitles.count)")
-                guard selectIntexPath.section < comicSectionTitles.count,
-                      let comics = self.sortedComicLib[comicSectionTitles[selectIntexPath.section]],
-                      selectIntexPath.row < comics.count else { return }
-                print("[DEBUG] comics.count=\(comics.count), row=\(selectIntexPath.row)")
-                currentComic = comics[selectIntexPath.row]
-            }
-            let comicEpisodesViewController = segue.destination as! ComicEpisodesViewController
-            comicEpisodesViewController.currentComic = currentComic
-            comicEpisodesViewController.title = currentComic.getName()
-            print("[DEBUG] navigate to episodes: \(currentComic.getName())")
+        guard segue.identifier == "showEpisodes",
+              let comicEpisodesViewController = segue.destination as? ComicEpisodesViewController else { return }
+
+        if shouldShowSearchResults {
+            guard selectIntexPath.row < filterComics.count else { return }
+            currentComic = filterComics[selectIntexPath.row]
         }
+        else {
+            guard selectIntexPath.section < comicSectionTitles.count,
+                  let comics = self.sortedComicLib[comicSectionTitles[selectIntexPath.section]],
+                  selectIntexPath.row < comics.count else { return }
+            currentComic = comics[selectIntexPath.row]
+        }
+        comicEpisodesViewController.currentComic = currentComic
+        comicEpisodesViewController.title = currentComic.getName()
     }
 
     // MARK: - Table View
