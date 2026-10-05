@@ -34,15 +34,39 @@ class EpisodeDetailViewController: UIViewController {
             detailViewController?.imgSlider.currentIndex = 0
             detailViewController?.delegate = self
         }
-        WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
+        self.tableView.tableHeaderView = nil
+        loadEpisode(at: episodeIndex)
+    }
+
+    /// 縮圖用：降採樣到 cell 大小、低下載優先度，避免搶走右側閱讀器的連線
+    private lazy var thumbnailOptions: KingfisherOptionsInfo = [
+        .transition(ImageTransition.fade(1)),
+        .processor(DownsamplingImageProcessor(size: CGSize(width: 116, height: 116))),
+        .scaleFactor(UIScreen.main.scale),
+        .cacheOriginalImage,
+        .downloadPriority(URLSessionTask.lowPriority),
+        // 重試次數壓到 1 次以免搶走閱讀器的連線
+        .retryStrategy(DelayRetryStrategy(maxRetryCount: 1, retryInterval: .seconds(2)))
+    ]
+
+    /// 載入指定集數並同步更新左側縮圖列表與右側閱讀器
+    private func loadEpisode(at index: Int) {
+        guard index >= 0 && index < allEpisodes.count else { return }
+        episodeIndex = index
+        currentEpisode = allEpisodes[index]
+        title = currentEpisode.getName()
+        WLComics.sharedInstance().loadEpisodeDetail(currentEpisode, onLoadDetail: { [weak self] (episode) in
             episode.setUpPages()
-            self.pages = episode.getImageUrlList()
-            self.detailViewController?.updateEpisode(url: episode.getUrl(), images: self.pages)
+            let pages = episode.getImageUrlList()
             DispatchQueue.main.async {
+                // 連續切換集數時，較早發出的請求可能較晚回來，丟掉過期結果；
+                // pages 也只在 main queue 寫入，避免和 tableView 讀取產生 data race
+                guard let self = self, self.episodeIndex == index else { return }
+                self.pages = pages
                 self.tableView.reloadData()
+                self.detailViewController?.updateEpisode(url: episode.getUrl(), images: pages)
             }
         })
-        self.tableView.tableHeaderView = nil
     }
 
     override func didReceiveMemoryWarning() {
@@ -87,13 +111,10 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
 
         guard indexPath.row < pages.count else { return cell }
         let url = URL(string:pages[indexPath.row])
-        // iPad 上這個清單會與右側閱讀器同時下載，縮圖優先度較低，
-        // 重試次數壓到 1 次以免搶走閱讀器的連線
+        // iPad 上這個清單會與右側閱讀器同時下載，縮圖優先度較低
         cell.imageView?.kf.setImage(with: url,
                                     placeholder: UIImage(named: "comic_place_holder"),
-                                    options: [.transition(ImageTransition.fade(1)),
-                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl())),
-                                              .retryStrategy(DelayRetryStrategy(maxRetryCount: 1, retryInterval: .seconds(2)))])
+                                    options: thumbnailOptions + [.requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(currentEpisode.getUrl()))])
         return cell
     }
     
@@ -106,37 +127,13 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func showNextEpisode() {
-        if episodeIndex < allEpisodes.count-1 {
-            episodeIndex += 1
-            self.currentEpisode = self.allEpisodes[episodeIndex]
-            detailViewController?.imgSlider.currentIndex = 0
-            WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
-                episode.setUpPages()
-                self.pages = episode.getImageUrlList()
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                    self.title = self.currentEpisode.getName()
-                    self.detailViewController?.updateEpisode(url: episode.getUrl(), images: self.pages)
-                }
-            })
-        }
+        guard episodeIndex < allEpisodes.count - 1 else { return }
+        loadEpisode(at: episodeIndex + 1)
     }
 
     func showPreviousEpisode() {
-        if episodeIndex > 0{
-            episodeIndex -= 1
-            self.currentEpisode = self.allEpisodes[episodeIndex]
-            detailViewController?.imgSlider.currentIndex = 0
-            WLComics.sharedInstance().loadEpisodeDetail(self.currentEpisode, onLoadDetail: { (episode) in
-                episode.setUpPages()
-                self.pages = episode.getImageUrlList()
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                    self.title = self.currentEpisode.getName()
-                    self.detailViewController?.updateEpisode(url: episode.getUrl(), images: self.pages)
-                }
-            })
-        }
+        guard episodeIndex > 0 else { return }
+        loadEpisode(at: episodeIndex - 1)
     }
     
 }

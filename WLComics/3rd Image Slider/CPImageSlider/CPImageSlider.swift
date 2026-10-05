@@ -225,53 +225,71 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     /// 避免 contentSize 變動時 scroll view 觸發的 callback 覆蓋 currentIndex
     private var isRebuildingScrollView = false
 
+    /// 超出當前頁前後幾頁的圖片會被釋放，避免讀到後面時記憶體一路累積
+    private let keepRange = 4
+
+    private let retryStrategy = DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2))
+
+    /// 某一頁圖片對應到哪些 imageView（循環模式的首尾複製頁也要一起處理）
+    private func viewIndices(forImageIndex imageIndex: Int) -> [Int]
+    {
+        guard allowCircular else { return [imageIndex] }
+        var indices = [imageIndex + 1]
+        // 第 0 個 view 是最後一頁的複製、最後一個 view 是第一頁的複製
+        if imageIndex == images.count - 1 { indices.append(0) }
+        if imageIndex == 0 { indices.append(images.count + 1) }
+        return indices
+    }
+
     func loadVisibleImages()
     {
         guard images.count > 0 else { return }
         guard let referer = episodeUrl else { return }
 
-        let modifier = WLComics.sharedInstance().buildDownloadEpisodeHeader(referer)
-        let options: KingfisherOptionsInfo = [.transition(ImageTransition.fade(1)),
-                                              .requestModifier(modifier),
-                                              .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))]
+        releaseFarImages()
+
+        var options: KingfisherOptionsInfo = [.transition(ImageTransition.fade(1)),
+                                              .requestModifier(WLComics.sharedInstance().buildDownloadEpisodeHeader(referer)),
+                                              .retryStrategy(retryStrategy),
+                                              // 原圖也存進快取，讓 iPad 左側縮圖可以共用，不必重新下載
+                                              .cacheOriginalImage]
+        // 依畫面大小降採樣，避免每頁都以原尺寸解碼常駐記憶體
+        let side = max(bounds.width, bounds.height)
+        if side > 0 {
+            options.append(.processor(DownsamplingImageProcessor(size: CGSize(width: side, height: side))))
+            options.append(.scaleFactor(UIScreen.main.scale))
+        }
         let placeholder = UIImage(named: "comic_place_holder")
 
-        let start = max(0, currentIndex - prefetchRange)
-        let end = min(images.count - 1, currentIndex + prefetchRange)
+        // 下載連線只有 2 條，當前頁要排第一個，接著往後讀的方向，最後才是前面的頁
+        var order = [currentIndex]
+        for offset in 1...prefetchRange { order.append(currentIndex + offset) }
+        for offset in 1...prefetchRange { order.append(currentIndex - offset) }
 
-        for imageIndex in start...end {
+        for imageIndex in order where imageIndex >= 0 && imageIndex < images.count {
             if loadedIndices.contains(imageIndex) { continue }
+            guard let url = URL(string: images[imageIndex]) else { continue }
             loadedIndices.insert(imageIndex)
 
-            if allowCircular {
-                let viewIndex = imageIndex + 1
-                guard viewIndex < imageViewArray.count else { continue }
+            for viewIndex in viewIndices(forImageIndex: imageIndex) where viewIndex < imageViewArray.count {
+                imageViewArray[viewIndex].kf.setImage(with: url, placeholder: placeholder, options: options) { [weak self] result in
+                    if case .failure = result { self?.loadedIndices.remove(imageIndex) }
+                }
+            }
+        }
+    }
+
+    /// 釋放離當前頁太遠的圖片並取消其下載；之後滑回來會從 Kingfisher 快取快速取回
+    private func releaseFarImages()
+    {
+        let placeholder = UIImage(named: "comic_place_holder")
+        let farIndices = loadedIndices.filter { abs($0 - currentIndex) > keepRange }
+        for imageIndex in farIndices {
+            loadedIndices.remove(imageIndex)
+            for viewIndex in viewIndices(forImageIndex: imageIndex) where viewIndex < imageViewArray.count {
                 let imageV = imageViewArray[viewIndex]
-                if let url = URL(string: images[imageIndex]) {
-                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options) { [weak self] result in
-                        if case .failure = result { self?.loadedIndices.remove(imageIndex) }
-                    }
-                }
-                // 循環模式的首尾複製頁
-                if imageIndex == 0 {
-                    if let url = URL(string: images.last!) {
-                        imageViewArray[0].kf.setImage(with: url, placeholder: placeholder, options: options)
-                    }
-                }
-                if imageIndex == images.count - 1 {
-                    let lastViewIndex = images.count + 1
-                    if lastViewIndex < imageViewArray.count, let url = URL(string: images.first!) {
-                        imageViewArray[lastViewIndex].kf.setImage(with: url, placeholder: placeholder, options: options)
-                    }
-                }
-            } else {
-                guard imageIndex < imageViewArray.count else { continue }
-                let imageV = imageViewArray[imageIndex]
-                if let url = URL(string: images[imageIndex]) {
-                    imageV.kf.setImage(with: url, placeholder: placeholder, options: options) { [weak self] result in
-                        if case .failure = result { self?.loadedIndices.remove(imageIndex) }
-                    }
-                }
+                imageV.kf.cancelDownloadTask()
+                imageV.image = placeholder
             }
         }
     }

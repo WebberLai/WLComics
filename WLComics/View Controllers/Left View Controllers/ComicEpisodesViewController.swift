@@ -69,16 +69,8 @@ class ComicEpisodesViewController: UIViewController {
 
             // 傳入所有集數和當前 index，讓 DetailViewController 能自動切換上下話
             pageDetailViewController.allEpisodes = self.allEpisodes
-            pageDetailViewController.episodeIndex = index
-
-            let episode = allEpisodes[index]
-            pageDetailViewController.title = episode.getName()
-
-            WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
-                episode.setUpPages()
-                let pages = episode.getImageUrlList()
-                pageDetailViewController.updateEpisode(url: episode.getUrl(), images: pages)
-            })
+            // 交給 DetailViewController 載入，它會丟掉使用者已切走後才回來的過期結果
+            pageDetailViewController.loadEpisode(at: index)
         }
     }
 }

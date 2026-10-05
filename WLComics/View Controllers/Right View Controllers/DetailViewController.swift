@@ -47,9 +47,12 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         if UIDevice.current.model.description == "iPhone"{
             navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .cancel , target: self, action: #selector(close))
         }
-        NotificationCenter.default.addObserver(forName:Notification.Name(rawValue:"BLEClickNotification"),
-                                               object:nil, queue:nil,
-                                               using:catchNotification(notification:))
+        // 用 selector 版本：不會強引用 self，VC 釋放時系統自動移除，
+        // 避免關掉閱讀器後舊的 VC 還在背景回應方向鍵
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(catchNotification(notification:)),
+                                               name: Notification.Name(rawValue:"BLEClickNotification"),
+                                               object: nil)
 
         // 滑動超過邊界時自動切換上下話
         imgSlider.onSwipePastLastPage = { [weak self] in
@@ -69,8 +72,7 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         }
         // iPhone 模式自行處理
         guard episodeIndex < allEpisodes.count - 1 else { return }
-        episodeIndex += 1
-        loadEpisode(at: episodeIndex)
+        loadEpisode(at: episodeIndex + 1)
     }
 
     /// iPhone 模式下載入上一話
@@ -80,22 +82,27 @@ class DetailViewController: UIViewController,CPSliderDelegate{
             return
         }
         guard episodeIndex > 0 else { return }
-        episodeIndex -= 1
-        loadEpisode(at: episodeIndex)
+        loadEpisode(at: episodeIndex - 1)
     }
 
-    private func loadEpisode(at index: Int) {
+    /// 載入指定集數。可在 view 載入前呼叫（例如 prepare(for:segue:)），畫面更新一律在 main queue
+    func loadEpisode(at index: Int) {
+        guard index >= 0 && index < allEpisodes.count else { return }
+        episodeIndex = index
         let episode = allEpisodes[index]
-        imgSlider.currentIndex = 0
         self.title = episode.getName()
-        WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { (episode) in
+        WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { [weak self] (episode) in
             episode.setUpPages()
             let pages = episode.getImageUrlList()
-            self.updateEpisode(url: episode.getUrl(), images: pages)
+            DispatchQueue.main.async {
+                // 連續切換集數時，較早發出的請求可能較晚回來，丟掉過期結果
+                guard let self = self, self.episodeIndex == index else { return }
+                self.updateEpisode(url: episode.getUrl(), images: pages)
+            }
         })
     }
-    
-    func catchNotification(notification:Notification) -> Void {
+
+    @objc func catchNotification(notification:Notification) -> Void {
         guard let userInfo = notification.userInfo,
             let action  = userInfo["action"] as? String else {
                 print("不支援的鍵盤指令")
