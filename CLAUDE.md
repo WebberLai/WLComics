@@ -38,6 +38,7 @@ TabBarController
 - **`episodeUrl` must be set before `images`**: use `DetailViewController.updateEpisode(url:images:)` to set both atomically on main queue
 - **Non-circular mode** (`allowCircular = false`): swipe past last/first page triggers `onSwipePastLastPage`/`onSwipePastFirstPage` callbacks for episode navigation
 - When switching episodes, call `cancelAllDownloads()` before setting new images
+- **Spread mode** (`isSpreadMode`, non-circular only): two pages per screen, earlier page on the right (manga order). `currentIndex` stays a page index aligned to the spread's first page; scroll offsets are in spreads. `DetailViewController` enables it only when `isiOSAppOnMac` and the slider is landscape
 
 ### Data Flow for Comic Reading
 

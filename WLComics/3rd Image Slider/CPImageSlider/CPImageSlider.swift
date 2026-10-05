@@ -53,6 +53,43 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
 
     // lazy loading：預先載入當前頁面前後各幾頁
     private let prefetchRange = 2
+
+    /// 雙頁（跨頁）模式：一個畫面並排兩頁，右邊是前一頁、左邊是後一頁（日漫順序）。
+    /// 只支援非循環模式；currentIndex 仍是頁碼，雙頁時固定為該組的第一頁（偶數）
+    var isSpreadMode : Bool = false {
+        didSet {
+            guard oldValue != isSpreadMode else { return }
+            addImagesOnScrollView()
+        }
+    }
+
+    /// 一個畫面（scroll view 的一格）放幾頁
+    var pagesPerSpread : Int {
+        return (isSpreadMode && !allowCircular) ? 2 : 1
+    }
+
+    /// scroll view 一共有幾格（不含循環模式首尾的複製頁）
+    private var spreadCount : Int {
+        return (images.count + pagesPerSpread - 1) / pagesPerSpread
+    }
+
+    /// 第 index 個 imageView 在 scroll view 中的位置
+    private func frameForImageView(at index: Int) -> CGRect
+    {
+        let width = bounds.width
+        guard pagesPerSpread == 2 else {
+            return CGRect(x: CGFloat(index)*width, y: 0, width: width, height: bounds.height)
+        }
+        let spreadX = CGFloat(index / 2) * width
+        // 最後一頁落單時佔滿整格，置中顯示
+        if index % 2 == 0 && index == images.count - 1 {
+            return CGRect(x: spreadX, y: 0, width: width, height: bounds.height)
+        }
+        let half = width / 2
+        // 前一頁（偶數）在右半邊，後一頁在左半邊
+        let x = index % 2 == 0 ? spreadX + half : spreadX
+        return CGRect(x: x, y: 0, width: half, height: bounds.height)
+    }
     
     var enableSwipe : Bool = false{
         didSet{
@@ -94,12 +131,11 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        for index in 0..<myScrollView.subviews.count
+        for (index, imageV) in imageViewArray.enumerated()
         {
-            let sub = myScrollView.subviews[index]
-            sub.frame = CGRect(x: CGFloat(index)*bounds.width, y: 0, width: bounds.width, height: bounds.height)
+            imageV.frame = frameForImageView(at: index)
         }
-        var count = images.count
+        var count = spreadCount
         if allowCircular
         {
             count += 2
@@ -116,7 +152,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         }
         else
         {
-            return currentIndex
+            return currentIndex / pagesPerSpread
         }
     }
     
@@ -178,7 +214,8 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         // 先鎖住目標 index，並停止任何進行中的減速動畫，
         // 避免接下來修改 contentSize 時 scroll view clamp offset
         // 觸發 delegate callback，把 currentIndex 改成舊的最後一頁
-        let targetIndex = currentIndex
+        // 雙頁模式下對齊到該組的第一頁
+        let targetIndex = currentIndex - currentIndex % pagesPerSpread
         isRebuildingScrollView = true
         myScrollView.setContentOffset(myScrollView.contentOffset, animated: false)
 
@@ -186,6 +223,8 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         {
             sub.removeFromSuperview()
         }
+        // 所有 imageView 都會被重設成 placeholder，已載入的紀錄也要一起清掉
+        loadedIndices.removeAll()
         if images.count == 0
         {
             isRebuildingScrollView = false
@@ -200,7 +239,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         for index in 0..<count
         {
             let imageV = getImageView(index: index)
-            imageV.frame = CGRect(x: CGFloat(index)*bounds.width, y: 0, width: bounds.width, height: bounds.height)
+            imageV.frame = frameForImageView(at: index)
             // 先設定 placeholder，實際圖片由 loadVisibleImages 按需載入
             imageV.image = placeholder
             myScrollView.addSubview(imageV)
@@ -209,7 +248,8 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         if count < imageViewArray.count {
             imageViewArray.removeSubrange(count..<imageViewArray.count)
         }
-        myScrollView.contentSize = CGSize(width: bounds.width*CGFloat(count), height: bounds.height)
+        let slotCount = allowCircular ? count : spreadCount
+        myScrollView.contentSize = CGSize(width: bounds.width*CGFloat(slotCount), height: bounds.height)
         currentIndex = targetIndex
         adjustContentOffsetFor(index: targetIndex, offsetIndex: convertIndex(), animated: false)
         isRebuildingScrollView = false
@@ -262,9 +302,12 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         let placeholder = UIImage(named: "comic_place_holder")
 
         // 下載連線只有 2 條，當前頁要排第一個，接著往後讀的方向，最後才是前面的頁
-        var order = [currentIndex]
-        for offset in 1...prefetchRange { order.append(currentIndex + offset) }
-        for offset in 1...prefetchRange { order.append(currentIndex - offset) }
+        // 雙頁模式下當前畫面有兩頁，預載範圍也以「組」為單位放大
+        let pps = pagesPerSpread
+        let span = prefetchRange * pps
+        var order = Array(currentIndex..<(currentIndex + pps))
+        for offset in 0..<span { order.append(currentIndex + pps + offset) }
+        for offset in 1...span { order.append(currentIndex - offset) }
 
         for imageIndex in order where imageIndex >= 0 && imageIndex < images.count {
             if loadedIndices.contains(imageIndex) { continue }
@@ -283,7 +326,8 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     private func releaseFarImages()
     {
         let placeholder = UIImage(named: "comic_place_holder")
-        let farIndices = loadedIndices.filter { abs($0 - currentIndex) > keepRange }
+        let range = keepRange * pagesPerSpread
+        let farIndices = loadedIndices.filter { abs($0 - currentIndex) > range }
         for imageIndex in farIndices {
             loadedIndices.remove(imageIndex)
             for viewIndex in viewIndices(forImageIndex: imageIndex) where viewIndex < imageViewArray.count {
@@ -349,7 +393,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         // 非循環模式：在邊界頁面滑動時，UIScrollView 會 clamp offset 導致 index == lastIndex
         // 所以需要在 index != lastIndex 判斷之外額外檢查邊界滑動
         if !allowCircular && index == lastIndex && images.count > 0 {
-            if currentIndex == images.count - 1 && velocity.x > 0 {
+            if isOnLastSpread && velocity.x > 0 {
                 onSwipePastLastPage?()
                 return
             } else if currentIndex == 0 && velocity.x < 0 {
@@ -374,17 +418,21 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
             else
             {
                 // 非循環模式：滑過最後一頁往右 → 下一話，滑過第一頁往左 → 上一話
-                if currentIndex >= images.count && velocity.x > 0 {
-                    currentIndex = images.count - 1
-                    targetContentOffset.pointee.x = getActualOffsetFor(index: currentIndex)
+                if index >= spreadCount && velocity.x > 0 {
+                    currentIndex = (spreadCount - 1) * pagesPerSpread
+                    targetContentOffset.pointee.x = getActualOffsetFor(index: spreadCount - 1)
                     onSwipePastLastPage?()
                     return
-                } else if currentIndex < 0 && velocity.x < 0 {
+                } else if index < 0 && velocity.x < 0 {
                     currentIndex = 0
                     targetContentOffset.pointee.x = 0
                     onSwipePastFirstPage?()
                     return
                 }
+                let slot = min(max(index, 0), max(spreadCount - 1, 0))
+                currentIndex = slot * pagesPerSpread
+                adjustContentOffsetFor(index: currentIndex, offsetIndex: slot, animated: true)
+                return
             }
             adjustContentOffsetFor(index: currentIndex, offsetIndex: index, animated: true)
         }
@@ -402,7 +450,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
             if currentIndex < 0 { currentIndex = images.count - 1 }
             else if currentIndex > images.count - 1 { currentIndex = 0 }
         } else {
-            currentIndex = index
+            currentIndex = min(max(index, 0), max(spreadCount - 1, 0)) * pagesPerSpread
         }
         // 滑動換頁後也要更新箭頭按鈕的啟用狀態，否則會停留在上一頁的判斷結果
         checkButtonsIfNeedsDisable()
@@ -490,6 +538,11 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         }
     }
     
+    /// 目前是否停在最後一頁（雙頁模式下是最後一組）
+    private var isOnLastSpread : Bool {
+        return currentIndex + pagesPerSpread > images.count - 1
+    }
+
     private func checkButtonsIfNeedsDisable()
     {
         checkIfPrevNeedsDisable()
@@ -498,7 +551,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     
     private func checkIfNextNeedsDisable()
     {
-        if !allowCircular && currentIndex == images.count-1  {
+        if !allowCircular && isOnLastSpread  {
             nextArrowButton.isEnabled = false
         }
         else
@@ -535,11 +588,11 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
             adjustContentOffsetFor(index: currentIndex, offsetIndex: convertedIndex, animated: true)
         } else {
             // 非循環模式：已在最後一頁就換下一話，與滑動到底的行為一致，不繞回第一頁
-            guard currentIndex < images.count - 1 else {
+            guard !isOnLastSpread else {
                 onSwipePastLastPage?()
                 return
             }
-            currentIndex += 1
+            currentIndex += pagesPerSpread
             adjustContentOffsetFor(index: currentIndex, offsetIndex: convertIndex(), animated: true)
         }
     }
@@ -562,7 +615,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
                 onSwipePastFirstPage?()
                 return
             }
-            currentIndex -= 1
+            currentIndex = max(currentIndex - pagesPerSpread, 0)
             adjustContentOffsetFor(index: currentIndex, offsetIndex: convertIndex(), animated: true)
         }
     }

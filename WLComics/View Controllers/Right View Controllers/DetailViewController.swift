@@ -63,6 +63,13 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Mac 上視窗為橫向時改用雙頁閱讀；iPad / iPhone 維持單頁
+        let isLandscape = imgSlider.bounds.width > imgSlider.bounds.height
+        imgSlider.isSpreadMode = ProcessInfo.processInfo.isiOSAppOnMac && isLandscape
+    }
+
     /// iPhone 模式下載入下一話
     private func loadNextEpisode() {
         // iPad 模式透過 delegate 處理
@@ -114,23 +121,12 @@ class DetailViewController: UIViewController,CPSliderDelegate{
             return
         }
 
-        var pageIndex = imgSlider.currentIndex
-
+        // 翻到最後／第一頁時，slider 會透過 onSwipePastLastPage / onSwipePastFirstPage 換話，
+        // 雙頁模式下也會自動一次翻兩頁
         if action == UIKeyInputRightArrow {
-            pageIndex += 1
-            if pageIndex < imgSlider.images.count {
-                imgSlider.nextButtonPressed()
-            } else if pageIndex == imgSlider.images.count {
-                loadNextEpisode()
-            }
+            imgSlider.nextButtonPressed()
         } else if action == UIKeyInputLeftArrow {
-            pageIndex -= 1
-            if pageIndex < 0 {
-                pageIndex = 0
-                loadPreviousEpisode()
-            } else {
-                imgSlider.previousButtonPressed()
-            }
+            imgSlider.previousButtonPressed()
         }
     }
     
