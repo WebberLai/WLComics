@@ -81,6 +81,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         }
 
         self.title = "漫畫列表"
+        // storyboard 裡寫死白底，改用系統顏色才會跟著深色模式變
+        tableView.backgroundColor = .systemBackground
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
         // iCloud 收到其他裝置的收藏變動時更新愛心狀態
@@ -240,8 +242,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
-        header.contentView.backgroundColor = UIColor.white
-        header.textLabel?.textColor = UIColor.darkGray
+        header.contentView.backgroundColor = .secondarySystemBackground
+        header.textLabel?.textColor = .secondaryLabel
         header.textLabel?.font = UIFont.boldSystemFont(ofSize: 15)
     }
 

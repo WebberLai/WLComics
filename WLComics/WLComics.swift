@@ -105,7 +105,7 @@ open class WLComics{
               !array.isEmpty else { return nil }
         return array.compactMap { dict -> Comic? in
             guard let id = dict["comic_id"], let name = dict["name"] else { return nil }
-            let comic = mR8Comic.generatorFakeComic(id, name: name)
+            let comic = mR8Comic.generatorFakeComic(id, name: name.htmlEntityDecoded)
             comic.setIconUrl(mR8Comic.getComicIconUrl(id))
             comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(id))
             return comic
@@ -181,7 +181,7 @@ open class WLComics{
                             if !name.isEmpty {
                                 // 舊格式：名稱在同一行
                                 seen.insert(comicId)
-                                let comic = mR8Comic.generatorFakeComic(comicId, name: name)
+                                let comic = mR8Comic.generatorFakeComic(comicId, name: name.htmlEntityDecoded)
                                 comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
                                 comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
                                 comics.append(comic)
@@ -201,7 +201,7 @@ open class WLComics{
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 if !name.isEmpty {
                     seen.insert(comicId)
-                    let comic = mR8Comic.generatorFakeComic(comicId, name: name)
+                    let comic = mR8Comic.generatorFakeComic(comicId, name: name.htmlEntityDecoded)
                     comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
                     comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
                     comics.append(comic)
@@ -424,7 +424,7 @@ open class WLComics{
             guard !name.isEmpty else { continue }
 
             seen.insert(comicId)
-            let comic = mR8Comic.generatorFakeComic(comicId, name: name)
+            let comic = mR8Comic.generatorFakeComic(comicId, name: name.htmlEntityDecoded)
             comic.setIconUrl(mR8Comic.getComicIconUrl(comicId))
             comic.setSmallIconUrl(mR8Comic.getComicSmallIconUrl(comicId))
             comics.append(comic)
@@ -449,5 +449,38 @@ open class WLComics{
         }
 
         return modifier
+    }
+}
+
+extension String {
+    /// 網站上的漫畫名稱有時是 HTML 數字編碼（例如 &#20206;狩），解碼成一般文字；
+    /// 也順便處理常見的具名實體
+    var htmlEntityDecoded: String {
+        guard contains("&") else { return self }
+        var result = self
+        let pattern = "&#(x[0-9A-Fa-f]+|[0-9]+);"
+        if let regex = try? NSRegularExpression(pattern: pattern) {
+            let ns = result as NSString
+            var decoded = ""
+            var last = 0
+            for match in regex.matches(in: result, range: NSRange(location: 0, length: ns.length)) {
+                decoded += ns.substring(with: NSRange(location: last, length: match.range.location - last))
+                let body = ns.substring(with: match.range(at: 1))
+                let value = body.hasPrefix("x") ? UInt32(body.dropFirst(), radix: 16) : UInt32(body)
+                if let v = value, let scalar = Unicode.Scalar(v) {
+                    decoded.unicodeScalars.append(scalar)
+                } else {
+                    decoded += ns.substring(with: match.range)
+                }
+                last = match.range.location + match.range.length
+            }
+            decoded += ns.substring(from: last)
+            result = decoded
+        }
+        let named = ["&quot;": "\"", "&apos;": "'", "&lt;": "<", "&gt;": ">", "&nbsp;": " ", "&amp;": "&"]
+        for (entity, char) in named {
+            result = result.replacingOccurrences(of: entity, with: char)
+        }
+        return result
     }
 }

@@ -37,6 +37,14 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     // iPhone 用：集數列表和當前 index（用於自動切換上下話）
     var allEpisodes = [Episode]()
     var episodeIndex: Int = 0
+    /// iPhone 用：目前漫畫的 id，記錄閱讀進度用（iPad 由 EpisodeDetailViewController 透過 updateEpisode 傳入）
+    var comicId: String?
+
+    /// 目前畫面上這一集所屬的漫畫與集數，跟著 updateEpisode 一起更新，
+    /// 避免切換漫畫時新舊資料交錯而把進度記到別部漫畫
+    private var displayedComicId: String?
+    private var displayedEpisodeUrl: String?
+    private var displayedEpisodeName = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,6 +52,9 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         imgSlider.enableSwipe = true
         imgSlider.allowCircular = false
         imgSlider.enablePageIndicator = false
+        // 跟著系統深淺色；storyboard 裡寫死白底，深色模式下會和左側列表黑白交錯
+        view.backgroundColor = .systemBackground
+        imgSlider.backgroundColor = .systemBackground
         if UIDevice.current.model.description == "iPhone"{
             navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .cancel , target: self, action: #selector(close))
         }
@@ -60,6 +71,13 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         }
         imgSlider.onSwipePastFirstPage = { [weak self] in
             self?.loadPreviousEpisode()
+        }
+        // 每翻到新的一頁就記錄閱讀進度
+        imgSlider.onPageChanged = { [weak self] page in
+            guard let self = self,
+                  let comicId = self.displayedComicId,
+                  let url = self.displayedEpisodeUrl else { return }
+            ReadingProgress.save(comicId: comicId, episodeUrl: url, episodeName: self.displayedEpisodeName, page: page)
         }
     }
 
@@ -93,10 +111,11 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     }
 
     /// 載入指定集數。可在 view 載入前呼叫（例如 prepare(for:segue:)），畫面更新一律在 main queue
-    func loadEpisode(at index: Int) {
+    func loadEpisode(at index: Int, startPage: Int = 0) {
         guard index >= 0 && index < allEpisodes.count else { return }
         episodeIndex = index
         let episode = allEpisodes[index]
+        let comicId = self.comicId
         self.title = episode.getName()
         WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { [weak self] (episode) in
             episode.setUpPages()
@@ -104,7 +123,8 @@ class DetailViewController: UIViewController,CPSliderDelegate{
             DispatchQueue.main.async {
                 // 連續切換集數時，較早發出的請求可能較晚回來，丟掉過期結果
                 guard let self = self, self.episodeIndex == index else { return }
-                self.updateEpisode(url: episode.getUrl(), images: pages)
+                self.updateEpisode(url: episode.getUrl(), images: pages, name: episode.getName(),
+                                   comicId: comicId, startPage: startPage)
             }
         })
     }
@@ -156,10 +176,15 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     }
 
     /// 確保 episodeUrl 和 images 在同一個 main queue 週期設定，避免 race condition
-    func updateEpisode(url: String, images: [String]) {
+    /// startPage：從第幾頁開始（繼續閱讀用），超出範圍會自動夾限
+    func updateEpisode(url: String, images: [String], name: String = "", comicId: String? = nil, startPage: Int = 0) {
         DispatchQueue.main.async {
             self.imgSlider.cancelAllDownloads()
-            self.imgSlider.currentIndex = 0
+            // 要在設定 images 之前更新，images 一設定就會回報頁碼
+            self.displayedComicId = comicId
+            self.displayedEpisodeUrl = url
+            self.displayedEpisodeName = name
+            self.imgSlider.currentIndex = min(max(startPage, 0), max(images.count - 1, 0))
             self.imgSlider.episodeUrl = url
             self.imgSlider.images = images
         }

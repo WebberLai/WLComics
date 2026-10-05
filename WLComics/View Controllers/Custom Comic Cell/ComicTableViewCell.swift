@@ -18,6 +18,8 @@ class ComicTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        // 空心愛心（dislike）是 template 圖，用系統次要文字色，深色模式下才看得到
+        favoriteBtn.tintColor = .secondaryLabel
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

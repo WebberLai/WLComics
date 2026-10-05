@@ -19,6 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         SwiftyPlistManager.shared.start(plistNames:["MyFavoritesComics"], logging: false)
         FavoriteComics.startCloudSync()
+        ReadingProgress.startCloudSync()
 
         // 每次 app 更新時，用 bundle 中最新的 AllComics.plist 覆蓋 Documents 的舊版
         refreshBundlePlistIfNeeded(name: "AllComics")
@@ -56,14 +57,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
     }
 
-    func setupSplitViewController() {
-        guard let splitViewController = window?.rootViewController as? UISplitViewController else { return }
-        splitViewController.preferredDisplayMode = .allVisible
-        let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
-        navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-        splitViewController.delegate = self
-    }
-    
     override var keyCommands: [UIKeyCommand]? {
         let commands = [
             UIKeyCommand(input: UIKeyInputRightArrow, modifierFlags:[], action: #selector(AppDelegate.rightClick(command:)), discoverabilityTitle: "Next Page"),

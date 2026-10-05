@@ -27,7 +27,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let splitViewController = window?.rootViewController as? UISplitViewController,
            let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             splitViewController.preferredDisplayMode = .allVisible
-            if let navigationController = splitViewController.viewControllers.last as? UINavigationController {
+            // iOS 26 起 split view 會自己顯示側邊欄按鈕，再手動加一次會多出一顆空白的圓形按鈕
+            if #unavailable(iOS 26),
+               let navigationController = splitViewController.viewControllers.last as? UINavigationController {
                 navigationController.topViewController?.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
             }
             splitViewController.delegate = appDelegate

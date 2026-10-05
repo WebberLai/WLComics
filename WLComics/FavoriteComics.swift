@@ -20,13 +20,21 @@ class FavoriteComics: NSObject {
             return []
         }
         // 既有資料可能是 NSMutableDictionary 或 NSDictionary，統一轉成可變型別
-        if let list = raw as? [NSMutableDictionary] {
-            return list
+        let list: [NSMutableDictionary]
+        if let mutable = raw as? [NSMutableDictionary] {
+            list = mutable
+        } else if let immutable = raw as? [NSDictionary] {
+            list = immutable.map { NSMutableDictionary(dictionary: $0) }
+        } else {
+            return []
         }
-        if let list = raw as? [NSDictionary] {
-            return list.map { NSMutableDictionary(dictionary: $0) }
+        // 舊版收藏可能存了 HTML 編碼的名稱（例如 &#20206;狩），讀取時一併解碼
+        for item in list {
+            if let name = item.object(forKey: "name") as? String {
+                item.setObject(name.htmlEntityDecoded, forKey: "name" as NSCopying)
+            }
         }
-        return []
+        return list
     }
 
     private static func saveFavorites(_ favorites: [NSMutableDictionary], pushToCloud: Bool = true) {
@@ -51,6 +59,9 @@ class FavoriteComics: NSObject {
     static func startCloudSync() {
         NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
                                                object: cloudStore, queue: .main) { note in
+            // 同一個 KVS 也存了閱讀進度，只處理收藏這個 key 的變動
+            let changedKeys = note.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? []
+            guard changedKeys.contains(listKey) else { return }
             let reason = note.userInfo?[NSUbiquitousKeyValueStoreChangeReasonKey] as? Int
             switch reason {
             case NSUbiquitousKeyValueStoreServerChange:

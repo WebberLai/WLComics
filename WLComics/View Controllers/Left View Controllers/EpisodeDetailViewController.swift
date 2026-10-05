@@ -22,6 +22,12 @@ class EpisodeDetailViewController: UIViewController {
     var pages = Array<String>()
     
     var episodeIndex : Int = 0
+
+    /// 目前漫畫的 id，記錄閱讀進度用
+    var comicId : String?
+
+    /// 第一次開啟時要從第幾頁開始（繼續閱讀用）
+    var startPage : Int = 0
     
     @IBOutlet weak var tableView : UITableView!
     
@@ -35,7 +41,9 @@ class EpisodeDetailViewController: UIViewController {
             detailViewController?.delegate = self
         }
         self.tableView.tableHeaderView = nil
-        loadEpisode(at: episodeIndex)
+        view.backgroundColor = .systemBackground
+        tableView.backgroundColor = .systemBackground
+        loadEpisode(at: episodeIndex, startPage: startPage)
     }
 
     /// 縮圖用：降採樣到 cell 大小、低下載優先度，避免搶走右側閱讀器的連線
@@ -50,7 +58,7 @@ class EpisodeDetailViewController: UIViewController {
     ]
 
     /// 載入指定集數並同步更新左側縮圖列表與右側閱讀器
-    private func loadEpisode(at index: Int) {
+    private func loadEpisode(at index: Int, startPage: Int = 0) {
         guard index >= 0 && index < allEpisodes.count else { return }
         episodeIndex = index
         currentEpisode = allEpisodes[index]
@@ -64,7 +72,12 @@ class EpisodeDetailViewController: UIViewController {
                 guard let self = self, self.episodeIndex == index else { return }
                 self.pages = pages
                 self.tableView.reloadData()
-                self.detailViewController?.updateEpisode(url: episode.getUrl(), images: pages)
+                self.detailViewController?.updateEpisode(url: episode.getUrl(), images: pages, name: episode.getName(),
+                                                         comicId: self.comicId, startPage: startPage)
+                // 左側縮圖列表也捲到開始的那一頁
+                if startPage > 0 && startPage < pages.count {
+                    self.tableView.selectRow(at: IndexPath(row: startPage, section: 0), animated: false, scrollPosition: .middle)
+                }
             }
         })
     }
@@ -119,7 +132,8 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        detailViewController?.imgSlider.adjustContentOffsetFor(index: indexPath.row, offsetIndex: indexPath.row, animated: true)
+        // 用 scrollToPage 才會正確換算雙頁模式的位置
+        detailViewController?.imgSlider.scrollToPage(indexPath.row)
     }
     
     func sliderImageTapped(index: Int) {

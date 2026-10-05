@@ -43,6 +43,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
     
     var images = [String](){
         didSet{
+            lastReportedPage = -1
             loadedIndices.removeAll()
             myPageControl.numberOfPages = images.count
             addImagesOnScrollView()
@@ -177,6 +178,9 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         view.frame = bounds
         // Make the view stretch with containing view
         view.autoresizingMask = [UIViewAutoresizing.flexibleWidth, UIViewAutoresizing.flexibleHeight]
+        // xib 內是寫死的白底，改成透明，由外層決定背景色
+        view.backgroundColor = .clear
+        myScrollView.backgroundColor = .clear
         // Adding custom subview on top of our view (over any custom drawing > see note below)
         addSubview(view)
     }
@@ -197,6 +201,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         checkButtonsIfNeedsDisable()
         checkForAutoScrolled()
         loadVisibleImages()
+        reportPageIfChanged()
     }
     
     func cancelAllDownloads()
@@ -438,6 +443,26 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         }
     }
 
+    /// 停在新的一頁時回報頁碼（雙頁模式回報該組的第一頁），用來記錄閱讀進度
+    var onPageChanged: ((Int) -> Void)?
+    private var lastReportedPage = -1
+
+    private func reportPageIfChanged()
+    {
+        guard images.count > 0, currentIndex != lastReportedPage else { return }
+        lastReportedPage = currentIndex
+        onPageChanged?(currentIndex)
+    }
+
+    /// 跳到指定頁（雙頁模式會對齊到該頁所在的那一組）
+    func scrollToPage(_ page: Int, animated: Bool = true)
+    {
+        guard images.count > 0 else { return }
+        let target = min(max(page, 0), images.count - 1)
+        currentIndex = target - target % pagesPerSpread
+        adjustContentOffsetFor(index: currentIndex, offsetIndex: convertIndex(), animated: animated)
+    }
+
     // 滑過邊界時的 callback
     var onSwipePastLastPage: (() -> Void)?
     var onSwipePastFirstPage: (() -> Void)?
@@ -455,6 +480,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         // 滑動換頁後也要更新箭頭按鈕的啟用狀態，否則會停留在上一頁的判斷結果
         checkButtonsIfNeedsDisable()
         loadVisibleImages()
+        reportPageIfChanged()
     }
 
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
