@@ -9,14 +9,14 @@
 import Foundation
 
 open class StringUtility{
-    open static let ENCODE_BIG5 = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5_HKSCS_1999.rawValue))
-    open static let ENCODE_GB2312 = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))
+    public static let ENCODE_BIG5 = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.big5_HKSCS_1999.rawValue))
+    public static let ENCODE_GB2312 = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(CFStringEncodings.GB_18030_2000.rawValue))
     
     public init() {
     }
     
     open class func count(_ source : String) -> Int{
-        return source.characters.count
+        return source.count
     }
 
     open class func indexOf(source : String, search : String) -> Range<String.Index>?{
@@ -27,7 +27,7 @@ open class StringUtility{
         let ret = source.range(of: target, options: .backwards)
         
         if( ret != nil){
-            let result = source.characters.distance(from: source.characters.startIndex, to: (ret?.lowerBound)!)
+            let result = source.distance(from: source.startIndex, to: (ret?.lowerBound)!)
             
             return result
         }
@@ -37,7 +37,7 @@ open class StringUtility{
     
     open class func indexOfInt(_ source : String, _ search : String) -> Int{
         let range = source.range(of: search)
-        let result = source.characters.distance(from: source.characters.startIndex, to: (range?.lowerBound)!)
+        let result = source.distance(from: source.startIndex, to: (range?.lowerBound)!)
         
         return result;
     }
@@ -87,7 +87,7 @@ open class StringUtility{
         let lowerIndex = lastIndexOf(source: source, target: lowerString)
         
         if(upperIndex != -1 && lowerIndex != -1){
-            return substring(source, upperIndex + upperString.characters.count, lowerIndex)
+            return substring(source, upperIndex + upperString.count, lowerIndex)
         }
         
         return nil

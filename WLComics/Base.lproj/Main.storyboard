@@ -170,7 +170,7 @@
         <!--Comic Episodes View Controller-->
         <scene sceneID="KJl-TP-1ig">
             <objects>
-                <viewController id="ZL9-3c-F3t" customClass="ComicEpisodesViewController" customModule="WLComics" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ComicEpisodesViewController" id="ZL9-3c-F3t" customClass="ComicEpisodesViewController" customModule="WLComics" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="5vy-VH-dkU"/>
                         <viewControllerLayoutGuide type="bottom" id="Qng-3X-U03"/>

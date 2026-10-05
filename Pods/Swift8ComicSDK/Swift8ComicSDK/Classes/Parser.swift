@@ -339,13 +339,13 @@ open class Parser{
         var ret = ""
         let st = "<"
         let ed = ">"
-        let charAry = txt.characters
+        let charAry = txt
         var check = false
         
         for c in charAry {
-            if(c == st.characters.first){
+            if(c == st.first){
                 check = true
-            }else if(c == ed.characters.first){
+            }else if(c == ed.first){
                 check = false
                 continue
             }

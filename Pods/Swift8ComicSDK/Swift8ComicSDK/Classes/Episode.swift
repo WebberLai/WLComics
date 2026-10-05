@@ -15,8 +15,11 @@ open class Episode{
     private var mCopyright : String?
     private var mImageUrl : [String] = [String]()//每頁漫畫圖片
     private let mJSnview = JSnview();
-    
-    
+
+    // WLComics 本地修改：讓 app 端可以自行建立 Episode（離線閱讀時從下載紀錄還原集數列表）
+    public init() {}
+
+
     //讀取1話(集、卷)全部漫畫圖片網址
     open func setUpPages(){
         mImageUrl = mJSnview.setupPagesDownloadUrl()

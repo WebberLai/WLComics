@@ -193,7 +193,7 @@ class FavoriteTableViewController: UITableViewController {
     
     
     // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             var comics : [NSMutableDictionary] = sortedComicLib.object(forKey:comicSectionTitles[indexPath.section]) as! [NSMutableDictionary]
             let comicDict  : NSMutableDictionary = comics[indexPath.row]

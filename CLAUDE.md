@@ -56,11 +56,14 @@ External SDK that scrapes 8comic.com. Locally modified files in Pods/:
 - **`Parser.swift`** — HTML parsing with guards for variable-length data arrays
 - **`JSnview.swift`** — JS evaluation for image URLs; handles both old (`var cs='...'`) and new (`.src=unescape(...)`) website formats
 - **`R8Comic.swift`** — main SDK class; `loadEpisodeDetail` callback may run on background thread
+- **`Episode.swift`** — added `public init()` so the app can rebuild `Episode` objects from download records
 
 ### Data Persistence
 
 - **`AllComics.plist`** — bundled comic database (~10800 entries). Copied to Documents on app version change. Primary source for comic list.
 - **`MyFavoritesComics.plist`** — favorites, stored in Documents, mirrored to `NSUbiquitousKeyValueStore` key `favorite_list`
+- **Reading progress** — `ReadingProgress` stores last episode/page per comic in UserDefaults + iCloud KVS key `reading_progress`; episode URLs are compared via `normalizedEpisodeUrl` (relative before load, absolute after)
+- **Offline downloads** — `DownloadManager` saves pages to `Application Support/Downloads/<comicId>/<episode>/` with a `manifest.json` per comic (file names only, never absolute paths); excluded from backup; deletion is manual only. Readers check `localPageURLs` before hitting the network. The 已下載 tab (`DownloadsViewController`) is appended to the tab bar in `SceneDelegate` and opens `ComicEpisodesViewController` (storyboard ID) with `offlineMode = true`
 - **`MasterViewController.favoriteIds`** — in-memory `Set<String>` cache of favorite comic IDs, rebuilt in `viewWillAppear`
 
 ## Key Dependencies

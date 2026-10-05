@@ -25,7 +25,9 @@ class ComicEpisodesViewController: UIViewController {
 
     private lazy var continueButton = UIBarButtonItem(title: "繼續閱讀", style: .plain, target: self, action: #selector(continueReading))
 
-    /// 8comic 會擋掉沒有 Referer 的圖片請求，快取一份避免每個 cell 重建
+    /// 離線模式：從「已下載」進來時，集數列表改由下載紀錄還原，不連網
+    var offlineMode = false
+
     /// 封面在 cell 中的最大尺寸：列高 116，上下各留約 8pt
     private static let coverSize = CGSize(width: 75, height: 100)
 
@@ -39,6 +41,7 @@ class ComicEpisodesViewController: UIViewController {
         }
     }()
 
+    /// 8comic 會擋掉沒有 Referer 的圖片請求，快取一份避免每個 cell 重建
     private let refererModifier = AnyModifier { request in
         var r = request
         r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
@@ -47,14 +50,22 @@ class ComicEpisodesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        WLComics.sharedInstance().getR8Comic().loadComicDetail(currentComic) { (comicDetail : Comic) in
-            let episodes = comicDetail.getEpisode()
-            DispatchQueue.main.async {
-                self.allEpisodes = episodes
-                self.refreshLastRead()
-                self.tableView.reloadData()
-                self.updateContinueButton()
-                self.scrollToLastRead()
+        if offlineMode {
+            allEpisodes = DownloadManager.shared.downloadedEpisodes(comicId: currentComic.getId())
+            refreshLastRead()
+            tableView.reloadData()
+            updateContinueButton()
+            scrollToLastRead()
+        } else {
+            WLComics.sharedInstance().getR8Comic().loadComicDetail(currentComic) { (comicDetail : Comic) in
+                let episodes = comicDetail.getEpisode()
+                DispatchQueue.main.async {
+                    self.allEpisodes = episodes
+                    self.refreshLastRead()
+                    self.tableView.reloadData()
+                    self.updateContinueButton()
+                    self.scrollToLastRead()
+                }
             }
         }
         self.tableView.tableHeaderView = nil
@@ -66,11 +77,54 @@ class ComicEpisodesViewController: UIViewController {
         tableView.separatorInsetReference = .fromCellEdges
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
         continueButton.isEnabled = false
-        navigationItem.rightBarButtonItems = [UIBarButtonItem.init(barButtonSystemItem: .fastForward , target: self, action: #selector(scrollToBottom)),
-                                              continueButton]
+        var barItems = [UIBarButtonItem.init(barButtonSystemItem: .fastForward , target: self, action: #selector(scrollToBottom)),
+                        continueButton]
+        if !offlineMode {
+            barItems.append(UIBarButtonItem(image: UIImage(systemName: "arrow.down.circle"), style: .plain,
+                                            target: self, action: #selector(downloadAll)))
+        }
+        navigationItem.rightBarButtonItems = barItems
         // 其他裝置同步過來的進度也要反映在列表上
         NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange),
                                                name: ReadingProgress.didChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(downloadsDidChange(_:)),
+                                               name: DownloadManager.didChangeNotification, object: nil)
+    }
+
+    // MARK: - 下載
+
+    @objc func downloadsDidChange(_ notification: Notification) {
+        guard notification.userInfo?["comicId"] as? String == currentComic.getId() else { return }
+        if offlineMode {
+            // 離線列表只列已下載完成的集數，刪除後要重建
+            allEpisodes = DownloadManager.shared.downloadedEpisodes(comicId: currentComic.getId())
+            refreshLastRead()
+            updateContinueButton()
+        }
+        tableView.reloadData()
+    }
+
+    @objc func downloadAll() {
+        guard !allEpisodes.isEmpty else { return }
+        let alert = UIAlertController(title: "下載全部",
+                                      message: "要下載全部 \(allEpisodes.count) 話嗎？已下載的會略過。\n下載的內容只能手動刪除。",
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: "下載", style: .default) { _ in
+            DownloadManager.shared.download(comic: self.currentComic,
+                                            episodes: self.allEpisodes.enumerated().map { (episode: $1, order: $0) })
+        })
+        present(alert, animated: true)
+    }
+
+    private func downloadStatusText(for episode: Episode) -> String? {
+        switch DownloadManager.shared.state(comicId: currentComic.getId(), episodeUrl: episode.getUrl()) {
+        case .none: return nil
+        case .queued: return "等待下載"
+        case .downloading(let progress): return "下載中 \(Int(progress * 100))%"
+        case .downloaded: return "已下載"
+        case .incomplete: return "下載未完成"
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -184,7 +238,7 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 重用 cell，避免每次捲動都新建並重新發出封面請求
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell")
-            ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell")
+            ?? UITableViewCell(style: .subtitle, reuseIdentifier: "Cell")
         let episode = allEpisodes[indexPath.row]
         cell.textLabel?.text = episode.getName()
         // 封面原圖比列高大，不裁切的話會溢出蓋住下方的分隔線
@@ -192,15 +246,20 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
         cell.imageView?.clipsToBounds = true
         cell.imageView?.contentMode = .scaleAspectFit
 
-        // 標示上次看到的那一集
+        // 標示上次看到的那一集，以及下載狀態
+        var details = [String]()
         if indexPath.row == lastReadIndex, let entry = lastRead {
-            cell.detailTextLabel?.text = "上次看到第 \(entry.page + 1) 頁"
+            details.append("上次看到第 \(entry.page + 1) 頁")
             cell.detailTextLabel?.textColor = .systemBlue
             cell.accessoryType = .checkmark
         } else {
-            cell.detailTextLabel?.text = nil
+            cell.detailTextLabel?.textColor = .secondaryLabel
             cell.accessoryType = .none
         }
+        if let status = downloadStatusText(for: episode) {
+            details.append(status)
+        }
+        cell.detailTextLabel?.text = details.isEmpty ? nil : details.joined(separator: " · ")
 
         // 重用時先取消舊請求，避免已捲離畫面的下載持續佔用連線
         cell.imageView?.kf.cancelDownloadTask()
@@ -226,6 +285,33 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
         let page = indexPath.row == lastReadIndex ? (lastRead?.page ?? 0) : 0
         openEpisode(at: indexPath.row, startPage: page)
     }
-    
-   
+
+    /// 往左滑：未下載 → 下載；下載中或排隊中 → 取消；已下載 → 刪除（只有手動刪除）
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let episode = allEpisodes[indexPath.row]
+        let comicId = currentComic.getId()
+        let action: UIContextualAction
+        switch DownloadManager.shared.state(comicId: comicId, episodeUrl: episode.getUrl()) {
+        case .none, .incomplete:
+            action = UIContextualAction(style: .normal, title: "下載") { _, _, done in
+                DownloadManager.shared.download(comic: self.currentComic, episodes: [(episode: episode, order: indexPath.row)])
+                done(true)
+            }
+            action.backgroundColor = .systemBlue
+        case .queued, .downloading:
+            action = UIContextualAction(style: .normal, title: "取消下載") { _, _, done in
+                DownloadManager.shared.deleteEpisode(comicId: comicId, episodeUrl: episode.getUrl())
+                done(true)
+            }
+            action.backgroundColor = .systemOrange
+        case .downloaded:
+            action = UIContextualAction(style: .destructive, title: "刪除下載") { _, _, done in
+                DownloadManager.shared.deleteEpisode(comicId: comicId, episodeUrl: episode.getUrl())
+                done(true)
+            }
+        }
+        let configuration = UISwipeActionsConfiguration(actions: [action])
+        configuration.performsFirstActionWithFullSwipe = false
+        return configuration
+    }
 }

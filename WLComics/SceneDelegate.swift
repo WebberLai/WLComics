@@ -33,6 +33,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 navigationController.topViewController?.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
             }
             splitViewController.delegate = appDelegate
+
+            // 第三個 tab「已下載」：離線時從這裡進入閱讀
+            if let tabBarController = splitViewController.viewControllers.first as? UITabBarController {
+                let downloads = UINavigationController(rootViewController: DownloadsViewController(style: .plain))
+                downloads.tabBarItem = UITabBarItem(title: "已下載", image: UIImage(systemName: "arrow.down.circle"), tag: 2)
+                tabBarController.viewControllers = (tabBarController.viewControllers ?? []) + [downloads]
+            }
         }
     }
 

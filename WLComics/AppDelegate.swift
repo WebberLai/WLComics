@@ -59,8 +59,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
     override var keyCommands: [UIKeyCommand]? {
         let commands = [
-            UIKeyCommand(input: UIKeyInputRightArrow, modifierFlags:[], action: #selector(AppDelegate.rightClick(command:)), discoverabilityTitle: "Next Page"),
-            UIKeyCommand(input: UIKeyInputLeftArrow , modifierFlags:[], action: #selector(AppDelegate.leftClick(command:)), discoverabilityTitle: "Previous Page"),
+            UIKeyCommand(input: UIKeyCommand.inputRightArrow, modifierFlags:[], action: #selector(AppDelegate.rightClick(command:)), discoverabilityTitle: "Next Page"),
+            UIKeyCommand(input: UIKeyCommand.inputLeftArrow , modifierFlags:[], action: #selector(AppDelegate.leftClick(command:)), discoverabilityTitle: "Previous Page"),
         ]
         return commands
     }
@@ -68,13 +68,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     @objc func rightClick(command:UIKeyCommand) {
         NotificationCenter.default.post(name:notificationName,
                                         object: nil,
-                                        userInfo: ["action":UIKeyInputRightArrow])
+                                        userInfo: ["action":UIKeyCommand.inputRightArrow])
     }
     
     @objc func leftClick(command:UIKeyCommand) {
         NotificationCenter.default.post(name:notificationName,
                                         object: nil,
-                                        userInfo: ["action":UIKeyInputLeftArrow])
+                                        userInfo: ["action":UIKeyCommand.inputLeftArrow])
     }
     
     

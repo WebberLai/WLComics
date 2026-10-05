@@ -117,6 +117,13 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         let episode = allEpisodes[index]
         let comicId = self.comicId
         self.title = episode.getName()
+        // 已下載的集數直接讀本機檔案，不需要連網
+        if let comicId = comicId,
+           let localPages = DownloadManager.shared.localPageURLs(comicId: comicId, episodeUrl: episode.getUrl()) {
+            updateEpisode(url: episode.getUrl(), images: localPages.map { $0.absoluteString }, name: episode.getName(),
+                          comicId: comicId, startPage: startPage)
+            return
+        }
         WLComics.sharedInstance().loadEpisodeDetail(episode, onLoadDetail: { [weak self] (episode) in
             episode.setUpPages()
             let pages = episode.getImageUrlList()
@@ -143,9 +150,9 @@ class DetailViewController: UIViewController,CPSliderDelegate{
 
         // 翻到最後／第一頁時，slider 會透過 onSwipePastLastPage / onSwipePastFirstPage 換話，
         // 雙頁模式下也會自動一次翻兩頁
-        if action == UIKeyInputRightArrow {
+        if action == UIKeyCommand.inputRightArrow {
             imgSlider.nextButtonPressed()
-        } else if action == UIKeyInputLeftArrow {
+        } else if action == UIKeyCommand.inputLeftArrow {
             imgSlider.previousButtonPressed()
         }
     }

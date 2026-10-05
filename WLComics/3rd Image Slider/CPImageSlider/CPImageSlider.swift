@@ -177,7 +177,7 @@ class CPImageSlider: UIView, UIScrollViewDelegate {
         // use bounds not frame or it'll be offset
         view.frame = bounds
         // Make the view stretch with containing view
-        view.autoresizingMask = [UIViewAutoresizing.flexibleWidth, UIViewAutoresizing.flexibleHeight]
+        view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         // xib 內是寫死的白底，改成透明，由外層決定背景色
         view.backgroundColor = .clear
         myScrollView.backgroundColor = .clear

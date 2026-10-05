@@ -63,6 +63,13 @@ class EpisodeDetailViewController: UIViewController {
         episodeIndex = index
         currentEpisode = allEpisodes[index]
         title = currentEpisode.getName()
+        // 已下載的集數直接讀本機檔案，不需要連網；左側縮圖也一樣用本機檔案
+        if let comicId = comicId,
+           let localPages = DownloadManager.shared.localPageURLs(comicId: comicId, episodeUrl: currentEpisode.getUrl()) {
+            showPages(localPages.map { $0.absoluteString }, episodeUrl: currentEpisode.getUrl(),
+                      episodeName: currentEpisode.getName(), startPage: startPage)
+            return
+        }
         WLComics.sharedInstance().loadEpisodeDetail(currentEpisode, onLoadDetail: { [weak self] (episode) in
             episode.setUpPages()
             let pages = episode.getImageUrlList()
@@ -70,16 +77,21 @@ class EpisodeDetailViewController: UIViewController {
                 // 連續切換集數時，較早發出的請求可能較晚回來，丟掉過期結果；
                 // pages 也只在 main queue 寫入，避免和 tableView 讀取產生 data race
                 guard let self = self, self.episodeIndex == index else { return }
-                self.pages = pages
-                self.tableView.reloadData()
-                self.detailViewController?.updateEpisode(url: episode.getUrl(), images: pages, name: episode.getName(),
-                                                         comicId: self.comicId, startPage: startPage)
-                // 左側縮圖列表也捲到開始的那一頁
-                if startPage > 0 && startPage < pages.count {
-                    self.tableView.selectRow(at: IndexPath(row: startPage, section: 0), animated: false, scrollPosition: .middle)
-                }
+                self.showPages(pages, episodeUrl: episode.getUrl(), episodeName: episode.getName(), startPage: startPage)
             }
         })
+    }
+
+    /// 更新左側縮圖列表與右側閱讀器
+    private func showPages(_ pages: [String], episodeUrl: String, episodeName: String, startPage: Int) {
+        self.pages = pages
+        tableView.reloadData()
+        detailViewController?.updateEpisode(url: episodeUrl, images: pages, name: episodeName,
+                                            comicId: comicId, startPage: startPage)
+        // 左側縮圖列表也捲到開始的那一頁
+        if startPage > 0 && startPage < pages.count {
+            tableView.selectRow(at: IndexPath(row: startPage, section: 0), animated: false, scrollPosition: .middle)
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -116,7 +128,7 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 重用 cell，避免每次捲動都新建並重新發出縮圖請求
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell")
-            ?? UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "Cell")
+            ?? UITableViewCell(style: .subtitle, reuseIdentifier: "Cell")
         cell.textLabel?.text = String("P" + "\(indexPath.row + 1)")
 
         // 重用時先取消舊請求，避免離開畫面的縮圖持續佔用連線
