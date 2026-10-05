@@ -28,7 +28,7 @@ TabBarController
 ### Key Singletons & Utilities
 
 - **`WLComics.sharedInstance()`** — app-level wrapper around `R8Comic` SDK. Handles episode loading, search API, Kingfisher referer headers.
-- **`FavoriteComics`** — static utility for favorites CRUD via `MyFavoritesComics.plist`, synced to Dropbox.
+- **`FavoriteComics`** — static utility for favorites CRUD via `MyFavoritesComics.plist`, synced via iCloud key-value store (`startCloudSync()` in AppDelegate).
 
 ### Image Loading (CPImageSlider)
 
@@ -59,7 +59,7 @@ External SDK that scrapes 8comic.com. Locally modified files in Pods/:
 ### Data Persistence
 
 - **`AllComics.plist`** — bundled comic database (~10800 entries). Copied to Documents on app version change. Primary source for comic list.
-- **`MyFavoritesComics.plist`** — favorites, stored in Documents, synced to Dropbox via SwiftyDropbox
+- **`MyFavoritesComics.plist`** — favorites, stored in Documents, mirrored to `NSUbiquitousKeyValueStore` key `favorite_list`
 - **`MasterViewController.favoriteIds`** — in-memory `Set<String>` cache of favorite comic IDs, rebuilt in `viewWillAppear`
 
 ## Key Dependencies
@@ -68,7 +68,6 @@ External SDK that scrapes 8comic.com. Locally modified files in Pods/:
 |-----|---------|
 | Swift8ComicSDK | 8comic.com scraper (git-based, locally patched) |
 | Kingfisher | Image downloading/caching with custom request modifiers |
-| SwiftyDropbox | Favorites cloud sync |
 | SVProgressHUD | Loading spinner |
 
 ## Common Pitfalls

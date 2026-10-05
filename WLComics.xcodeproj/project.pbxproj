@@ -71,6 +71,7 @@
 		60A561A31F82264B004C71C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		60A561A41F82264B004C71C1 /* WLMacComic.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WLMacComic.entitlements; sourceTree = "<group>"; };
 		60AA00FF2106D73B0093780B /* AllComics.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AllComics.plist; sourceTree = "<group>"; };
+		60B59FC730734C28007E668E /* WLComics.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WLComics.entitlements; sourceTree = "<group>"; };
 		60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeDetailViewController.swift; sourceTree = "<group>"; };
 		71BB3F481F2DBAF000EBED7D /* WLComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WLComics.swift; sourceTree = "<group>"; };
 		7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -184,6 +185,7 @@
 		6056EE1C1F28233F007BBE67 /* WLComics */ = {
 			isa = PBXGroup;
 			children = (
+				60B59FC730734C28007E668E /* WLComics.entitlements */,
 				60A1B90E1F58E2B600E41AAB /* Favorite Model */,
 				6079D0EF1F2B06FD002E6A3B /* 3rd Image Slider */,
 				601EEE231F2971BC00504E29 /* View Controllers */,
@@ -378,14 +380,12 @@
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
 				"${BUILT_PRODUCTS_DIR}/SVProgressHUD/SVProgressHUD.framework",
 				"${BUILT_PRODUCTS_DIR}/Swift8ComicSDK/Swift8ComicSDK.framework",
-				"${BUILT_PRODUCTS_DIR}/SwiftyDropbox/SwiftyDropbox.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SVProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Swift8ComicSDK.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyDropbox.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -572,6 +572,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = WLComics/WLComics.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
@@ -595,6 +596,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = WLComics/WLComics.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Webber Lai (7T4QCGLNFF)";
 				CODE_SIGN_STYLE = Automatic;

@@ -8,7 +8,6 @@
 
 import UIKit
 import Kingfisher
-import SwiftyDropbox
 
 class FavoriteTableViewController: UITableViewController {
     
@@ -23,22 +22,18 @@ class FavoriteTableViewController: UITableViewController {
     
     var sortedComicLib = NSMutableDictionary()
     
-    let client = DropboxClientsManager.authorizedClient
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "收藏列表"
         tableView.register(UINib(nibName: "ComicTableViewCell", bundle: nil), forCellReuseIdentifier: "ComicTableViewCell")
         tableView.backgroundColor = UIColor.white
-        navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .bookmarks , target: self, action: #selector(loginDropbox))
+        // iCloud 收到其他裝置的收藏變動時即時更新
+        NotificationCenter.default.addObserver(self, selector: #selector(favoritesDidChange),
+                                               name: FavoriteComics.didChangeNotification, object: nil)
     }
-    
-    @objc func loginDropbox(){
-        DropboxClientsManager.authorizeFromController(UIApplication.shared,
-                                                      controller: self,
-                                                      openURL: { (url: URL) -> Void in
-                                                        UIApplication.shared.openURL(url)
-        })
+
+    @objc func favoritesDidChange() {
+        reloadFavoriteComics()
     }
     
     func reloadFavoriteComics () {
@@ -50,76 +45,6 @@ class FavoriteTableViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.reloadFavoriteComics()
-        //Sync Favorite List
-        if let client = DropboxClientsManager.authorizedClient {
-            client.files.listFolder(path: "").response { response, error in
-                if let result = response {
-                    //print("Folder contents: \(result)")
-                    if result.entries.count == 0 {
-                        //上傳本地的
-                        print("上傳本地的")
-                        self.uploadDropboxPlsit()
-                    }else{
-                        //同步雲端的下來
-                        print("同步雲端的下來")
-                        self.downloadDropboxPlist()
-                    }
-                } else {
-                    print("Error: \(error!)")
-                }
-            }
-        }
-    }
-    
-    func uploadDropboxPlsit() {
-        if let client = DropboxClientsManager.authorizedClient {
-            client.files.listFolder(path: "").response { response, error in
-                if let _ = response {
-                    guard let fileData = FavoriteComics.getFavoritePlistData() else {
-                        print("Dropbox 上傳略過：本地收藏檔尚未建立")
-                        return
-                    }
-                    let _ = client.files.upload(path: "/MyFavoritesComics.plist", mode: .overwrite , input: fileData).response { response, error in
-                        if let response = response {
-                            print("Dropbox 上傳完成 \(response)")
-                        } else if let error = error {
-                            print("Dropbox 上傳失敗 \(error)")
-                        }
-                    }
-                        .progress { progressData in
-                            print(progressData)
-                    }
-                } else {
-                    print("Dropbox 上傳失敗 Error: \(error!)")
-                }
-            }
-        }
-    }
-    
-    func downloadDropboxPlist (){
-        if let client = DropboxClientsManager.authorizedClient {
-            client.files.listFolder(path:"").response { response, error in
-                if let _ = response {
-                    let fileManager = FileManager.default
-                    let directoryURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    let destURL = directoryURL.appendingPathComponent("MyFavoritesComics.plist")
-                    client.files.download(path: "/MyFavoritesComics.plist", overwrite: true, destination: destURL)
-                        .response { response, error in
-                            if let response = response {
-                                //print("Dropbox 下載完成 \(response)")
-                                self.reloadFavoriteComics()
-                            } else if let error = error {
-                                print("Dropbox 下載失敗 \(error)")
-                            }
-                        }
-                        .progress { progressData in
-                            print(progressData)
-                    }
-                } else {
-                    print("Dropbox 下載失敗 Error: \(error!)")
-                }
-            }
-        }
     }
     
     func sortComicList(){
@@ -291,7 +216,6 @@ class FavoriteTableViewController: UITableViewController {
             }
             sortedComicLib.setObject(comics, forKey: comicSectionTitles[indexPath.section] as NSCopying)
             tableView.deleteRows(at: [indexPath], with: .fade)
-            self.uploadDropboxPlsit()
             tableView.reloadData()
         }
     }

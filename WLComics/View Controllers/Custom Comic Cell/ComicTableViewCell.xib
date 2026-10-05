@@ -26,9 +26,6 @@
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Rf7-Ou-h0c">
                         <rect key="frame" x="86" y="8" width="265" height="100"/>
-                        <constraints>
-                            <constraint firstAttribute="width" constant="265" id="3DR-X6-7vy"/>
-                        </constraints>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -50,11 +47,9 @@
                     <constraint firstItem="aRD-tx-zVU" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="5LL-gs-wiY"/>
                     <constraint firstItem="Rf7-Ou-h0c" firstAttribute="top" secondItem="hVF-5f-9Vs" secondAttribute="top" id="8D6-tS-lma"/>
                     <constraint firstItem="Rf7-Ou-h0c" firstAttribute="bottom" secondItem="aRD-tx-zVU" secondAttribute="bottom" id="ByN-He-nng"/>
-                    <constraint firstItem="aRD-tx-zVU" firstAttribute="leading" secondItem="Rf7-Ou-h0c" secondAttribute="trailing" constant="8" id="EfY-Va-Zo3"/>
                     <constraint firstItem="hVF-5f-9Vs" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="HRl-KC-X3b"/>
                     <constraint firstItem="hVF-5f-9Vs" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="Hwa-js-DeK"/>
                     <constraint firstAttribute="bottom" secondItem="aRD-tx-zVU" secondAttribute="bottom" constant="8" id="Xsk-Un-Z6I"/>
-                    <constraint firstItem="aRD-tx-zVU" firstAttribute="leading" secondItem="Rf7-Ou-h0c" secondAttribute="trailing" constant="8" id="b4R-gr-MNd"/>
                     <constraint firstAttribute="trailing" secondItem="aRD-tx-zVU" secondAttribute="trailing" constant="8" id="byV-A1-BXN"/>
                     <constraint firstItem="aRD-tx-zVU" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="f8q-gr-lMC"/>
                     <constraint firstItem="aRD-tx-zVU" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="fgs-Hd-aDH"/>

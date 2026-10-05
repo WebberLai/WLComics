@@ -9,7 +9,6 @@
 import UIKit
 import Swift8ComicSDK
 import Kingfisher
-import SwiftyDropbox
 import SVProgressHUD
 
 class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate, UITableViewDataSourcePrefetching {
@@ -36,8 +35,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     var comicSectionTitles = [String]()
 
     var selectIntexPath  : IndexPath = IndexPath()
-
-    let client = DropboxClientsManager.authorizedClient
 
     // 快取 placeholder 圖片和 Kingfisher modifier，避免每個 cell 重複建立
     private lazy var placeholderImage = UIImage(named: "comic_place_holder")
@@ -86,6 +83,14 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.title = "漫畫列表"
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
+        // iCloud 收到其他裝置的收藏變動時更新愛心狀態
+        NotificationCenter.default.addObserver(self, selector: #selector(favoritesDidChange),
+                                               name: FavoriteComics.didChangeNotification, object: nil)
+    }
+
+    @objc func favoritesDidChange() {
+        reloadFavoriteIds()
+        tableView.reloadData()
     }
 
     /// 背景從網站分類頁面抓取最新漫畫列表，有新增時更新 UI
@@ -178,31 +183,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         super.didReceiveMemoryWarning()
     }
 
-    func uploadDropboxPlsit() {
-        if let client = DropboxClientsManager.authorizedClient {
-            client.files.listFolder(path: "").response { response, error in
-                if let _ = response {
-                    guard let fileData = FavoriteComics.getFavoritePlistData() else {
-                        print("Dropbox 上傳略過：本地收藏檔尚未建立")
-                        return
-                    }
-                    let _ = client.files.upload(path: "/MyFavoritesComics.plist", mode: .overwrite , input: fileData).response { response, error in
-                        if let response = response {
-                            print("Dropbox 上傳完成 \(response)")
-                        } else if let error = error {
-                            print("Dropbox 上傳失敗 \(error)")
-                        }
-                        }
-                        .progress { progressData in
-                            print(progressData)
-                    }
-                } else {
-                    print("Dropbox 上傳失敗 Error: \(error!)")
-                }
-            }
-        }
-    }
-    
     func insertNewObject(_ sender: Any) {
         let indexPath = IndexPath(row: 0, section: 0)
         tableView.insertRows(at: [indexPath], with: .automatic)
@@ -325,7 +305,6 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                 FavoriteComics.addComicToMyFavorite(comic)
                 self.favoriteIds.insert(comic.getId())
             }
-            self.uploadDropboxPlsit()
             self.tableView.reloadRows(at: [indexPath], with: .none)
         }
         return cell

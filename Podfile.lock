@@ -4,19 +4,16 @@ PODS:
     - SVProgressHUD/Core (= 2.3.1)
   - SVProgressHUD/Core (2.3.1)
   - Swift8ComicSDK (2.0.6)
-  - SwiftyDropbox (10.2.4)
 
 DEPENDENCIES:
   - Kingfisher
   - SVProgressHUD
   - Swift8ComicSDK (from `https://github.com/RayTW/Swift8ComicSDK.git`)
-  - SwiftyDropbox
 
 SPEC REPOS:
   trunk:
     - Kingfisher
     - SVProgressHUD
-    - SwiftyDropbox
 
 EXTERNAL SOURCES:
   Swift8ComicSDK:
@@ -31,8 +28,7 @@ SPEC CHECKSUMS:
   Kingfisher: beeaf65ed57dfa710d416aea4093277e8a9b1968
   SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
   Swift8ComicSDK: 2a09eb1cd6e162e562df47c291bef4c1fdee20a7
-  SwiftyDropbox: 3dbb9cb3dc28220e6b7b492d97b9160730e5ca81
 
-PODFILE CHECKSUM: d469c3d5605c51b51ee470becc66f2273c6778b7
+PODFILE CHECKSUM: 4821e82ea496022d6cde1a9712c25abbc8c6be97
 
 COCOAPODS: 1.16.2

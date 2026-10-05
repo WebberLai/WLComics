@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SwiftyDropbox
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
@@ -18,8 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     let notificationName = Notification.Name(rawValue:"BLEClickNotification")
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        DropboxClientsManager.setupWithAppKey("8lpshpy2m2lq74j")
         SwiftyPlistManager.shared.start(plistNames:["MyFavoritesComics"], logging: false)
+        FavoriteComics.startCloudSync()
 
         // 每次 app 更新時，用 bundle 中最新的 AllComics.plist 覆蓋 Documents 的舊版
         refreshBundlePlistIfNeeded(name: "AllComics")
@@ -86,22 +85,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     }
     
     
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        let canHandle = DropboxClientsManager.handleRedirectURL(url, includeBackgroundClient: false) { authResult in
-            if let authResult = authResult {
-                switch authResult {
-                case .success:
-                    print("Success! User is logged into Dropbox.")
-                case .cancel:
-                    print("Authorization flow was manually canceled by user!")
-                case .error(_, let description):
-                    print("Error: \(description)")
-                }
-            }
-        }
-        return canHandle
-    }
-
     // MARK: - Split view
 
     func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController:UIViewController, onto primaryViewController:UIViewController) -> Bool {
