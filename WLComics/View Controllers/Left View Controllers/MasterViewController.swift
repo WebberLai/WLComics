@@ -52,6 +52,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     // 快取收藏狀態，避免每個 cell 都讀 plist
     private var favoriteIds = Set<String>()
 
+    /// 列表位置存的是最上方那部漫畫的 id 加上捲進那一列的距離，網站新增漫畫導致列表變動時仍能回到同一部
+    private static let scrollAnchorKey = "master_scroll_anchor"
+    private var didRestoreScrollPosition = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -73,6 +77,7 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                     self.reloadFavoriteIds()
                     SVProgressHUD.dismiss()
                     self.tableView.reloadData()
+                    self.restoreScrollPosition()
 
                     // 背景從網站分類頁面更新漫畫列表
                     self.refreshComicsFromWeb()
@@ -88,6 +93,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         // iCloud 收到其他裝置的收藏變動時更新愛心狀態
         NotificationCenter.default.addObserver(self, selector: #selector(favoritesDidChange),
                                                name: FavoriteComics.didChangeNotification, object: nil)
+        // 從多工畫面滑掉 App 前一定會先進背景，在這裡存列表位置
+        NotificationCenter.default.addObserver(self, selector: #selector(saveScrollPosition),
+                                               name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
 
     @objc func favoritesDidChange() {
@@ -102,10 +110,13 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                 guard updatedComics.count > self.allComics.count else { return }
                 let library = self.buildComicLibrary(from: updatedComics)
                 DispatchQueue.main.async {
+                    // 新增的漫畫會插在中間，重新整理後捲回原本看到的那部，畫面才不會跳動
+                    let anchor = self.currentScrollAnchor()
                     self.allComics = updatedComics
                     self.sortedComicLib = library.sorted
                     self.comicSectionTitles = library.titles
                     self.tableView.reloadData()
+                    if let anchor = anchor { self.scroll(to: anchor) }
                 }
             }
         }
@@ -176,6 +187,11 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.tableView.reloadData()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        restoreScrollPosition()
+    }
+
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         shouldShowSearchResults = false
@@ -320,6 +336,53 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectIntexPath = indexPath
         self.performSegue(withIdentifier: "showEpisodes", sender: self)
+    }
+
+    // MARK: - 記住列表位置
+
+    /// 畫面最上方那部漫畫，以及畫面頂端在那一列裡的位移；搜尋中不記錄
+    private func currentScrollAnchor() -> (comicId: String, offset: CGFloat)? {
+        guard !shouldShowSearchResults, !comicSectionTitles.isEmpty else { return nil }
+        let top = tableView.contentOffset.y + tableView.adjustedContentInset.top
+        // 捲到最上方時頂端落在搜尋列上，改用第一個可見列，位移會是負的，還原時一樣會露出搜尋列
+        guard let indexPath = tableView.indexPathForRow(at: CGPoint(x: 1, y: top)) ?? tableView.indexPathsForVisibleRows?.first,
+              let comic = comicForIndexPath(indexPath) else { return nil }
+        return (comic.getId(), top - tableView.rectForRow(at: indexPath).minY)
+    }
+
+    private func scroll(to anchor: (comicId: String, offset: CGFloat)) {
+        guard let indexPath = indexPathForComic(id: anchor.comicId) else { return }
+        tableView.layoutIfNeeded()
+        let inset = tableView.adjustedContentInset
+        let minY = -inset.top
+        let maxY = max(tableView.contentSize.height - tableView.bounds.height + inset.bottom, minY)
+        let y = tableView.rectForRow(at: indexPath).minY + anchor.offset - inset.top
+        tableView.setContentOffset(CGPoint(x: tableView.contentOffset.x, y: min(max(y, minY), maxY)), animated: false)
+    }
+
+    private func indexPathForComic(id: String) -> IndexPath? {
+        for (section, title) in comicSectionTitles.enumerated() {
+            if let row = sortedComicLib[title]?.firstIndex(where: { $0.getId() == id }) {
+                return IndexPath(row: row, section: section)
+            }
+        }
+        return nil
+    }
+
+    @objc func saveScrollPosition() {
+        guard let anchor = currentScrollAnchor() else { return }
+        UserDefaults.standard.set(["comic_id": anchor.comicId, "offset": Double(anchor.offset)],
+                                  forKey: Self.scrollAnchorKey)
+    }
+
+    /// 只在第一次載入完列表時還原。畫面還沒放進視窗時導覽列高度未定，等 viewDidAppear 再還原
+    private func restoreScrollPosition() {
+        guard !didRestoreScrollPosition, view.window != nil, !comicSectionTitles.isEmpty else { return }
+        didRestoreScrollPosition = true
+        guard let saved = UserDefaults.standard.dictionary(forKey: Self.scrollAnchorKey),
+              let comicId = saved["comic_id"] as? String,
+              let offset = saved["offset"] as? Double else { return }
+        scroll(to: (comicId, CGFloat(offset)))
     }
 
     // MARK: - Prefetch（預先載入即將出現的封面圖片）
