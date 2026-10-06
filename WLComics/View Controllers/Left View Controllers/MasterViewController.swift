@@ -319,9 +319,12 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
             if isFavorite {
                 FavoriteComics.removeComicFromMyFavorite(comic)
                 self.favoriteIds.remove(comic.getId())
+                UpdateBadge.refresh()
             } else {
                 FavoriteComics.addComicToMyFavorite(comic)
                 self.favoriteIds.insert(comic.getId())
+                // 第一次收藏時才詢問通知權限，使用者比較能理解用途
+                UpdateNotifier.requestAuthorizationIfNeeded()
             }
             self.tableView.reloadRows(at: [indexPath], with: .none)
         }

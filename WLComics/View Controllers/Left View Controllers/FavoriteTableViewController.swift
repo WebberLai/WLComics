@@ -8,6 +8,7 @@
 
 import UIKit
 import Kingfisher
+import SVProgressHUD
 
 class FavoriteTableViewController: UITableViewController {
     
@@ -30,10 +31,33 @@ class FavoriteTableViewController: UITableViewController {
         // iCloud 收到其他裝置的收藏變動時即時更新
         NotificationCenter.default.addObserver(self, selector: #selector(favoritesDidChange),
                                                name: FavoriteComics.didChangeNotification, object: nil)
+        // 有新集數的標記變動（檢查完成、看過、其他裝置同步）時重新整理
+        NotificationCenter.default.addObserver(self, selector: #selector(trackingDidChange),
+                                               name: UpdateTracker.didChangeNotification, object: nil)
+        // 下拉強制檢查更新，不受每天一次的限制
+        refreshControl = UIRefreshControl()
+        refreshControl?.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
     }
 
     @objc func favoritesDidChange() {
         reloadFavoriteComics()
+    }
+
+    @objc func trackingDidChange() {
+        tableView.reloadData()
+    }
+
+    @objc func pullToRefresh() {
+        UpdateChecker.shared.check(reason: .manual) { [weak self] result in
+            // 人就在 App 裡看得到 NEW，不需要再推播
+            UpdateTracker.markNotified(comicIds: result.updates.map { $0.comicId })
+            // 沒有收藏時檢查會同步結束，在 valueChanged 當下收起轉圈可能卡住，延到下一輪
+            DispatchQueue.main.async { self?.refreshControl?.endRefreshing() }
+            if result.failedCount > 0 {
+                SVProgressHUD.showInfo(withStatus: "\(result.failedCount) 部檢查失敗")
+                SVProgressHUD.dismiss(withDelay: 1.5)
+            }
+        }
     }
     
     func reloadFavoriteComics () {
@@ -143,6 +167,9 @@ class FavoriteTableViewController: UITableViewController {
 
         let comicDict = comics[indexPath.row]
         cell.comicNametextLabel.text = comicDict.object(forKey: "name") as? String
+        if let comicId = comicDict.object(forKey: "comic_id") as? String {
+            cell.showsUpdateBadge = UpdateTracker.hasUpdate(comicId: comicId)
+        }
 
         // 先取消之前的圖片下載，避免 cell 重用時殘留舊圖
         cell.coverImageView?.kf.cancelDownloadTask()
@@ -200,6 +227,7 @@ class FavoriteTableViewController: UITableViewController {
             let deleteComic = WLComics.sharedInstance().getR8Comic().generatorFakeComic(comicDict.object(forKey: "comic_id") as! String ,
                                                                                          name: comicDict.object(forKey: "name") as! String)
             FavoriteComics.removeComicFromMyFavorite(deleteComic)
+            UpdateBadge.refresh()
             
             for (index, element) in (myFavoriteList?.enumerated())!{
                 if element == comicDict{

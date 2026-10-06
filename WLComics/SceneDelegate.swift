@@ -39,13 +39,46 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 let downloads = UINavigationController(rootViewController: DownloadsViewController(style: .plain))
                 downloads.tabBarItem = UITabBarItem(title: "已下載", image: UIImage(systemName: "arrow.down.circle"), tag: 2)
                 tabBarController.viewControllers = (tabBarController.viewControllers ?? []) + [downloads]
+                UpdateBadge.favoritesTabItem = tabBarController.viewControllers?
+                    .first(where: SceneDelegate.isFavoritesTab)?.tabBarItem
             }
         }
+
+        // 追蹤資料或收藏變動時更新分頁與 App 圖示的數字
+        NotificationCenter.default.addObserver(forName: UpdateTracker.didChangeNotification,
+                                               object: nil, queue: .main) { _ in UpdateBadge.refresh() }
+        NotificationCenter.default.addObserver(forName: FavoriteComics.didChangeNotification,
+                                               object: nil, queue: .main) { _ in UpdateBadge.refresh() }
+        UpdateBadge.refresh()
+        checkForUpdates()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {}
     func sceneDidBecomeActive(_ scene: UIScene) {}
     func sceneWillResignActive(_ scene: UIScene) {}
-    func sceneWillEnterForeground(_ scene: UIScene) {}
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        checkForUpdates()
+    }
     func sceneDidEnterBackground(_ scene: UIScene) {}
+
+    // MARK: - 收藏更新
+
+    /// 前景檢查：每天最多一次（節流在 UpdateChecker 內），結果只標示不推播
+    private func checkForUpdates() {
+        UpdateChecker.shared.check(reason: .foreground) { result in
+            UpdateTracker.markNotified(comicIds: result.updates.map { $0.comicId })
+        }
+    }
+
+    /// 點擊更新通知時切到「我的收藏」
+    func showFavoritesTab() {
+        guard let splitViewController = window?.rootViewController as? UISplitViewController,
+              let tabBarController = splitViewController.viewControllers.first as? UITabBarController,
+              let index = tabBarController.viewControllers?.firstIndex(where: SceneDelegate.isFavoritesTab) else { return }
+        tabBarController.selectedIndex = index
+    }
+
+    private static func isFavoritesTab(_ viewController: UIViewController) -> Bool {
+        return (viewController as? UINavigationController)?.viewControllers.first is FavoriteTableViewController
+    }
 }

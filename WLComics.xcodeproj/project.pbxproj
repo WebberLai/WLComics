@@ -32,6 +32,9 @@
 		60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */; };
 		71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
 		7E1A2B3C4D5E6F7081920A1C /* ReadingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A1B /* ReadingProgress.swift */; };
+		7E1A2B3C4D5E6F7081920A4C /* UpdateTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A4B /* UpdateTracker.swift */; };
+		7E1A2B3C4D5E6F7081920A5C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A5B /* UpdateChecker.swift */; };
+		7E1A2B3C4D5E6F7081920A6C /* UpdateNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A6B /* UpdateNotifier.swift */; };
 		7E1A2B3C4D5E6F7081920A2C /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A2B /* DownloadManager.swift */; };
 		7E1A2B3C4D5E6F7081920A3C /* DownloadsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A3B /* DownloadsViewController.swift */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
@@ -79,6 +82,9 @@
 		71BB3F481F2DBAF000EBED7D /* WLComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WLComics.swift; sourceTree = "<group>"; };
 		7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E1A2B3C4D5E6F7081920A1B /* ReadingProgress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadingProgress.swift; sourceTree = "<group>"; };
+		7E1A2B3C4D5E6F7081920A4B /* UpdateTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateTracker.swift; sourceTree = "<group>"; };
+		7E1A2B3C4D5E6F7081920A5B /* UpdateChecker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
+		7E1A2B3C4D5E6F7081920A6B /* UpdateNotifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateNotifier.swift; sourceTree = "<group>"; };
 		7E1A2B3C4D5E6F7081920A2B /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		7E1A2B3C4D5E6F7081920A3B /* DownloadsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadsViewController.swift; sourceTree = "<group>"; };
 		AA000001AAAA000100000000 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -242,6 +248,9 @@
 			children = (
 				60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */,
 				7E1A2B3C4D5E6F7081920A1B /* ReadingProgress.swift */,
+				7E1A2B3C4D5E6F7081920A4B /* UpdateTracker.swift */,
+				7E1A2B3C4D5E6F7081920A5B /* UpdateChecker.swift */,
+				7E1A2B3C4D5E6F7081920A6B /* UpdateNotifier.swift */,
 				7E1A2B3C4D5E6F7081920A2B /* DownloadManager.swift */,
 				6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */,
 			);
@@ -429,6 +438,9 @@
 				6034C3011F73463600D2B861 /* SwiftyPlistManager.swift in Sources */,
 				6034C2FF1F73456200D2B861 /* FavoriteComics.swift in Sources */,
 				7E1A2B3C4D5E6F7081920A1C /* ReadingProgress.swift in Sources */,
+				7E1A2B3C4D5E6F7081920A4C /* UpdateTracker.swift in Sources */,
+				7E1A2B3C4D5E6F7081920A5C /* UpdateChecker.swift in Sources */,
+				7E1A2B3C4D5E6F7081920A6C /* UpdateNotifier.swift in Sources */,
 				7E1A2B3C4D5E6F7081920A3C /* DownloadsViewController.swift in Sources */,
 				7E1A2B3C4D5E6F7081920A2C /* DownloadManager.swift in Sources */,
 				60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */,

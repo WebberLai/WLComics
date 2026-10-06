@@ -7,19 +7,34 @@
 //
 
 import UIKit
+import BackgroundTasks
+import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
     // Define identifier
     let notificationName = Notification.Name(rawValue:"BLEClickNotification")
 
+    /// 需和 Info.plist 的 BGTaskSchedulerPermittedIdentifiers（<bundle id>.checkUpdates）一致
+    private static let updateTaskId = (Bundle.main.bundleIdentifier ?? "com.webberlai.WLComics") + ".checkUpdates"
+    /// 漫畫多半是週刊，一天檢查一次就夠
+    private static let updateInterval: TimeInterval = 24 * 60 * 60
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         SwiftyPlistManager.shared.start(plistNames:["MyFavoritesComics"], logging: false)
         FavoriteComics.startCloudSync()
         ReadingProgress.startCloudSync()
+        UpdateTracker.startCloudSync()
+        // 已有收藏的使用者，更新後第一次啟動時詢問通知權限（只會問一次）
+        if !FavoriteComics.listAllFavorite().isEmpty {
+            UpdateNotifier.requestAuthorizationIfNeeded()
+        }
+        UNUserNotificationCenter.current().delegate = self
+        registerUpdateTask()
+        scheduleUpdateTask()
 
         // 每次 app 更新時，用 bundle 中最新的 AllComics.plist 覆蓋 Documents 的舊版
         refreshBundlePlistIfNeeded(name: "AllComics")
@@ -46,6 +61,59 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             try? fileManager.copyItem(atPath: bundlePath, toPath: docPath)
             UserDefaults.standard.set(currentVersion, forKey: versionKey)
         }
+    }
+
+    // MARK: - 背景檢查收藏更新
+
+    private func registerUpdateTask() {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: AppDelegate.updateTaskId, using: nil) { task in
+            guard let task = task as? BGAppRefreshTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleUpdateTask(task)
+        }
+    }
+
+    private func scheduleUpdateTask() {
+        let request = BGAppRefreshTaskRequest(identifier: AppDelegate.updateTaskId)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: AppDelegate.updateInterval)
+        // Mac 或使用者關閉「背景 App 重新整理」時會失敗，此時只靠前景檢查
+        try? BGTaskScheduler.shared.submit(request)
+    }
+
+    /// 系統叫起背景任務時執行（在背景執行緒），檢查與通知都切回 main thread
+    private func handleUpdateTask(_ task: BGAppRefreshTask) {
+        scheduleUpdateTask()
+        task.expirationHandler = {
+            DispatchQueue.main.async { UpdateChecker.shared.cancel() }
+        }
+        DispatchQueue.main.async {
+            UpdateChecker.shared.check(reason: .background) { result in
+                UpdateNotifier.post(result.updates) {
+                    UpdateBadge.refresh()
+                    task.setTaskCompleted(success: true)
+                }
+            }
+        }
+    }
+
+    // MARK: - 通知
+
+    /// App 在前景時背景任務剛好跑完，仍顯示通知
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .list, .sound])
+    }
+
+    /// 點擊更新通知時切到「我的收藏」
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        if response.notification.request.identifier.hasPrefix(UpdateNotifier.identifierPrefix) {
+            let scene = UIApplication.shared.connectedScenes.first { $0.delegate is SceneDelegate }
+            (scene?.delegate as? SceneDelegate)?.showFavoritesTab()
+        }
+        completionHandler()
     }
 
     // MARK: - UISceneSession Lifecycle

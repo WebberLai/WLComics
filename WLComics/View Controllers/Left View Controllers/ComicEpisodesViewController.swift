@@ -61,6 +61,10 @@ class ComicEpisodesViewController: UIViewController {
                 let episodes = comicDetail.getEpisode()
                 DispatchQueue.main.async {
                     self.allEpisodes = episodes
+                    // 看過集數列表就清掉 NEW 標記（只追蹤收藏的漫畫；0 集時 markSeen 會忽略）
+                    if FavoriteComics.checkComicIsMyFavorite(self.currentComic) {
+                        UpdateTracker.markSeen(comicId: self.currentComic.getId(), episodeCount: episodes.count)
+                    }
                     self.refreshLastRead()
                     self.tableView.reloadData()
                     self.updateContinueButton()
