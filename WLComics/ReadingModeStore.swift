@@ -17,20 +17,24 @@ class ReadingModeStore: NSObject {
 
     private static let storeKey = "reading_mode"
     /// KVS 單一 key 上限 1MB，每部漫畫一筆，只保留最近的一千部
-    private static let maxEntries = 1000
+    static let maxEntries = 1000
 
-    private static let sourceManual = "manual"
+    static let sourceManual = "manual"
 
     private static let cloudStore = NSUbiquitousKeyValueStore.default
 
-    private typealias Store = [String: [String: Any]]
+    typealias Store = [String: [String: Any]]
 
     // MARK: - 讀寫
 
     /// 沒有手動選過時回傳 nil，由閱讀器用預設的左右翻頁。
     /// 早期版本曾存過自動判斷（source = auto）的結果，判斷不準，一律忽略
     static func mode(for comicId: String) -> ReadingMode? {
-        guard let entry = loadLocal()[comicId],
+        return mode(in: loadLocal(), for: comicId)
+    }
+
+    static func mode(in store: Store, for comicId: String) -> ReadingMode? {
+        guard let entry = store[comicId],
               entry["source"] as? String == sourceManual,
               let raw = entry["mode"] as? String else { return nil }
         return ReadingMode(rawValue: raw)
@@ -65,8 +69,21 @@ class ReadingModeStore: NSObject {
         mergeFromCloud()
     }
 
+    private static func mergeFromCloud() {
+        let cloud = cloudStore.dictionary(forKey: storeKey) as? Store ?? [:]
+        let result = merged(local: loadLocal(), cloud: cloud)
+        if result.localChanged {
+            saveLocal(result.store)
+        }
+        if result.cloudNeedsUpdate {
+            cloudStore.set(result.store, forKey: storeKey)
+        }
+    }
+
+    // MARK: - 計算（不讀寫儲存，方便測試）
+
     /// a 是否應該蓋過 b：手動優先，來源相同時取較新的
-    private static func entry(_ a: [String: Any], winsOver b: [String: Any]?) -> Bool {
+    static func entry(_ a: [String: Any], winsOver b: [String: Any]?) -> Bool {
         guard let b = b else { return true }
         let aManual = a["source"] as? String == sourceManual
         let bManual = b["source"] as? String == sourceManual
@@ -74,10 +91,7 @@ class ReadingModeStore: NSObject {
         return (a["updated_at"] as? TimeInterval ?? 0) > (b["updated_at"] as? TimeInterval ?? 0)
     }
 
-    private static func mergeFromCloud() {
-        let cloud = cloudStore.dictionary(forKey: storeKey) as? Store ?? [:]
-        let local = loadLocal()
-
+    static func merged(local: Store, cloud: Store) -> (store: Store, localChanged: Bool, cloudNeedsUpdate: Bool) {
         var merged = local
         var localChanged = false
         for (comicId, cloudEntry) in cloud where entry(cloudEntry, winsOver: local[comicId]) {
@@ -87,14 +101,7 @@ class ReadingModeStore: NSObject {
         let cloudNeedsUpdate = local.contains { comicId, localEntry in
             entry(localEntry, winsOver: cloud[comicId])
         }
-
-        merged = trimmed(merged)
-        if localChanged {
-            saveLocal(merged)
-        }
-        if cloudNeedsUpdate {
-            cloudStore.set(merged, forKey: storeKey)
-        }
+        return (trimmed(merged), localChanged, cloudNeedsUpdate)
     }
 
     // MARK: - 本機儲存
@@ -108,7 +115,7 @@ class ReadingModeStore: NSObject {
     }
 
     /// 超過上限時丟掉最久沒更新的
-    private static func trimmed(_ store: Store) -> Store {
+    static func trimmed(_ store: Store) -> Store {
         guard store.count > maxEntries else { return store }
         let sorted = store.sorted {
             ($0.value["updated_at"] as? TimeInterval ?? 0) > ($1.value["updated_at"] as? TimeInterval ?? 0)

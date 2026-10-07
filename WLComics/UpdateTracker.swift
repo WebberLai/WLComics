@@ -18,9 +18,9 @@ class UpdateTracker: NSObject {
 
     private static let cloudStore = NSUbiquitousKeyValueStore.default
 
-    private typealias Store = [String: [String: Any]]
+    typealias Store = [String: [String: Any]]
 
-    private struct Entry {
+    struct Entry {
         var seen: Int
         var notified: Int
         var latest: Int
@@ -45,6 +45,9 @@ class UpdateTracker: NSObject {
             checkedAt = dict["checked_at"] as? TimeInterval ?? 0
         }
 
+        var hasUpdate: Bool { return latest > seen }
+        var needsNotification: Bool { return latest > notified }
+
         var dictionary: [String: Any] {
             return ["seen_count": seen,
                     "notified_count": notified,
@@ -61,26 +64,19 @@ class UpdateTracker: NSObject {
     }
 
     static func hasUpdate(comicId: String) -> Bool {
-        guard let entry = Entry(loadLocal()[comicId]) else { return false }
-        return entry.latest > entry.seen
+        return Entry(loadLocal()[comicId])?.hasUpdate ?? false
     }
 
     /// 收藏中有新集數的部數，給分頁與 App 圖示 badge 用
     static func updatedComicCount() -> Int {
         let store = loadLocal()
-        return Set(favoriteIds()).filter { id in
-            guard let entry = Entry(store[id]) else { return false }
-            return entry.latest > entry.seen
-        }.count
+        return Set(favoriteIds()).filter { Entry(store[$0])?.hasUpdate ?? false }.count
     }
 
     /// 有新集數但還沒通知過的收藏，依收藏順序
     static func pendingNotificationIds() -> [String] {
         let store = loadLocal()
-        return favoriteIds().filter { id in
-            guard let entry = Entry(store[id]) else { return false }
-            return entry.latest > entry.notified
-        }
+        return favoriteIds().filter { Entry(store[$0])?.needsNotification ?? false }
     }
 
     // MARK: - 寫入
@@ -97,10 +93,7 @@ class UpdateTracker: NSObject {
     static func markSeen(comicId: String, episodeCount: Int) {
         guard episodeCount > 0 else { return }
         var store = loadLocal()
-        var entry = applying(count: episodeCount, to: Entry(store[comicId]))
-        entry.seen = entry.latest
-        entry.notified = max(entry.notified, entry.latest)
-        store[comicId] = entry.dictionary
+        store[comicId] = markingSeen(Entry(store[comicId]), count: episodeCount).dictionary
         commit(store)
     }
 
@@ -108,9 +101,8 @@ class UpdateTracker: NSObject {
         var store = loadLocal()
         var changed = false
         for id in comicIds {
-            guard var entry = Entry(store[id]), entry.notified < entry.latest else { continue }
-            entry.notified = entry.latest
-            store[id] = entry.dictionary
+            guard let entry = Entry(store[id]), let notified = markingNotified(entry) else { continue }
+            store[id] = notified.dictionary
             changed = true
         }
         if changed { commit(store) }
@@ -121,14 +113,6 @@ class UpdateTracker: NSObject {
         let store = loadLocal()
         let kept = store.filter { comicIds.contains($0.key) }
         if kept.count != store.count { commit(kept) }
-    }
-
-    /// 第一次追蹤，或網站刪了集數（集數變少）時，三個數字都重設為目前集數
-    private static func applying(count: Int, to old: Entry?) -> Entry {
-        guard var entry = old, count >= entry.latest else { return Entry(count: count) }
-        entry.latest = count
-        entry.checkedAt = Date().timeIntervalSince1970
-        return entry
     }
 
     private static func commit(_ store: Store) {
@@ -156,11 +140,48 @@ class UpdateTracker: NSObject {
         mergeFromCloud()
     }
 
-    /// 每部漫畫：seen、notified 取較大值（任一台看過或通知過就算），latest 取較新檢查的那筆
     private static func mergeFromCloud() {
         let cloud = cloudStore.dictionary(forKey: storeKey) as? Store ?? [:]
         let local = loadLocal()
+        let merged = self.merged(local: local, cloud: cloud)
 
+        let mergedDict = NSDictionary(dictionary: merged)
+        if !mergedDict.isEqual(to: local) {
+            saveLocal(merged)
+            NotificationCenter.default.post(name: didChangeNotification, object: nil)
+        }
+        if !mergedDict.isEqual(to: cloud) {
+            cloudStore.set(merged, forKey: storeKey)
+        }
+    }
+
+    // MARK: - 計算（不讀寫儲存，方便測試）
+
+    /// 第一次追蹤，或網站刪了集數（集數變少）時，三個數字都重設為目前集數
+    static func applying(count: Int, to old: Entry?) -> Entry {
+        guard var entry = old, count >= entry.latest else { return Entry(count: count) }
+        entry.latest = count
+        entry.checkedAt = Date().timeIntervalSince1970
+        return entry
+    }
+
+    static func markingSeen(_ old: Entry?, count: Int) -> Entry {
+        var entry = applying(count: count, to: old)
+        entry.seen = entry.latest
+        entry.notified = max(entry.notified, entry.latest)
+        return entry
+    }
+
+    /// 已經通知過最新集數時回傳 nil，不需要改
+    static func markingNotified(_ entry: Entry) -> Entry? {
+        guard entry.notified < entry.latest else { return nil }
+        var entry = entry
+        entry.notified = entry.latest
+        return entry
+    }
+
+    /// 每部漫畫：seen、notified 取較大值（任一台看過或通知過就算），latest 取較新檢查的那筆
+    static func merged(local: Store, cloud: Store) -> Store {
         var merged = local
         for (comicId, cloudDict) in cloud {
             guard let cloudEntry = Entry(cloudDict) else { continue }
@@ -174,15 +195,7 @@ class UpdateTracker: NSObject {
             entry.notified = min(max(cloudEntry.notified, localEntry.notified), entry.latest)
             merged[comicId] = entry.dictionary
         }
-
-        let mergedDict = NSDictionary(dictionary: merged)
-        if !mergedDict.isEqual(to: local) {
-            saveLocal(merged)
-            NotificationCenter.default.post(name: didChangeNotification, object: nil)
-        }
-        if !mergedDict.isEqual(to: cloud) {
-            cloudStore.set(merged, forKey: storeKey)
-        }
+        return merged
     }
 
     // MARK: - 本機儲存

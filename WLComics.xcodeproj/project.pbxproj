@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11AA5CE258D49204E4D9D217 /* Pods_WLComicsTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F775CEA85BDD293314945180 /* Pods_WLComicsTests.framework */; };
 		6012D7EA1F57D16A00F5C688 /* ComicTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */; };
 		6012D7EE1F57DF8000F5C688 /* FavoriteTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6012D7ED1F57DF8000F5C688 /* FavoriteTableViewController.swift */; };
 		601EEE251F29722300504E29 /* ComicEpisodesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */; };
@@ -16,7 +17,6 @@
 		6056EE1E1F28233F007BBE67 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1D1F28233F007BBE67 /* AppDelegate.swift */; };
 		6056EE201F28233F007BBE67 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE1F1F28233F007BBE67 /* MasterViewController.swift */; };
 		6056EE221F28233F007BBE67 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6056EE211F28233F007BBE67 /* DetailViewController.swift */; };
-		7E1A2B3C4D5E6F7081920A8C /* VerticalReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A8B /* VerticalReaderView.swift */; };
 		6056EE251F28233F007BBE67 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6056EE231F28233F007BBE67 /* Main.storyboard */; };
 		6056EE271F28233F007BBE67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6056EE261F28233F007BBE67 /* Assets.xcassets */; };
 		6056EE2A1F28233F007BBE67 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6056EE281F28233F007BBE67 /* LaunchScreen.storyboard */; };
@@ -33,15 +33,26 @@
 		60EA2F931F2AC91500928D95 /* EpisodeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EA2F921F2AC91500928D95 /* EpisodeDetailViewController.swift */; };
 		71BB3F491F2DBAF000EBED7D /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
 		7E1A2B3C4D5E6F7081920A1C /* ReadingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A1B /* ReadingProgress.swift */; };
+		7E1A2B3C4D5E6F7081920A2C /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A2B /* DownloadManager.swift */; };
+		7E1A2B3C4D5E6F7081920A3C /* DownloadsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A3B /* DownloadsViewController.swift */; };
 		7E1A2B3C4D5E6F7081920A4C /* UpdateTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A4B /* UpdateTracker.swift */; };
 		7E1A2B3C4D5E6F7081920A5C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A5B /* UpdateChecker.swift */; };
 		7E1A2B3C4D5E6F7081920A6C /* UpdateNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A6B /* UpdateNotifier.swift */; };
 		7E1A2B3C4D5E6F7081920A7C /* ReadingModeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A7B /* ReadingModeStore.swift */; };
-		7E1A2B3C4D5E6F7081920A2C /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A2B /* DownloadManager.swift */; };
-		7E1A2B3C4D5E6F7081920A3C /* DownloadsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A3B /* DownloadsViewController.swift */; };
+		7E1A2B3C4D5E6F7081920A8C /* VerticalReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A8B /* VerticalReaderView.swift */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
 		AA000001AAAA000100000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001AAAA000100000000 /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		602725D7307617600071AD3A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6056EE121F28233F007BBE67 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6056EE191F28233F007BBE67;
+			remoteInfo = WLComics;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.release.xcconfig"; sourceTree = "<group>"; };
@@ -55,13 +66,13 @@
 		6012D81B1F57FE7900F5C688 /* Preview.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Preview.PNG; sourceTree = "<group>"; };
 		6012D81C1F5802EB00F5C688 /* Cache.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cache.PNG; sourceTree = "<group>"; };
 		601EEE241F29722300504E29 /* ComicEpisodesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicEpisodesViewController.swift; sourceTree = "<group>"; };
+		602725D3307617600071AD3A /* WLComicsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WLComicsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftyPlistManager.swift; sourceTree = "<group>"; };
 		6034C3021F73479900D2B861 /* MyFavoritesComics.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = MyFavoritesComics.plist; sourceTree = "<group>"; };
 		6056EE1A1F28233F007BBE67 /* 看漫畫.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "看漫畫.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6056EE1D1F28233F007BBE67 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6056EE1F1F28233F007BBE67 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
 		6056EE211F28233F007BBE67 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
-		7E1A2B3C4D5E6F7081920A8B /* VerticalReaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerticalReaderView.swift; sourceTree = "<group>"; };
 		6056EE241F28233F007BBE67 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		6056EE261F28233F007BBE67 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6056EE291F28233F007BBE67 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -85,18 +96,34 @@
 		71BB3F481F2DBAF000EBED7D /* WLComics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WLComics.swift; sourceTree = "<group>"; };
 		7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E1A2B3C4D5E6F7081920A1B /* ReadingProgress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadingProgress.swift; sourceTree = "<group>"; };
+		7E1A2B3C4D5E6F7081920A2B /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
+		7E1A2B3C4D5E6F7081920A3B /* DownloadsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadsViewController.swift; sourceTree = "<group>"; };
 		7E1A2B3C4D5E6F7081920A4B /* UpdateTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateTracker.swift; sourceTree = "<group>"; };
 		7E1A2B3C4D5E6F7081920A5B /* UpdateChecker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		7E1A2B3C4D5E6F7081920A6B /* UpdateNotifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateNotifier.swift; sourceTree = "<group>"; };
 		7E1A2B3C4D5E6F7081920A7B /* ReadingModeStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadingModeStore.swift; sourceTree = "<group>"; };
-		7E1A2B3C4D5E6F7081920A2B /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
-		7E1A2B3C4D5E6F7081920A3B /* DownloadsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadsViewController.swift; sourceTree = "<group>"; };
+		7E1A2B3C4D5E6F7081920A8B /* VerticalReaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerticalReaderView.swift; sourceTree = "<group>"; };
 		AA000001AAAA000100000000 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		B72AA88981B403D7045D297B /* Pods-WLComicsTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComicsTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WLComicsTests/Pods-WLComicsTests.debug.xcconfig"; sourceTree = "<group>"; };
 		BA128D022324A59500EE12B4 /* WLComics-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WLComics-Bridging-Header.h"; sourceTree = "<group>"; };
 		EBCC57C77576999D43679021 /* Pods-WLComics.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.debug.xcconfig"; sourceTree = "<group>"; };
+		ECA4828C01E31EE0437EF223 /* Pods-WLComicsTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComicsTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-WLComicsTests/Pods-WLComicsTests.release.xcconfig"; sourceTree = "<group>"; };
+		F775CEA85BDD293314945180 /* Pods_WLComicsTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WLComicsTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		602725D4307617600071AD3A /* WLComicsTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WLComicsTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		602725D0307617600071AD3A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11AA5CE258D49204E4D9D217 /* Pods_WLComicsTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6056EE171F28233F007BBE67 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -120,6 +147,8 @@
 			children = (
 				EBCC57C77576999D43679021 /* Pods-WLComics.debug.xcconfig */,
 				0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */,
+				B72AA88981B403D7045D297B /* Pods-WLComicsTests.debug.xcconfig */,
+				ECA4828C01E31EE0437EF223 /* Pods-WLComicsTests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -184,6 +213,7 @@
 			children = (
 				6056EE1C1F28233F007BBE67 /* WLComics */,
 				60A561991F82264B004C71C1 /* WLMacComic */,
+				602725D4307617600071AD3A /* WLComicsTests */,
 				6056EE1B1F28233F007BBE67 /* Products */,
 				3526AE096006480C1DF0ADAF /* Pods */,
 				E63344A200A32F08202A6A7C /* Frameworks */,
@@ -196,6 +226,7 @@
 			children = (
 				6056EE1A1F28233F007BBE67 /* 看漫畫.app */,
 				60A561981F82264B004C71C1 /* WLMacComic.app */,
+				602725D3307617600071AD3A /* WLComicsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -280,6 +311,7 @@
 			isa = PBXGroup;
 			children = (
 				7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */,
+				F775CEA85BDD293314945180 /* Pods_WLComicsTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -287,6 +319,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		602725D2307617600071AD3A /* WLComicsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 602725DB307617600071AD3A /* Build configuration list for PBXNativeTarget "WLComicsTests" */;
+			buildPhases = (
+				A0F134FEA35245DAC9348F8B /* [CP] Check Pods Manifest.lock */,
+				602725CF307617600071AD3A /* Sources */,
+				602725D0307617600071AD3A /* Frameworks */,
+				602725D1307617600071AD3A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				602725D8307617600071AD3A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				602725D4307617600071AD3A /* WLComicsTests */,
+			);
+			name = WLComicsTests;
+			productName = WLComicsTests;
+			productReference = 602725D3307617600071AD3A /* WLComicsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		6056EE191F28233F007BBE67 /* WLComics */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6056EE2E1F28233F007BBE67 /* Build configuration list for PBXNativeTarget "WLComics" */;
@@ -329,10 +383,14 @@
 		6056EE121F28233F007BBE67 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0900;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = webberlai;
 				TargetAttributes = {
+					602725D2307617600071AD3A = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 6056EE191F28233F007BBE67;
+					};
 					6056EE191F28233F007BBE67 = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = 7T4QCGLNFF;
@@ -361,11 +419,19 @@
 			targets = (
 				6056EE191F28233F007BBE67 /* WLComics */,
 				60A561971F82264B004C71C1 /* WLMacComic */,
+				602725D2307617600071AD3A /* WLComicsTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		602725D1307617600071AD3A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6056EE181F28233F007BBE67 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -416,6 +482,28 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		A0F134FEA35245DAC9348F8B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-WLComicsTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		E5019BE780296B63622675AE /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -437,6 +525,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		602725CF307617600071AD3A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6056EE161F28233F007BBE67 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -475,6 +570,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		602725D8307617600071AD3A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6056EE191F28233F007BBE67 /* WLComics */;
+			targetProxy = 602725D7307617600071AD3A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		6056EE231F28233F007BBE67 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
@@ -503,6 +606,86 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		602725D9307617600071AD3A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B72AA88981B403D7045D297B /* Pods-WLComicsTests.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7T4QCGLNFF;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComicsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/看漫畫.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/看漫畫";
+			};
+			name = Debug;
+		};
+		602725DA307617600071AD3A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = ECA4828C01E31EE0437EF223 /* Pods-WLComicsTests.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7T4QCGLNFF;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComicsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/看漫畫.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/看漫畫";
+			};
+			name = Release;
+		};
 		6056EE2C1F28233F007BBE67 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -592,7 +775,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -611,8 +795,12 @@
 				DEVELOPMENT_TEAM = 7T4QCGLNFF;
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComics;
+				PRODUCT_MODULE_NAME = WLComics;
 				PRODUCT_NAME = "看漫畫";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -635,8 +823,12 @@
 				DEVELOPMENT_TEAM = 7T4QCGLNFF;
 				INFOPLIST_FILE = WLComics/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLComics;
+				PRODUCT_MODULE_NAME = WLComics;
 				PRODUCT_NAME = "看漫畫";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -664,7 +856,10 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = WLMacComic/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLMacComic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -692,7 +887,10 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = WLMacComic/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLMacComic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -704,6 +902,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		602725DB307617600071AD3A /* Build configuration list for PBXNativeTarget "WLComicsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				602725D9307617600071AD3A /* Debug */,
+				602725DA307617600071AD3A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6056EE151F28233F007BBE67 /* Build configuration list for PBXProject "WLComics" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

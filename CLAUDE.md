@@ -5,9 +5,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Run
 
 - **Open `WLComics.xcworkspace`** (not `.xcodeproj`) — CocoaPods workspace
-- Install/update dependencies: `cd WLComics && pod install`
-- Build target: `WLComics` (iOS 14.0+), supports iPhone and iPad
-- No test targets exist in this project
+- Install dependencies: `pod install` at the repo root (where `Podfile` is). Pods/ is tracked in git — after `pod install`, restore SDK patches with `git checkout -- Pods/Swift8ComicSDK`
+- Build target: `WLComics` (iOS 14.0+), supports iPhone and iPad. Product name is `看漫畫`; `PRODUCT_MODULE_NAME = WLComics` is set explicitly so tests can `@testable import WLComics`
+- Unit tests: `WLComicsTests` target (XCTest, deployment target 15.6), files in `WLComicsTests/` (synchronized folder — new files are picked up automatically). Run with ⌘U
+  - `UpdateTracker` / `ReadingModeStore` expose their logic as static pure functions (`applying`, `markingSeen`, `merged`, `trimmed`, `mode(in:for:)`…); tests call those and never touch UserDefaults / iCloud KVS
+  - `SDKParserTests` parses saved 8comic pages in `WLComicsTests/Fixtures/` — run after editing the SDK's `Parser` / `JSnview`
+  - `SDKLiveSiteTests` hits the real site to detect redesigns; skipped unless the scheme sets env var `WLCOMICS_LIVE_TESTS=1`
+- Adding a target in Xcode 26 bumps `objectVersion` to 70, which CocoaPods (xcodeproj 1.27) rejects — change it to 77 in `project.pbxproj` before `pod install`
 
 ## Architecture
 
