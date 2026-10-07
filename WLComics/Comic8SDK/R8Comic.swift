@@ -1,3 +1,10 @@
+//
+//  R8Comic.swift
+//  Comic8SDK
+//
+
+import Foundation
+
 open class R8Comic{
     private static let sInstance : R8Comic = R8Comic()
     private var mConfig : Config = Config()

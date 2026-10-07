@@ -1,6 +1,6 @@
 //
 //  JSnview.swift
-//  Pods
+//  Comic8SDK
 //
 //  解析每集(話)漫畫圖片下載網址
 //

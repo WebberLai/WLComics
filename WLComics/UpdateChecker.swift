@@ -4,7 +4,6 @@
 //
 
 import Foundation
-import Swift8ComicSDK
 
 /// 向網站抓收藏漫畫的集數列表，交給 UpdateTracker 比對。只在 main thread 呼叫。
 class UpdateChecker {

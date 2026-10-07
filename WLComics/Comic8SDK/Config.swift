@@ -1,10 +1,12 @@
 //
 //  Config.swift
-//  Pods
+//  Comic8SDK
 //
 //  Created by ray.lee on 2017/6/7.
 //
 //
+
+import Foundation
 
 open class Config {
     public static let mComicHost : String = "https://www.8comic.com/"

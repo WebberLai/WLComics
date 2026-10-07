@@ -1,6 +1,6 @@
 //
 //  Parser.swift
-//  Pods
+//  Comic8SDK
 //
 //  Created by ray.lee on 2017/6/8.
 //
@@ -16,12 +16,12 @@ open class Parser{
     let mCommicNameBegin = "hidethumb();'>"
     let mCommicNameEnd = "</a></td>"
     let mFindCview = "cview("
-    let mFindDeaitlTag = "style=\"line-height:25px\">"
     let mFinishTag = "class=\"hide\"";
     
-    //comicDetail
-    let mAuthorTag = "作者：</td>"
-    let mUpdateTag = "更新：</td>"
+    //comicDetail（2026 版網頁）
+    let mAuthorTag = "item-info-author"
+    let mUpdateTag = "item-info-date"
+    let mDescriptionTag = "item_info_detail"
     let mNameTag = ");return"
     
     //cviewJS
@@ -97,9 +97,6 @@ open class Parser{
         let html : [String] = StringUtility.split(htmlString, separatedBy: "\n")
         
         var findCviewRange :Range<String.Index>?
-        var findDetailTagRange :Range<String.Index>?;
-        var findAuthorRange :Range<String.Index>?
-        var latestUpdateTimeRange :Range<String.Index>?
         var nameTagRange :Range<String.Index>?
         var episodes = [Episode]() //建立集數物件
         var isFinishEpisode : Bool = false
@@ -173,39 +170,21 @@ open class Parser{
                     }
                 }
             }else{
-                //解析漫畫簡介
-                if(comic.getDescription() == nil){
-                    findDetailTagRange = StringUtility.indexOf(source: txt, search: mFindDeaitlTag)
-                    
-                    if(findDetailTagRange != nil){
-                        let lower = StringUtility.indexOfLower(source: txt, search: "</td>")
-                        comic.setDescription(StringUtility.substring(source: txt, upper: (findDetailTagRange?.upperBound)!, lower: lower!))
+                //解析作者：<span class="mr-1 item-info-author mb-1">作者: 尾田榮一郎</span>
+                if(comic.getAuthor() == nil && txt.range(of: mAuthorTag) != nil){
+                    var author = self.plainText(txt)
+                    for prefix in ["作者:", "作者："] where author.hasPrefix(prefix) {
+                        author = String(author.dropFirst(prefix.count))
                     }
+                    comic.setAuthor(author.trimmingCharacters(in: .whitespaces))
                 }
-                //解析作者
-                if(comic.getAuthor() == nil){
-                    if(findAuthorRange == nil){
-                        findAuthorRange = StringUtility.indexOf(source: txt, search: mAuthorTag)
-                        
-                        if(findAuthorRange != nil){
-                            continue
-                        }
-                    }
-                    if(findAuthorRange != nil){
-                        comic.setAuthor(self.replaceTag(txt))
-                    }
-                } else if(comic.getLatestUpdateDateTime() == nil){
-                    //解析最新更新日期
-                    if(latestUpdateTimeRange == nil){
-                        latestUpdateTimeRange = StringUtility.indexOf(source: txt, search: mUpdateTag)
-                        
-                        if(latestUpdateTimeRange != nil){
-                            continue
-                        }
-                    }
-                    if(latestUpdateTimeRange != nil){
-                        comic.setLatestUpdateDateTime(self.replaceTag(txt))
-                    }
+                //解析最新更新日期：<span class="item-info-date">2026-09-27</span>
+                if(comic.getLatestUpdateDateTime() == nil && txt.range(of: mUpdateTag) != nil){
+                    comic.setLatestUpdateDateTime(self.plainText(txt))
+                }
+                //解析漫畫簡介：<li class="item_info_detail"> 的下一行
+                if(comic.getDescription() == nil && txt.range(of: mDescriptionTag) != nil && i + 1 < html.count){
+                    comic.setDescription(self.plainText(html[i + 1]))
                 }
             }
         }
@@ -359,6 +338,11 @@ open class Parser{
         }
         
         return ret
+    }
+    
+    /// 去掉 HTML 標籤與前後空白（含全形空白）
+    func plainText(_ txt : String) -> String{
+        return self.replaceTag(txt).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     open func removeScriptsTag(_ st : String) -> String{

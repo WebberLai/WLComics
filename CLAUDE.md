@@ -5,11 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Run
 
 - **Open `WLComics.xcworkspace`** (not `.xcodeproj`) — CocoaPods workspace
-- Install dependencies: `pod install` at the repo root (where `Podfile` is). Pods/ is tracked in git — after `pod install`, restore SDK patches with `git checkout -- Pods/Swift8ComicSDK`
+- Install dependencies: `pod install` at the repo root (where `Podfile` is). Pods/ is tracked in git
 - Build target: `WLComics` (iOS 14.0+), supports iPhone and iPad. Product name is `看漫畫`; `PRODUCT_MODULE_NAME = WLComics` is set explicitly so tests can `@testable import WLComics`
 - Unit tests: `WLComicsTests` target (XCTest, deployment target 15.6), files in `WLComicsTests/` (synchronized folder — new files are picked up automatically). Run with ⌘U
   - `UpdateTracker` / `ReadingModeStore` expose their logic as static pure functions (`applying`, `markingSeen`, `merged`, `trimmed`, `mode(in:for:)`…); tests call those and never touch UserDefaults / iCloud KVS
-  - `SDKParserTests` parses saved 8comic pages in `WLComicsTests/Fixtures/` — run after editing the SDK's `Parser` / `JSnview`
+  - `SDKParserTests` parses saved 8comic pages in `WLComicsTests/Fixtures/` — run after editing `Comic8SDK`'s `Parser` / `JSnview`
   - `SDKLiveSiteTests` hits the real site to detect redesigns; skipped unless the scheme sets env var `WLCOMICS_LIVE_TESTS=1`
 - Adding a target in Xcode 26 bumps `objectVersion` to 70, which CocoaPods (xcodeproj 1.27) rejects — change it to 77 in `project.pbxproj` before `pod install`
 
@@ -31,7 +31,7 @@ TabBarController
 
 ### Key Singletons & Utilities
 
-- **`WLComics.sharedInstance()`** — app-level wrapper around `R8Comic` SDK. Handles episode loading, search API, Kingfisher referer headers.
+- **`WLComics.sharedInstance()`** — app-level wrapper around `R8Comic` (in `Comic8SDK/`). Handles episode loading, search API, Kingfisher referer headers.
 - **`FavoriteComics`** — static utility for favorites CRUD via `MyFavoritesComics.plist`, synced via iCloud key-value store (`startCloudSync()` in AppDelegate).
 
 ### Image Loading (CPImageSlider)
@@ -54,13 +54,14 @@ loadEpisodeDetail(episode) → callback (may be background thread)
     → CPImageSlider.images = urls → addImagesOnScrollView() → loadVisibleImages()
 ```
 
-### Swift8ComicSDK (CocoaPod, source in `Pods/`)
+### Comic8SDK (`WLComics/Comic8SDK/`, vendored)
 
-External SDK that scrapes 8comic.com. Locally modified files in Pods/:
-- **`Parser.swift`** — HTML parsing with guards for variable-length data arrays
+8comic.com scraper, originally the Swift8ComicSDK CocoaPod (2.0.6, MIT). Upstream is unmaintained, so the source now lives in the app target and is edited directly — no `import` needed.
+- **`Parser.swift`** — HTML parsing. `comicDetail` reads the 2026 page layout: episodes from `cview(...)`, author `item-info-author`, update date `item-info-date`, description the line after `item_info_detail`
 - **`JSnview.swift`** — JS evaluation for image URLs; handles both old (`var cs='...'`) and new (`.src=unescape(...)`) website formats
-- **`R8Comic.swift`** — main SDK class; `loadEpisodeDetail` callback may run on background thread
-- **`Episode.swift`** — added `public init()` so the app can rebuild `Episode` objects from download records
+- **`StringUtility.swift`** — `dataToStringBig5` / `dataToStringGB2312` decode UTF-8 first (the site is UTF-8 now) and fall back to the legacy encoding
+- **`R8Comic.swift`** — main class; `loadEpisodeDetail` callback may run on background thread
+- **`Episode.swift`** — has `public init()` so the app can rebuild `Episode` objects from download records
 
 ### Data Persistence
 
@@ -74,7 +75,6 @@ External SDK that scrapes 8comic.com. Locally modified files in Pods/:
 
 | Pod | Purpose |
 |-----|---------|
-| Swift8ComicSDK | 8comic.com scraper (git-based, locally patched) |
 | Kingfisher | Image downloading/caching with custom request modifiers |
 | SVProgressHUD | Loading spinner |
 
@@ -83,4 +83,4 @@ External SDK that scrapes 8comic.com. Locally modified files in Pods/:
 - **Thread safety**: `loadEpisodeDetail` callback can be on a background thread. Always dispatch UI updates to main queue.
 - **Chinese pinyin sorting**: `CFStringTransform` is slow for 10000+ entries — always run `buildComicLibrary` on background queue.
 - **Image download failures**: missing/wrong `Referer` header causes 8comic.com to reject requests silently.
-- **Pod modifications**: SDK bugs are fixed directly in `Pods/Swift8ComicSDK/` — these changes are lost on `pod install`. Consider forking the SDK.
+- **Xcode resets `objectVersion`**: Xcode may save `project.pbxproj` back to `objectVersion = 70`; set it to 77 again before each `pod install`.

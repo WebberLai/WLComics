@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  Pods
+//  Comic8SDK
 //
 //  Created by ray.lee on 2017/6/12.
 //
@@ -112,18 +112,23 @@ open class StringUtility{
         return String(source[range])
     }
     
-    open class func dataToStringBig5(data : Data) -> String{
-        if let string = NSString(data: data, encoding: ENCODE_BIG5) {
+    /// 網站已改用 UTF-8，先用 UTF-8 解碼；不是合法 UTF-8 時才用舊網頁的編碼（Big5 / GB2312）
+    open class func dataToString(data : Data, fallbackEncoding : String.Encoding) -> String{
+        if let string = String(data: data, encoding: .utf8) {
+            return string
+        }
+        if let string = NSString(data: data, encoding: fallbackEncoding.rawValue) {
             return string as String
         }
-        return String(data: data, encoding: .utf8) ?? ""
+        return ""
+    }
+
+    open class func dataToStringBig5(data : Data) -> String{
+        return dataToString(data: data, fallbackEncoding: String.Encoding(rawValue: ENCODE_BIG5))
     }
 
     open class func dataToStringGB2312(data : Data) -> String{
-        if let string = NSString(data: data, encoding: ENCODE_GB2312) {
-            return string as String
-        }
-        return String(data: data, encoding: .utf8) ?? ""
+        return dataToString(data: data, fallbackEncoding: String.Encoding(rawValue: ENCODE_GB2312))
     }
     
     open class func split(_ source : String, separatedBy : String) -> [String]{

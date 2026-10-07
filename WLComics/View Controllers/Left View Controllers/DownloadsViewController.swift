@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import Swift8ComicSDK
 import Kingfisher
 
 /// 「已下載」tab：列出有下載內容的漫畫，離線時從這裡進入閱讀。只能手動刪除。

@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Swift8ComicSDK
 import Kingfisher
 
 open class WLComics{

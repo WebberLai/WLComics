@@ -6,7 +6,6 @@
 import UIKit
 import BackgroundTasks
 import os
-import Swift8ComicSDK
 
 /// 離線閱讀的下載管理。
 /// 圖片存在 Application Support/Downloads/<漫畫id>/<集數資料夾>/001.jpg…，

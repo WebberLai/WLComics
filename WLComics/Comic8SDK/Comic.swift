@@ -1,6 +1,6 @@
 //
 //  Comic.swift
-//  Pods
+//  Comic8SDK
 //
 //  Created by ray.lee on 2017/6/7.
 //

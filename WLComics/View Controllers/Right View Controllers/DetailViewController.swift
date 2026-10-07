@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Swift8ComicSDK
 
 @objc protocol DetailViewControllerDelegate: NSObjectProtocol {
     func sliderImageTapped(index: Int)

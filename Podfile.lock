@@ -3,32 +3,20 @@ PODS:
   - SVProgressHUD (2.3.1):
     - SVProgressHUD/Core (= 2.3.1)
   - SVProgressHUD/Core (2.3.1)
-  - Swift8ComicSDK (2.0.6)
 
 DEPENDENCIES:
   - Kingfisher
   - SVProgressHUD
-  - Swift8ComicSDK (from `https://github.com/RayTW/Swift8ComicSDK.git`)
 
 SPEC REPOS:
   trunk:
     - Kingfisher
     - SVProgressHUD
 
-EXTERNAL SOURCES:
-  Swift8ComicSDK:
-    :git: https://github.com/RayTW/Swift8ComicSDK.git
-
-CHECKOUT OPTIONS:
-  Swift8ComicSDK:
-    :commit: 573cf3a994b8102be06ce36270b84665ae204f33
-    :git: https://github.com/RayTW/Swift8ComicSDK.git
-
 SPEC CHECKSUMS:
   Kingfisher: beeaf65ed57dfa710d416aea4093277e8a9b1968
   SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
-  Swift8ComicSDK: 2a09eb1cd6e162e562df47c291bef4c1fdee20a7
 
-PODFILE CHECKSUM: 522a1e2e74d24ee931a90dffe0ee56c2eb77511d
+PODFILE CHECKSUM: 82345a61961310b804d779ec1929802ddc2a7381
 
 COCOAPODS: 1.16.2

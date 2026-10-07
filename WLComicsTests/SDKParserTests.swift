@@ -2,12 +2,12 @@
 //  SDKParserTests.swift
 //  WLComicsTests
 //
-//  Swift8ComicSDK 的解析測試，用存下來的 8comic 網頁（Fixtures/，2026-10-07 抓的海賊王）。
-//  改 Pods/Swift8ComicSDK 的 Parser / JSnview 後跑這組，確認沒有改壞。
+//  Comic8SDK 的解析測試，用存下來的 8comic 網頁（Fixtures/，2026-10-07 抓的海賊王）。
+//  改 WLComics/Comic8SDK 的 Parser / JSnview 後跑這組，確認沒有改壞。
 //
 
 import XCTest
-import Swift8ComicSDK
+@testable import WLComics
 
 final class SDKParserTests: XCTestCase {
 
@@ -49,6 +49,32 @@ final class SDKParserTests: XCTestCase {
             XCTAssertFalse(name.isEmpty)
             XCTAssertNil(name.rangeOfCharacter(from: CharacterSet(charactersIn: "<>\r\n\t")), name)
         }
+    }
+
+    // MARK: - 漫畫資訊
+
+    func testComicDetailParsesInfo() throws {
+        let comic = try parseComicDetail()
+        XCTAssertEqual(comic.getAuthor(), "尾田榮一郎")
+        XCTAssertEqual(comic.getLatestUpdateDateTime(), "2026-09-27")
+        let description = try XCTUnwrap(comic.getDescription())
+        XCTAssertTrue(description.hasPrefix("他擁有世上一切財富"), description)
+        XCTAssertNil(description.rangeOfCharacter(from: CharacterSet(charactersIn: "<>\r\n")))
+    }
+
+    // MARK: - 編碼
+
+    /// 網站已是 UTF-8，要直接以 UTF-8 解出正確的中文
+    func testUtf8PageDecodesCorrectly() {
+        let data = Data("<li>海賊王</li>".utf8)
+        XCTAssertEqual(StringUtility.dataToStringBig5(data: data), "<li>海賊王</li>")
+    }
+
+    /// 舊網頁（Big5）不是合法 UTF-8，要改用 Big5 解碼
+    func testBig5PageFallsBack() throws {
+        let big5 = try XCTUnwrap("海賊王".data(using: String.Encoding(rawValue: StringUtility.ENCODE_BIG5)))
+        XCTAssertNil(String(data: big5, encoding: .utf8))
+        XCTAssertEqual(StringUtility.dataToStringBig5(data: big5), "海賊王")
     }
 
     // MARK: - 單集圖片網址
@@ -110,6 +136,7 @@ final class SDKLiveSiteTests: XCTestCase {
         let r8comic = R8Comic.get()
         let comic = r8comic.generatorFakeComic("103", name: "海賊王")
         let detail = Parser().comicDetail(htmlString: try fetch(r8comic.getConfig().getComicDetailUrl("103")), comic: comic)
+        XCTAssertNotNil(detail.getLatestUpdateDateTime(), "更新日期解析不到，網站可能改版")
         let episode = try XCTUnwrap(detail.getEpisode().first, "集數列表解析不到任何集數，網站可能改版")
 
         let html = try fetch(Config.mComicHost + "view/" + episode.getUrl())

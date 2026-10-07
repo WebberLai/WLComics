@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Swift8ComicSDK
 
 class FavoriteComics: NSObject {
 
