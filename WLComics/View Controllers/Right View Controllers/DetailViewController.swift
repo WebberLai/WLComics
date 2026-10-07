@@ -45,6 +45,18 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     private var displayedComicId: String?
     private var displayedEpisodeUrl: String?
     private var displayedEpisodeName = ""
+    /// 目前這一集的頁面網址，切換閱讀模式時交給另一個閱讀器
+    private var displayedImages = [String]()
+
+    /// 上下捲動閱讀器（條漫用），疊在 imgSlider 上方，依模式切換顯示
+    private let verticalReader = VerticalReaderView()
+    private var currentMode: ReadingMode = .horizontal
+    private lazy var modeButton = UIBarButtonItem(image: nil, style: .plain, target: self, action: #selector(toggleReadingMode))
+
+    /// 目前顯示中的閱讀器所在的頁碼
+    private var currentPage: Int {
+        return currentMode == .horizontal ? imgSlider.currentIndex : verticalReader.currentIndex
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,11 +86,42 @@ class DetailViewController: UIViewController,CPSliderDelegate{
         }
         // 每翻到新的一頁就記錄閱讀進度
         imgSlider.onPageChanged = { [weak self] page in
-            guard let self = self,
-                  let comicId = self.displayedComicId,
-                  let url = self.displayedEpisodeUrl else { return }
-            ReadingProgress.save(comicId: comicId, episodeUrl: url, episodeName: self.displayedEpisodeName, page: page)
+            self?.saveProgress(page: page)
         }
+        setUpVerticalReader()
+    }
+
+    private func setUpVerticalReader() {
+        verticalReader.isHidden = true
+        verticalReader.backgroundColor = .systemBackground
+        verticalReader.translatesAutoresizingMaskIntoConstraints = false
+        let container: UIView = imgSlider.superview ?? view
+        container.insertSubview(verticalReader, aboveSubview: imgSlider)
+        NSLayoutConstraint.activate([
+            verticalReader.topAnchor.constraint(equalTo: imgSlider.topAnchor),
+            verticalReader.bottomAnchor.constraint(equalTo: imgSlider.bottomAnchor),
+            verticalReader.leadingAnchor.constraint(equalTo: imgSlider.leadingAnchor),
+            verticalReader.trailingAnchor.constraint(equalTo: imgSlider.trailingAnchor),
+        ])
+        verticalReader.onSwipePastLastPage = { [weak self] in
+            self?.loadNextEpisode()
+        }
+        verticalReader.onSwipePastFirstPage = { [weak self] in
+            self?.loadPreviousEpisode()
+        }
+        verticalReader.onPageChanged = { [weak self] page in
+            self?.saveProgress(page: page)
+        }
+        verticalReader.onTap = { [weak self] in
+            guard let self = self else { return }
+            self.readerTapped(index: self.verticalReader.currentIndex)
+        }
+        updateModeButton()
+    }
+
+    private func saveProgress(page: Int) {
+        guard let comicId = displayedComicId, let url = displayedEpisodeUrl else { return }
+        ReadingProgress.save(comicId: comicId, episodeUrl: url, episodeName: displayedEpisodeName, page: page)
     }
 
     override func viewDidLayoutSubviews() {
@@ -143,17 +186,20 @@ class DetailViewController: UIViewController,CPSliderDelegate{
                 return
         }
         
-        if imgSlider.images.count == 0 {
+        if displayedImages.isEmpty {
             print("尚未載入漫畫")
             return
         }
 
-        // 翻到最後／第一頁時，slider 會透過 onSwipePastLastPage / onSwipePastFirstPage 換話，
-        // 雙頁模式下也會自動一次翻兩頁
-        if action == UIKeyCommand.inputRightArrow {
-            imgSlider.nextButtonPressed()
-        } else if action == UIKeyCommand.inputLeftArrow {
-            imgSlider.previousButtonPressed()
+        // 翻到最後／第一頁時，閱讀器會透過 onSwipePastLastPage / onSwipePastFirstPage 換話，
+        // 雙頁模式下也會自動一次翻兩頁；上下捲動模式則是捲動約一個畫面
+        let isNext = action == UIKeyCommand.inputRightArrow
+        guard isNext || action == UIKeyCommand.inputLeftArrow else { return }
+        switch currentMode {
+        case .horizontal:
+            isNext ? imgSlider.nextButtonPressed() : imgSlider.previousButtonPressed()
+        case .vertical:
+            isNext ? verticalReader.nextButtonPressed() : verticalReader.previousButtonPressed()
         }
     }
     
@@ -168,7 +214,7 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.hidesBarsOnTap = true
+        updateBarsOnTap()
     }
     
     //設定每集漫畫的root網址
@@ -186,18 +232,79 @@ class DetailViewController: UIViewController,CPSliderDelegate{
     /// startPage：從第幾頁開始（繼續閱讀用），超出範圍會自動夾限
     func updateEpisode(url: String, images: [String], name: String = "", comicId: String? = nil, startPage: Int = 0) {
         DispatchQueue.main.async {
-            self.imgSlider.cancelAllDownloads()
             // 要在設定 images 之前更新，images 一設定就會回報頁碼
             self.displayedComicId = comicId
             self.displayedEpisodeUrl = url
             self.displayedEpisodeName = name
-            self.imgSlider.currentIndex = min(max(startPage, 0), max(images.count - 1, 0))
-            self.imgSlider.episodeUrl = url
-            self.imgSlider.images = images
+            self.displayedImages = images
+            // 沒有手動選過的漫畫一律用左右翻頁
+            let savedMode = comicId.flatMap { ReadingModeStore.mode(for: $0) }
+            self.show(mode: savedMode ?? .horizontal, page: startPage)
+        }
+    }
+
+    /// 顯示指定模式的閱讀器，並把目前這一集交給它、停在 page；另一個閱讀器清空並取消下載
+    private func show(mode: ReadingMode, page: Int) {
+        currentMode = mode
+        imgSlider.cancelAllDownloads()
+        verticalReader.cancelAllDownloads()
+        let images = displayedImages
+        let target = min(max(page, 0), max(images.count - 1, 0))
+        switch mode {
+        case .horizontal:
+            verticalReader.images = []
+            verticalReader.isHidden = true
+            imgSlider.isHidden = false
+            imgSlider.currentIndex = target
+            imgSlider.episodeUrl = displayedEpisodeUrl
+            imgSlider.images = images
+        case .vertical:
+            imgSlider.images = []
+            imgSlider.isHidden = true
+            verticalReader.isHidden = false
+            verticalReader.currentIndex = target
+            verticalReader.episodeUrl = displayedEpisodeUrl
+            verticalReader.images = images
+        }
+        updateModeButton()
+        updateBarsOnTap()
+    }
+
+    /// 上下捲動模式自己處理點擊（要等雙擊判定），關掉導覽列的點擊隱藏，避免雙擊縮放時導覽列也跟著切換
+    private func updateBarsOnTap() {
+        navigationController?.hidesBarsOnTap = currentMode == .horizontal
+    }
+
+    /// 導覽列按鈕：手動切換閱讀模式並記住，停在同一頁
+    @objc private func toggleReadingMode() {
+        guard let comicId = displayedComicId else { return }
+        let newMode: ReadingMode = currentMode == .horizontal ? .vertical : .horizontal
+        ReadingModeStore.setManual(newMode, for: comicId)
+        show(mode: newMode, page: currentPage)
+    }
+
+    private func updateModeButton() {
+        // 圖示表示「按下後會切換成的方向」
+        modeButton.image = UIImage(systemName: currentMode == .horizontal ? "arrow.up.and.down" : "arrow.left.and.right")
+        navigationItem.rightBarButtonItem = displayedComicId == nil ? nil : modeButton
+    }
+
+    /// iPad 左側縮圖：捲到指定頁
+    func scrollToPage(_ page: Int) {
+        switch currentMode {
+        case .horizontal:
+            imgSlider.scrollToPage(page)
+        case .vertical:
+            verticalReader.scrollToPage(page)
         }
     }
     
     func sliderImageTapped(slider: CPImageSlider, index: Int) {
+        readerTapped(index: index)
+    }
+
+    /// 點擊閱讀器：切換導覽列顯示，並同步 iPad 左側縮圖的選取
+    private func readerTapped(index: Int) {
         hidden = !hidden
         self.navigationController?.navigationBar.isHidden = hidden
         delegate?.sliderImageTapped(index: index)

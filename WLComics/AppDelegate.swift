@@ -28,6 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         FavoriteComics.startCloudSync()
         ReadingProgress.startCloudSync()
         UpdateTracker.startCloudSync()
+        ReadingModeStore.startCloudSync()
         // 已有收藏的使用者，更新後第一次啟動時詢問通知權限（只會問一次）
         if !FavoriteComics.listAllFavorite().isEmpty {
             UpdateNotifier.requestAuthorizationIfNeeded()

@@ -64,6 +64,8 @@ class ReadingProgress: NSObject {
         store = trimmed(store)
         saveLocal(store)
         cloudStore.set(store, forKey: storeKey)
+        // iPad / Mac 的集數列表與閱讀器同時顯示，翻頁時列表也要即時更新
+        NotificationCenter.default.post(name: didChangeNotification, object: nil)
     }
 
     // MARK: - iCloud 同步

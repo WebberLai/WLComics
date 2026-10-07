@@ -144,8 +144,8 @@ extension EpisodeDetailViewController : UITableViewDataSource , UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // 用 scrollToPage 才會正確換算雙頁模式的位置
-        detailViewController?.imgSlider.scrollToPage(indexPath.row)
+        // 交給閱讀器處理：雙頁模式會換算位置，上下捲動模式會捲到該頁頂端
+        detailViewController?.scrollToPage(indexPath.row)
     }
     
     func sliderImageTapped(index: Int) {
