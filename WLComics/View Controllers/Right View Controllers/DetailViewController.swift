@@ -235,6 +235,8 @@ class DetailViewController: UIViewController,CPSliderDelegate{
             self.displayedComicId = comicId
             self.displayedEpisodeUrl = url
             self.displayedEpisodeName = name
+            // iPad 由左側集數列表呼叫，不會經過 loadEpisode，標題要在這裡更新
+            if !name.isEmpty { self.title = name }
             self.displayedImages = images
             // 沒有手動選過的漫畫一律用左右翻頁
             let savedMode = comicId.flatMap { ReadingModeStore.mode(for: $0) }

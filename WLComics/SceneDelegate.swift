@@ -38,7 +38,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             if let tabBarController = splitViewController.viewControllers.first as? UITabBarController {
                 let downloads = UINavigationController(rootViewController: DownloadsViewController(style: .plain))
                 downloads.tabBarItem = UITabBarItem(title: "已下載", image: UIImage(systemName: "arrow.down.circle"), tag: 2)
+                downloads.tabBarItem.selectedImage = UIImage(systemName: "arrow.down.circle.fill")
                 tabBarController.viewControllers = (tabBarController.viewControllers ?? []) + [downloads]
+                // 分頁圖示用 SF Symbols，大小由系統決定（自訂點陣圖太大會蓋到文字）
+                for case let navigationController as UINavigationController in tabBarController.viewControllers ?? [] {
+                    let symbol: String
+                    switch navigationController.viewControllers.first {
+                    case is MasterViewController: symbol = "books.vertical"
+                    case is FavoriteTableViewController: symbol = "heart"
+                    default: continue
+                    }
+                    navigationController.tabBarItem.image = UIImage(systemName: symbol)
+                    navigationController.tabBarItem.selectedImage = UIImage(systemName: symbol + ".fill")
+                }
                 UpdateBadge.favoritesTabItem = tabBarController.viewControllers?
                     .first(where: SceneDelegate.isFavoritesTab)?.tabBarItem
             }

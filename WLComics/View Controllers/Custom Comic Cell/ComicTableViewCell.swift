@@ -40,6 +40,9 @@ class ComicTableViewCell: UITableViewCell {
         super.awakeFromNib()
         // 空心愛心（dislike）是 template 圖，用系統次要文字色，深色模式下才看得到
         favoriteBtn.tintColor = .secondaryLabel
+        // iPad 左欄較窄，長名稱單行會被截成「…」；列高有 100pt，最多換三行
+        comicNametextLabel.numberOfLines = 3
+        comicNametextLabel.lineBreakMode = .byTruncatingTail
 
         contentView.addSubview(updateBadgeLabel)
         NSLayoutConstraint.activate([

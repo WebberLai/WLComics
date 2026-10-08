@@ -62,7 +62,7 @@
         <scene sceneID="pY4-Hu-kfo">
             <objects>
                 <navigationController title="Master" id="RMx-3f-FxP" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="漫畫列表" image="comic_place_holder" id="49O-XW-TAd"/>
+                    <tabBarItem key="tabBarItem" title="漫畫列表" id="49O-XW-TAd"/>
                     <navigationBar key="navigationBar" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="Pmd-2v-anx">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -78,7 +78,7 @@
         <!--Detail-->
         <scene sceneID="yUG-lL-AsK">
             <objects>
-                <viewController title="Detail" id="JEX-9P-axG" customClass="DetailViewController" customModule="WLComics" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="JEX-9P-axG" customClass="DetailViewController" customModule="WLComics" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="SYR-Wa-9uf"/>
                         <viewControllerLayoutGuide type="bottom" id="GAO-Cl-Wes"/>
@@ -101,7 +101,7 @@
                         </constraints>
                     </view>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" title="Detail" id="mOI-FS-AaM"/>
+                    <navigationItem key="navigationItem" id="mOI-FS-AaM"/>
                     <connections>
                         <outlet property="imgSlider" destination="g2T-BS-5lh" id="nbW-te-5o8"/>
                     </connections>
@@ -266,7 +266,7 @@
         <scene sceneID="zq6-BT-xvR">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="pSp-Sh-9q5" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="我的收藏" image="like" id="0TM-Xr-EpW"/>
+                    <tabBarItem key="tabBarItem" title="我的收藏" id="0TM-Xr-EpW"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="xiJ-Dg-VVQ">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -282,10 +282,6 @@
             <point key="canvasLocation" x="708" y="-622.03898050974522"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="comic_place_holder" width="32" height="32"/>
-        <image name="like" width="32" height="32"/>
-    </resources>
     <inferredMetricsTieBreakers>
         <segue reference="MsI-UY-ZiG"/>
         <segue reference="Zvc-yz-hVU"/>
