@@ -10,7 +10,7 @@ import UIKit
 import Kingfisher
 import SVProgressHUD
 
-class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate, UITableViewDataSourcePrefetching {
+class MasterViewController: UITableViewController , UISearchResultsUpdating,UISearchBarDelegate, UISearchControllerDelegate, UITableViewDataSourcePrefetching {
 
     var allComics = [Comic]()
 
@@ -26,7 +26,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     var currentComic : Comic = WLComics.sharedInstance().getR8Comic().generatorFakeComic("-1", name: "")
 
-    var scrollRecordTop :  IndexPath = IndexPath.init(row: 0, section: 0)
+    /// 進入搜尋前的列表位置，取消搜尋後捲回這裡
+    private var searchScrollAnchor: (comicId: String, offset: CGFloat)?
 
     // 改用 Swift Dictionary 取代 NSMutableDictionary，避免型別轉換開銷
     var sortedComicLib = [String: [Comic]]()
@@ -162,15 +163,13 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
     
     @objc func startSearch() {
         searchController.searchBar.becomeFirstResponder()
-        if let visibleRows = self.tableView.indexPathsForVisibleRows, !visibleRows.isEmpty {
-            scrollRecordTop = visibleRows[0]
-        }
     }
     
     func initSearchController() {
         self.definesPresentationContext = true
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
+        searchController.delegate = self
         searchController.dimsBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "輸入想要搜尋的漫畫名稱"
         searchController.searchBar.delegate = self
@@ -193,7 +192,8 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        shouldShowSearchResults = false
+        // 從搜尋結果點進漫畫再返回時，搜尋列仍在，要繼續顯示搜尋結果
+        shouldShowSearchResults = searchController.isActive
     }
 
     override func didReceiveMemoryWarning() {
@@ -443,6 +443,14 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         self.tableView.reloadData()
     }
     
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        // 在搜尋控制器出現、列表換成搜尋結果之前記下位置；已在搜尋中再次點搜尋列時不覆蓋
+        if !shouldShowSearchResults {
+            searchScrollAnchor = currentScrollAnchor()
+        }
+        return true
+    }
+
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         shouldShowSearchResults = true
     }
@@ -451,12 +459,14 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         shouldShowSearchResults = false
         isWaitingForAPISearch = false
         self.tableView.reloadData()
-        DispatchQueue.main.async {
-            guard self.scrollRecordTop.section < self.comicSectionTitles.count,
-                  let comics = self.sortedComicLib[self.comicSectionTitles[self.scrollRecordTop.section]],
-                  self.scrollRecordTop.row < comics.count else { return }
-            self.tableView.scrollToRow(at: self.scrollRecordTop, at: .top, animated: false)
-        }
+        if let anchor = searchScrollAnchor { scroll(to: anchor) }
+    }
+
+    /// 搜尋列收回時導覽列高度會變，等動畫結束再捲一次才準
+    func didDismissSearchController(_ searchController: UISearchController) {
+        guard let anchor = searchScrollAnchor else { return }
+        searchScrollAnchor = nil
+        scroll(to: anchor)
     }
     
     //按下搜尋按鈕之後，先顯示本地結果，再呼叫搜尋 API 補充
