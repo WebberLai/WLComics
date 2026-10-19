@@ -102,6 +102,15 @@ final class SDKParserTests: XCTestCase {
         XCTAssertEqual(episode.getPages(), 0)
     }
 
+    /// 網站顯示 2.1、2.2 的集數，網址是 ch=2a、ch=2b，字母要保留給網站的 JS 判斷上下篇
+    func testChKeepsPartLetter() {
+        let nview = JSnview()
+        nview.setCh("2a")
+        XCTAssertEqual(nview.getCh(), "2a")
+        nview.setCh("3');alert(1)//")
+        XCTAssertEqual(nview.getCh(), "3alert1")
+    }
+
     // MARK: - 小工具
 
     /// comicDetail 以 "\n" 切行，每行尾端只會剩 "\r"

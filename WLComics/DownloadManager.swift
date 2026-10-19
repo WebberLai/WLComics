@@ -163,7 +163,8 @@ final class DownloadManager {
         episode.setName(name)
         episode.setUrl(url)
         if let range = url.range(of: "ch=") {
-            let ch = url[range.upperBound...].prefix { "0123456789".contains($0) }
+            // 上下篇的集數是 2a、2b，字母也要留著
+            let ch = url[range.upperBound...].prefix { $0.isASCII && ($0.isLetter || $0.isNumber) }
             if !ch.isEmpty { episode.setCh(String(ch)) }
         }
         return episode

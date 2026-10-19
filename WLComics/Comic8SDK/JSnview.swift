@@ -13,7 +13,7 @@ import JavaScriptCore
 
 open class JSnview{
     private var mSource : String?
-    private var mCh : Int?
+    private var mCh : String?
     private var mChs : Int = 0
     private var mTi : Int = 0
     private var mPs : Int = 0 //漫畫總頁數
@@ -26,14 +26,16 @@ open class JSnview{
     }
 
     /*
-     * 取得集數編號，例如1、2、3…
+     * 取得集數編號，例如1、2、3…；拆成上下篇的集數（網站顯示 2.1、2.2）是 2a、2b
      */
-    open func getCh() -> Int{
-        return mCh ?? 0
+    open func getCh() -> String{
+        return mCh ?? ""
     }
 
+    /// 只留英數字，會原樣塞進 JS 字串，不能讓引號之類的字元混進去
     open func setCh(_ ch : String) -> Void{
-        mCh = Int(ch)
+        let cleaned = ch.filter { $0.isASCII && ($0.isLetter || $0.isNumber) }
+        mCh = cleaned.isEmpty ? nil : cleaned
     }
 
     /*
@@ -77,12 +79,13 @@ open class JSnview{
         if source.range(of: ".src=unescape(") != nil {
             return invokeJSNew(source, ch)
         } else {
-            return invokeJS(source, JSnview.Y, ch)
+            // 舊格式的 JS 只認數字集數
+            return invokeJS(source, JSnview.Y, Int(ch.prefix { $0.isNumber }) ?? 0)
         }
     }
 
     // 新格式：混淆過的 JS，用 JSContext 直接執行
-    open func invokeJSNew(_ js: String, _ ch: Int) -> [String] {
+    open func invokeJSNew(_ js: String, _ ch: String) -> [String] {
         guard let context = JSContext() else {
             print("[DEBUG] JSnview: JSContext 建立失敗")
             return []
@@ -94,7 +97,7 @@ open class JSnview{
         // 2. 修改 source JS
         var modJS = js
 
-        // 替換 request('ch') 為實際的 ch 值
+        // 替換 request('ch') 為實際的 ch 值；網站的 JS 會自己把 2a 拆成集數 2 和上下篇代號 a
         modJS = modJS.replacingOccurrences(of: "request('ch')", with: "'\(ch)'")
         modJS = modJS.replacingOccurrences(of: "request(\"ch\")", with: "'\(ch)'")
 

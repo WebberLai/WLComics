@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -62,10 +62,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0EC85FB74C159C2CBA7CE677 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		0EC85FB74C159C2CBA7CE677 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.release.xcconfig"; sourceTree = "<group>"; };
 		2D703CCA82049F3983C5F7E2 /* Parser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
-		42C919B5575DC3D79B45087E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		42C919B5575DC3D79B45087E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicTableViewCell.swift; sourceTree = "<group>"; };
 		6012D7ED1F57DF8000F5C688 /* FavoriteTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteTableViewController.swift; sourceTree = "<group>"; };
 		6012D8161F57FE7800F5C688 /* Search Result.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Search Result.PNG"; sourceTree = "<group>"; };
@@ -128,17 +128,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		602725D4307617600071AD3A /* WLComicsTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = WLComicsTests;
-			sourceTree = "<group>";
-		};
+		602725D4307617600071AD3A /* WLComicsTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WLComicsTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -347,7 +337,6 @@
 				42C919B5575DC3D79B45087E /* README.md */,
 				0EC85FB74C159C2CBA7CE677 /* LICENSE */,
 			);
-			name = Comic8SDK;
 			path = Comic8SDK;
 			sourceTree = "<group>";
 		};
