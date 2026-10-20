@@ -122,6 +122,25 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         }
     }
 
+    /// 搜尋 API 補進新漫畫後重建 A–Z 索引，回到列表時才看得到
+    private func rebuildComicLibrary() {
+        let comics = allComics
+        DispatchQueue.global(qos: .userInitiated).async {
+            let library = self.buildComicLibrary(from: comics)
+            DispatchQueue.main.async {
+                // 重建期間 allComics 又被換掉（例如 refreshComicsFromWeb）就放棄，交給那邊重建
+                guard self.allComics.count == comics.count else { return }
+                let anchor = self.currentScrollAnchor()
+                self.sortedComicLib = library.sorted
+                self.comicSectionTitles = library.titles
+                // 搜尋中顯示的是 filterComics，不必重新整理；已離開搜尋時才捲回原位
+                guard !self.shouldShowSearchResults else { return }
+                self.tableView.reloadData()
+                if let anchor = anchor { self.scroll(to: anchor) }
+            }
+        }
+    }
+
     func reloadFavoriteIds() {
         favoriteIds = Set(FavoriteComics.listAllFavorite().compactMap { $0.object(forKey: "comic_id") as? String })
     }
@@ -498,10 +517,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
                     self.filterComics.append(contentsOf: newComics)
                     // 同時更新 allComics 以供後續本地搜尋
                     let allIds = Set(self.allComics.map { $0.getId() })
-                    for comic in newComics {
-                        if !allIds.contains(comic.getId()) {
-                            self.allComics.append(comic)
-                        }
+                    let addedComics = newComics.filter { !allIds.contains($0.getId()) }
+                    if !addedComics.isEmpty {
+                        self.allComics.append(contentsOf: addedComics)
+                        self.rebuildComicLibrary()
                     }
                 }
                 self.tableView.reloadData()

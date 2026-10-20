@@ -37,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         registerUpdateTask()
         scheduleUpdateTask()
 
-        // 每次 app 更新時，用 bundle 中最新的 AllComics.plist 覆蓋 Documents 的舊版
+        // 每次 app 更新時，用 bundle 中最新的 AllComics.plist 更新 Documents 的舊版（保留搜尋、爬取累積的漫畫）
         refreshBundlePlistIfNeeded(name: "AllComics")
         SwiftyPlistManager.shared.start(plistNames:["AllComics"], logging: false)
 
@@ -45,7 +45,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         return true
     }
 
-    /// 比對 bundle 版本，若 bundle 的 plist 較新則覆蓋 Documents 目錄的副本
+    /// 比對 bundle 版本，若 bundle 的 plist 較新則與 Documents 目錄的副本合併
     private func refreshBundlePlistIfNeeded(name: String) {
         let fileManager = FileManager.default
         guard let bundlePath = Bundle.main.path(forResource: name, ofType: "plist") else { return }
@@ -58,10 +58,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         let savedVersion = UserDefaults.standard.string(forKey: versionKey) ?? ""
 
         if currentVersion != savedVersion {
-            try? fileManager.removeItem(atPath: docPath)
-            try? fileManager.copyItem(atPath: bundlePath, toPath: docPath)
+            let bundleComics = (NSDictionary(contentsOfFile: bundlePath)?["comics"] as? [[String: String]]) ?? []
+            let savedComics = (NSDictionary(contentsOfFile: docPath)?["comics"] as? [[String: String]]) ?? []
+            let merged = AppDelegate.mergedComicEntries(bundle: bundleComics, saved: savedComics)
+
+            // 合併後寫不進去才退回整份覆蓋，至少保證有 bundle 的版本可用
+            if bundleComics.isEmpty || !(["comics": merged] as NSDictionary).write(toFile: docPath, atomically: true) {
+                try? fileManager.removeItem(atPath: docPath)
+                try? fileManager.copyItem(atPath: bundlePath, toPath: docPath)
+            }
             UserDefaults.standard.set(currentVersion, forKey: versionKey)
         }
+    }
+
+    /// bundle 的漫畫在前（名稱以 bundle 為準），再接上 Documents 裡 bundle 沒有的漫畫（搜尋或爬取補進來的）
+    static func mergedComicEntries(bundle: [[String: String]], saved: [[String: String]]) -> [[String: String]] {
+        var seen = Set(bundle.compactMap { $0["comic_id"] })
+        var merged = bundle
+        for entry in saved {
+            guard let id = entry["comic_id"], entry["name"] != nil, !seen.contains(id) else { continue }
+            seen.insert(id)
+            merged.append(entry)
+        }
+        return merged
     }
 
     // MARK: - 背景檢查收藏更新
