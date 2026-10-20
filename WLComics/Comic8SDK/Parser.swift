@@ -117,6 +117,11 @@ open class Parser{
                 data = data.replacingOccurrences(of: "'", with: "")
                 let dataAry = StringUtility.split(data, separatedBy: ",") //集數圖片總張數參數
 
+                // 「開始看」按鈕的 cview('id-'+$(this).attr('ch')+'.html') 不是集數，直接略過
+                if data.contains("$(this)") {
+                    continue
+                }
+
                 // 確保 dataAry 有足夠元素，否則跳過此筆資料
                 guard dataAry.count >= 3 else {
                     print("[DEBUG] Parser: dataAry 元素不足, data=\(data), count=\(dataAry.count)")
