@@ -134,7 +134,7 @@ class TVEpisodeListViewController: UITableViewController {
                                   placeholder: UIImage(named: "comic_place_holder"),
                                   options: [.requestModifier(refererModifier),
                                             .processor(DownsamplingImageProcessor(size: CGSize(width: 80, height: 110))),
-                                            .scaleFactor(UIScreen.main.scale)])
+                                            .scaleFactor(2.0)])
             config.image = imageView.image
         }
 

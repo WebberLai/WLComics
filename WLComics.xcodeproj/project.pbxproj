@@ -46,9 +46,25 @@
 		7E1A2B3C4D5E6F7081920A6C /* UpdateNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A6B /* UpdateNotifier.swift */; };
 		7E1A2B3C4D5E6F7081920A7C /* ReadingModeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A7B /* ReadingModeStore.swift */; };
 		7E1A2B3C4D5E6F7081920A8C /* VerticalReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A8B /* VerticalReaderView.swift */; };
+		807A924B972DA7245515A869 /* Pods_wltvcomics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D1A64AE893381AEC5AA2A7D /* Pods_wltvcomics.framework */; };
 		91F4A9BD675ADAE8FF41F5A9 /* Pods_WLComics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */; };
 		AA000001AAAA000100000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001AAAA000100000000 /* SceneDelegate.swift */; };
 		B0813961CCA9A2A9C97248C8 /* Episode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE35CDB2FE2B64602A410B88 /* Episode.swift */; };
+		CC000001TV00000000000001 /* Comic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F914D5FAC2855926D2D68DC0 /* Comic.swift */; };
+		CC000001TV00000000000002 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD1E9E8E8EFA1FED131CE6D /* Config.swift */; };
+		CC000001TV00000000000003 /* Episode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE35CDB2FE2B64602A410B88 /* Episode.swift */; };
+		CC000001TV00000000000004 /* JSnview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE3B07A453B692EE82BFA17 /* JSnview.swift */; };
+		CC000001TV00000000000005 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D703CCA82049F3983C5F7E2 /* Parser.swift */; };
+		CC000001TV00000000000006 /* R8Comic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580DCF0EA24504B8B273268 /* R8Comic.swift */; };
+		CC000001TV00000000000007 /* StringUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F17BE6B036DB7CB2C3EE69 /* StringUtility.swift */; };
+		CC000001TV00000000000008 /* WLComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BB3F481F2DBAF000EBED7D /* WLComics.swift */; };
+		CC000001TV00000000000009 /* FavoriteComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */; };
+		CC000001TV0000000000000A /* SwiftyPlistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */; };
+		CC000001TV0000000000000B /* ReadingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A1B /* ReadingProgress.swift */; };
+		CC000001TV0000000000000E /* ReadingModeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A7B /* ReadingModeStore.swift */; };
+		CC000001TV0000000000000F /* VerticalReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A8B /* VerticalReaderView.swift */; };
+		CC000001TV0000000000000C /* AllComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 60AA00FF2106D73B0093780B /* AllComics.plist */; };
+		CC000001TV0000000000000D /* MyFavoritesComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6034C3021F73479900D2B861 /* MyFavoritesComics.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +82,8 @@
 		0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.release.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.release.xcconfig"; sourceTree = "<group>"; };
 		2D703CCA82049F3983C5F7E2 /* Parser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		42C919B5575DC3D79B45087E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		43DA2562C65013435CB0EC83 /* Pods-wltvcomics.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-wltvcomics.debug.xcconfig"; path = "Pods/Target Support Files/Pods-wltvcomics/Pods-wltvcomics.debug.xcconfig"; sourceTree = "<group>"; };
+		5D1A64AE893381AEC5AA2A7D /* Pods_wltvcomics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_wltvcomics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6012D7E81F57D16A00F5C688 /* ComicTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicTableViewCell.swift; sourceTree = "<group>"; };
 		6012D7ED1F57DF8000F5C688 /* FavoriteTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteTableViewController.swift; sourceTree = "<group>"; };
 		6012D8161F57FE7800F5C688 /* Search Result.PNG */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Search Result.PNG"; sourceTree = "<group>"; };
@@ -115,6 +133,7 @@
 		7E1A2B3C4D5E6F7081920A7B /* ReadingModeStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadingModeStore.swift; sourceTree = "<group>"; };
 		7E1A2B3C4D5E6F7081920A8B /* VerticalReaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerticalReaderView.swift; sourceTree = "<group>"; };
 		86F17BE6B036DB7CB2C3EE69 /* StringUtility.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StringUtility.swift; sourceTree = "<group>"; };
+		999FD627D6794AD005B4009D /* Pods-wltvcomics.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-wltvcomics.release.xcconfig"; path = "Pods/Target Support Files/Pods-wltvcomics/Pods-wltvcomics.release.xcconfig"; sourceTree = "<group>"; };
 		A580DCF0EA24504B8B273268 /* R8Comic.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = R8Comic.swift; sourceTree = "<group>"; };
 		AA000001AAAA000100000000 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		B72AA88981B403D7045D297B /* Pods-WLComicsTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComicsTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WLComicsTests/Pods-WLComicsTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -128,11 +147,6 @@
 		F914D5FAC2855926D2D68DC0 /* Comic.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Comic.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		602725D4307617600071AD3A /* WLComicsTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WLComicsTests; sourceTree = "<group>"; };
-		BA966E4D3088EB9500A5992C /* wltvcomics */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (BA966E6A3088EB9500A5992C /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = wltvcomics; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
-
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		BA966E6A3088EB9500A5992C /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -142,6 +156,11 @@
 			target = BA966E4B3088EB9400A5992C /* wltvcomics */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		602725D4307617600071AD3A /* WLComicsTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WLComicsTests; sourceTree = "<group>"; };
+		BA966E4D3088EB9500A5992C /* wltvcomics */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (BA966E6A3088EB9500A5992C /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = wltvcomics; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		602725D0307617600071AD3A /* Frameworks */ = {
@@ -171,6 +190,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				807A924B972DA7245515A869 /* Pods_wltvcomics.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,6 +204,8 @@
 				0FBD39A1BC78904AFAA8197C /* Pods-WLComics.release.xcconfig */,
 				B72AA88981B403D7045D297B /* Pods-WLComicsTests.debug.xcconfig */,
 				ECA4828C01E31EE0437EF223 /* Pods-WLComicsTests.release.xcconfig */,
+				43DA2562C65013435CB0EC83 /* Pods-wltvcomics.debug.xcconfig */,
+				999FD627D6794AD005B4009D /* Pods-wltvcomics.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -366,6 +388,7 @@
 			children = (
 				7B1ABE3475CCA9F1B69CF164 /* Pods_WLComics.framework */,
 				F775CEA85BDD293314945180 /* Pods_WLComicsTests.framework */,
+				5D1A64AE893381AEC5AA2A7D /* Pods_wltvcomics.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -435,9 +458,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = BA966E5C3088EB9900A5992C /* Build configuration list for PBXNativeTarget "wltvcomics" */;
 			buildPhases = (
+				75B353CD1B8B8D52392F54C1 /* [CP] Check Pods Manifest.lock */,
 				BA966E483088EB9400A5992C /* Sources */,
 				BA966E493088EB9400A5992C /* Frameworks */,
 				BA966E4A3088EB9400A5992C /* Resources */,
+				EB5A8C9E9B65121C2CFA9A20 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -447,8 +472,6 @@
 				BA966E4D3088EB9500A5992C /* wltvcomics */,
 			);
 			name = wltvcomics;
-			packageProductDependencies = (
-			);
 			productName = wltvcomics;
 			productReference = BA966E4C3088EB9400A5992C /* wltvcomics.app */;
 			productType = "com.apple.product-type.application";
@@ -541,12 +564,36 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC000001TV0000000000000C /* AllComics.plist in Resources */,
+				CC000001TV0000000000000D /* MyFavoritesComics.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		75B353CD1B8B8D52392F54C1 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-wltvcomics-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		7CA6D2859019703195AABF8D /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -554,7 +601,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-WLComics/Pods-WLComics-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
+				"${BUILT_PRODUCTS_DIR}/Kingfisher-iOS/Kingfisher.framework",
 				"${BUILT_PRODUCTS_DIR}/SVProgressHUD/SVProgressHUD.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -605,6 +652,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EB5A8C9E9B65121C2CFA9A20 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-wltvcomics/Pods-wltvcomics-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Kingfisher-tvOS/Kingfisher.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-wltvcomics/Pods-wltvcomics-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -664,6 +729,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC000001TV00000000000001 /* Comic.swift in Sources */,
+				CC000001TV00000000000002 /* Config.swift in Sources */,
+				CC000001TV00000000000003 /* Episode.swift in Sources */,
+				CC000001TV00000000000004 /* JSnview.swift in Sources */,
+				CC000001TV00000000000005 /* Parser.swift in Sources */,
+				CC000001TV00000000000006 /* R8Comic.swift in Sources */,
+				CC000001TV00000000000007 /* StringUtility.swift in Sources */,
+				CC000001TV00000000000008 /* WLComics.swift in Sources */,
+				CC000001TV00000000000009 /* FavoriteComics.swift in Sources */,
+				CC000001TV0000000000000A /* SwiftyPlistManager.swift in Sources */,
+				CC000001TV0000000000000B /* ReadingProgress.swift in Sources */,
+				CC000001TV0000000000000E /* ReadingModeStore.swift in Sources */,
+				CC000001TV0000000000000F /* VerticalReaderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1000,6 +1078,7 @@
 		};
 		BA966E5A3088EB9900A5992C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 43DA2562C65013435CB0EC83 /* Pods-wltvcomics.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -1012,15 +1091,16 @@
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = wltvcomics/WLTVComics.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7T4QCGLNFF;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = wltvcomics/Info.plist;
@@ -1051,6 +1131,7 @@
 		};
 		BA966E5B3088EB9900A5992C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 999FD627D6794AD005B4009D /* Pods-wltvcomics.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -1063,15 +1144,16 @@
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = "$(inherited)";
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = wltvcomics/WLTVComics.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7T4QCGLNFF;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = wltvcomics/Info.plist;

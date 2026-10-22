@@ -25,6 +25,14 @@ class TVAppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    // MARK: - UISceneSession Lifecycle
+
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let config = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        config.delegateClass = TVSceneDelegate.self
+        return config
+    }
+
     /// 比對 bundle 版本，若 bundle 的 plist 較新則覆蓋 Documents 目錄的副本
     private func refreshBundlePlistIfNeeded(name: String) {
         let fileManager = FileManager.default

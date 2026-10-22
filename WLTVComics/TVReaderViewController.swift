@@ -2,7 +2,7 @@
 //  TVReaderViewController.swift
 //  WLTVComics
 //
-//  全螢幕閱讀器 — tvOS 用 Siri Remote 觸控板左右滑動翻頁
+//  全螢幕閱讀器 — 支援左右翻頁（日漫）與上下捲動（條漫）
 //
 
 import UIKit
@@ -18,16 +18,21 @@ class TVReaderViewController: UIViewController {
     private var displayedEpisodeUrl: String?
     private var displayedEpisodeName = ""
 
+    // MARK: - 水平模式（翻頁）
     private let imageView = UIImageView()
+
+    // MARK: - 直式模式（上下捲動）
+    private let verticalReader = VerticalReaderView()
+    private var currentMode: ReadingMode = .horizontal
+
     private let pageLabel = UILabel()
     private let episodeLabel = UILabel()
+    private let modeLabel = UILabel()
     private let activityIndicator = UIActivityIndicatorView(style: .large)
 
     private var currentPage = 0
-    /// 隱藏 UI 的計時器
     private var hideTimer: Timer?
 
-    /// 8comic 要求 Referer header
     private var refererModifier: AnyModifier {
         let url = displayedEpisodeUrl ?? "https://www.8comic.com/"
         return AnyModifier { request in
@@ -41,10 +46,17 @@ class TVReaderViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .black
 
+        // 讀取該漫畫存過的閱讀模式
+        if let id = comicId, let saved = ReadingModeStore.mode(for: id) {
+            currentMode = saved
+        }
+
         setUpImageView()
+        setUpVerticalReader()
         setUpOverlayLabels()
         setUpActivityIndicator()
         setUpGestures()
+        applyMode()
     }
 
     // MARK: - UI Setup
@@ -62,8 +74,31 @@ class TVReaderViewController: UIViewController {
         ])
     }
 
+    private func setUpVerticalReader() {
+        verticalReader.translatesAutoresizingMaskIntoConstraints = false
+        verticalReader.backgroundColor = .black
+        view.addSubview(verticalReader)
+        NSLayoutConstraint.activate([
+            verticalReader.topAnchor.constraint(equalTo: view.topAnchor),
+            verticalReader.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            verticalReader.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            verticalReader.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+
+        verticalReader.onPageChanged = { [weak self] page in
+            guard let self = self else { return }
+            self.currentPage = page
+            self.pageLabel.text = "  \(page + 1) / \(self.displayedImages.count)  "
+            if let comicId = self.comicId, let url = self.displayedEpisodeUrl {
+                ReadingProgress.save(comicId: comicId, episodeUrl: url, episodeName: self.displayedEpisodeName, page: page)
+            }
+        }
+        verticalReader.onSwipePastLastPage = { [weak self] in self?.loadNextEpisode() }
+        verticalReader.onSwipePastFirstPage = { [weak self] in self?.loadPreviousEpisode() }
+        verticalReader.onTap = { [weak self] in self?.handleTap() }
+    }
+
     private func setUpOverlayLabels() {
-        // 頁碼標籤（右下）
         pageLabel.font = .systemFont(ofSize: 32, weight: .bold)
         pageLabel.textColor = .white
         pageLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
@@ -74,7 +109,6 @@ class TVReaderViewController: UIViewController {
         pageLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(pageLabel)
 
-        // 集數標籤（左上）
         episodeLabel.font = .systemFont(ofSize: 36, weight: .bold)
         episodeLabel.textColor = .white
         episodeLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
@@ -85,6 +119,17 @@ class TVReaderViewController: UIViewController {
         episodeLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(episodeLabel)
 
+        // 閱讀模式提示（右上）
+        modeLabel.font = .systemFont(ofSize: 28, weight: .medium)
+        modeLabel.textColor = .white
+        modeLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        modeLabel.layer.cornerRadius = 8
+        modeLabel.clipsToBounds = true
+        modeLabel.textAlignment = .center
+        modeLabel.alpha = 0
+        modeLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(modeLabel)
+
         NSLayoutConstraint.activate([
             pageLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -40),
             pageLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
@@ -93,6 +138,9 @@ class TVReaderViewController: UIViewController {
             episodeLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 40),
             episodeLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
             episodeLabel.heightAnchor.constraint(equalToConstant: 56),
+            modeLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -40),
+            modeLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
+            modeLabel.heightAnchor.constraint(equalToConstant: 44),
         ])
     }
 
@@ -107,7 +155,6 @@ class TVReaderViewController: UIViewController {
     }
 
     private func setUpGestures() {
-        // Siri Remote 左右滑動翻頁
         let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeLeft.direction = .left
         view.addGestureRecognizer(swipeLeft)
@@ -116,15 +163,49 @@ class TVReaderViewController: UIViewController {
         swipeRight.direction = .right
         view.addGestureRecognizer(swipeRight)
 
-        // 點擊顯示/隱藏頁碼資訊
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        tap.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
-        view.addGestureRecognizer(tap)
+        let swipeUp = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+        swipeUp.direction = .up
+        view.addGestureRecognizer(swipeUp)
 
-        // Menu 按鈕關閉閱讀器
-        let menu = UITapGestureRecognizer(target: self, action: #selector(handleMenu))
-        menu.allowedPressTypes = [NSNumber(value: UIPress.PressType.menu.rawValue)]
-        view.addGestureRecognizer(menu)
+        let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+        swipeDown.direction = .down
+        view.addGestureRecognizer(swipeDown)
+    }
+
+    // MARK: - 閱讀模式切換
+
+    private func applyMode() {
+        imageView.isHidden = currentMode == .vertical
+        verticalReader.isHidden = currentMode == .horizontal
+    }
+
+    private func toggleMode() {
+        let newMode: ReadingMode = currentMode == .horizontal ? .vertical : .horizontal
+        currentMode = newMode
+        if let id = comicId {
+            ReadingModeStore.setManual(newMode, for: id)
+        }
+        applyMode()
+        showCurrentContent()
+
+        modeLabel.text = currentMode == .vertical ? "  ↕ 直式閱讀  " : "  ↔ 翻頁閱讀  "
+        modeLabel.alpha = 1
+        UIView.animate(withDuration: 0.5, delay: 1.5) {
+            self.modeLabel.alpha = 0
+        }
+    }
+
+    /// 在模式切換後，用目前的 page 重新顯示
+    private func showCurrentContent() {
+        if currentMode == .horizontal {
+            verticalReader.cancelAllDownloads()
+            loadCurrentPage()
+        } else {
+            imageView.kf.cancelDownloadTask()
+            verticalReader.episodeUrl = displayedEpisodeUrl
+            verticalReader.currentIndex = currentPage
+            verticalReader.images = displayedImages
+        }
     }
 
     // MARK: - Episode Loading
@@ -137,16 +218,23 @@ class TVReaderViewController: UIViewController {
         activityIndicator.startAnimating()
 
         WLComics.sharedInstance().loadEpisodeDetail(episode) { [weak self] episode in
-            episode.setUpPages()
-            let pages = episode.getImageUrlList()
             DispatchQueue.main.async {
                 guard let self = self, self.episodeIndex == index else { return }
+                episode.setUpPages()
+                let pages = episode.getImageUrlList()
                 self.displayedEpisodeUrl = episode.getUrl()
                 self.displayedEpisodeName = episode.getName()
                 self.displayedImages = pages
                 self.currentPage = min(max(startPage, 0), max(pages.count - 1, 0))
                 self.activityIndicator.stopAnimating()
-                self.loadCurrentPage()
+
+                if self.currentMode == .horizontal {
+                    self.loadCurrentPage()
+                } else {
+                    self.verticalReader.episodeUrl = episode.getUrl()
+                    self.verticalReader.currentIndex = self.currentPage
+                    self.verticalReader.images = pages
+                }
                 self.showOverlayBriefly()
             }
         }
@@ -165,35 +253,82 @@ class TVReaderViewController: UIViewController {
         pageLabel.text = "  \(currentPage + 1) / \(displayedImages.count)  "
         episodeLabel.text = "  \(displayedEpisodeName)  "
 
-        // 記錄閱讀進度
         if let comicId = comicId, let url = displayedEpisodeUrl {
             ReadingProgress.save(comicId: comicId, episodeUrl: url, episodeName: displayedEpisodeName, page: currentPage)
         }
     }
 
-    // MARK: - Gestures
+    // MARK: - Gestures & Press Events
 
     @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
-        showOverlayBriefly()
+        switch gesture.direction {
+        case .left:  goNextPage()
+        case .right: goPreviousPage()
+        case .up:
+            if currentMode == .vertical { verticalReader.nextButtonPressed() }
+        case .down:
+            if currentMode == .vertical { verticalReader.previousButtonPressed() }
+        default: break
+        }
+    }
 
-        if gesture.direction == .left {
-            // 下一頁
-            if currentPage < displayedImages.count - 1 {
-                currentPage += 1
-                loadCurrentPage()
-            } else {
-                // 載入下一話
-                loadNextEpisode()
+    override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        for press in presses {
+            switch press.type {
+            case .rightArrow:
+                goNextPage()
+                return
+            case .leftArrow:
+                goPreviousPage()
+                return
+            case .upArrow:
+                if currentMode == .vertical { verticalReader.previousButtonPressed() }
+                return
+            case .downArrow:
+                if currentMode == .vertical { verticalReader.nextButtonPressed() }
+                return
+            case .select:
+                handleTap()
+                return
+            case .menu:
+                dismiss(animated: true)
+                return
+            case .playPause:
+                // 播放/暫停鍵切換閱讀模式
+                toggleMode()
+                return
+            default:
+                break
             }
-        } else if gesture.direction == .right {
-            // 上一頁
-            if currentPage > 0 {
-                currentPage -= 1
-                loadCurrentPage()
-            } else {
-                // 載入上一話
-                loadPreviousEpisode()
-            }
+        }
+        super.pressesBegan(presses, with: event)
+    }
+
+    private func goNextPage() {
+        if currentMode == .vertical {
+            verticalReader.nextButtonPressed()
+            return
+        }
+        showOverlayBriefly()
+        if currentPage < displayedImages.count - 1 {
+            currentPage += 1
+            loadCurrentPage()
+        } else {
+            loadNextEpisode()
+        }
+    }
+
+    private func goPreviousPage() {
+        if currentMode == .vertical {
+            verticalReader.previousButtonPressed()
+            return
+        }
+        showOverlayBriefly()
+        if currentPage > 0 {
+            currentPage -= 1
+            loadCurrentPage()
+        } else {
+            loadPreviousEpisode()
         }
     }
 
@@ -204,10 +339,6 @@ class TVReaderViewController: UIViewController {
             self.episodeLabel.alpha = isVisible ? 0 : 1
         }
         if !isVisible { scheduleHideTimer() }
-    }
-
-    @objc private func handleMenu() {
-        dismiss(animated: true)
     }
 
     private func showOverlayBriefly() {

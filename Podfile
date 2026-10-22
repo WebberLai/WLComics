@@ -10,7 +10,7 @@ target 'WLComics' do
   end
 end
 
-target 'WLTVComics' do
+target 'wltvcomics' do
   platform :tvos, '16.0'
   pod 'Kingfisher'
 end

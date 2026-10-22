@@ -11,11 +11,20 @@ import Kingfisher
 class TVComicGridViewController: UIViewController {
 
     private var collectionView: UICollectionView!
-    private let searchController = UISearchController(searchResultsController: nil)
 
     private var allComics = [Comic]()
-    private var displayedComics = [Comic]()
     private var isSearching = false
+
+    /// 分組資料（A-Z 拼音首字母）
+    private var sectionTitles = [String]()
+    private var sectionedComics = [String: [Comic]]()
+
+    /// 搜尋結果（平面列表，不分組）
+    private var filterComics = [Comic]()
+
+    /// 記住列表捲動位置
+    private static let scrollAnchorKey = "tv_grid_scroll_anchor"
+    private var didRestoreScrollPosition = false
 
     /// 8comic 會擋掉沒有 Referer 的圖片請求
     private let refererModifier = AnyModifier { request in
@@ -26,53 +35,129 @@ class TVComicGridViewController: UIViewController {
 
     private let activityIndicator = UIActivityIndicatorView(style: .large)
 
+    private static let headerKind = UICollectionView.elementKindSectionHeader
+    private static let headerId = "TVSectionHeader"
+
+    private let searchButton: UIButton = {
+        let btn = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .medium)
+        btn.setImage(UIImage(systemName: "magnifyingglass", withConfiguration: config), for: .normal)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "漫畫列表"
         view.backgroundColor = .black
+        navigationController?.isNavigationBarHidden = true
 
         setUpCollectionView()
-        setUpSearchController()
         setUpActivityIndicator()
+        setUpSearchButton()
 
         activityIndicator.startAnimating()
         WLComics.sharedInstance().loadAllComics { [weak self] comics in
             guard let self = self else { return }
-            self.allComics = comics
-            self.displayedComics = comics
-            self.activityIndicator.stopAnimating()
-            self.collectionView.reloadData()
-
-            // 背景更新漫畫列表
-            self.refreshComicsFromWeb()
+            DispatchQueue.global(qos: .userInitiated).async {
+                let library = self.buildComicLibrary(from: comics)
+                DispatchQueue.main.async {
+                    self.allComics = comics
+                    self.sectionTitles = library.titles
+                    self.sectionedComics = library.sorted
+                    self.activityIndicator.stopAnimating()
+                    self.collectionView.reloadData()
+                    self.restoreScrollPosition()
+                    self.refreshComicsFromWeb()
+                }
+            }
         }
+
+        NotificationCenter.default.addObserver(self, selector: #selector(saveScrollPosition),
+                                               name: UIApplication.didEnterBackgroundNotification, object: nil)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        restoreScrollPosition()
     }
 
     private func refreshComicsFromWeb() {
         WLComics.sharedInstance().refreshComicsFromWeb { [weak self] updatedComics in
             guard let self = self, updatedComics.count > self.allComics.count else { return }
-            self.allComics = updatedComics
-            if !self.isSearching {
-                self.displayedComics = updatedComics
-                self.collectionView.reloadData()
+            DispatchQueue.global(qos: .userInitiated).async {
+                let library = self.buildComicLibrary(from: updatedComics)
+                DispatchQueue.main.async {
+                    self.allComics = updatedComics
+                    if !self.isSearching {
+                        self.sectionTitles = library.titles
+                        self.sectionedComics = library.sorted
+                        self.collectionView.reloadData()
+                    }
+                }
             }
         }
+    }
+
+    // MARK: - Pinyin 分組
+
+    /// 建立拼音首字母分組（跟 iOS 版 MasterViewController 一樣的邏輯）
+    private func buildComicLibrary(from comics: [Comic]) -> (sorted: [String: [Comic]], titles: [String]) {
+        // 先一次算好所有拼音，避免排序時重複做 CFStringTransform
+        var pinyinCache = [String: String]() // comic id -> pinyin
+        var library = [String: [Comic]]()
+        for comic in comics {
+            let pinyin = pinyinKey(comic.getName())
+            pinyinCache[comic.getId()] = pinyin
+            let key = String(pinyin.prefix(1)).uppercased()
+            library[key, default: []].append(comic)
+        }
+        for key in library.keys {
+            library[key]?.sort { a, b in
+                let pa = pinyinCache[a.getId()] ?? ""
+                let pb = pinyinCache[b.getId()] ?? ""
+                return pa.localizedCaseInsensitiveCompare(pb) == .orderedAscending
+            }
+        }
+        let titles = library.keys.sorted()
+        return (sorted: library, titles: titles)
+    }
+
+    private func pinyinKey(_ chinese: String) -> String {
+        let mutable = NSMutableString(string: chinese) as CFMutableString
+        CFStringTransform(mutable, nil, kCFStringTransformMandarinLatin, false)
+        CFStringTransform(mutable, nil, kCFStringTransformStripCombiningMarks, false)
+        return mutable as String
+    }
+
+    // MARK: - Search
+
+    @objc private func showSearch() {
+        let resultsVC = TVSearchResultsController()
+        resultsVC.allComics = allComics
+        resultsVC.onSelect = { [weak self] comic in
+            self?.showEpisodes(for: comic)
+        }
+        let searchController = UISearchController(searchResultsController: resultsVC)
+        searchController.searchResultsUpdater = resultsVC
+        let searchContainer = UISearchContainerViewController(searchController: searchController)
+        searchContainer.title = "搜尋漫畫"
+        navigationController?.pushViewController(searchContainer, animated: true)
     }
 
     // MARK: - UI Setup
 
     private func setUpCollectionView() {
         let layout = UICollectionViewFlowLayout()
-        // tvOS 大螢幕，每排放 6 張海報
         let spacing: CGFloat = 48
         let sideInset: CGFloat = 80
-        let availableWidth = UIScreen.main.bounds.width - sideInset * 2 - spacing * 5
+        let availableWidth: CGFloat = 1920 - sideInset * 2 - spacing * 5
         let itemWidth = floor(availableWidth / 6)
-        let itemHeight = itemWidth * 1.5 + 40 // 海報 + 標題
+        let itemHeight = itemWidth * 1.5 + 40
         layout.itemSize = CGSize(width: itemWidth, height: itemHeight)
         layout.minimumInteritemSpacing = spacing
         layout.minimumLineSpacing = spacing
-        layout.sectionInset = UIEdgeInsets(top: 40, left: sideInset, bottom: 40, right: sideInset)
+        layout.sectionInset = UIEdgeInsets(top: 20, left: sideInset, bottom: 40, right: sideInset)
+        layout.headerReferenceSize = CGSize(width: 1920, height: 60)
 
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -80,15 +165,22 @@ class TVComicGridViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(TVComicCell.self, forCellWithReuseIdentifier: TVComicCell.reuseId)
+        collectionView.register(TVSectionHeaderView.self,
+                                forSupplementaryViewOfKind: Self.headerKind,
+                                withReuseIdentifier: Self.headerId)
         view.addSubview(collectionView)
     }
 
-    private func setUpSearchController() {
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "搜尋漫畫名稱"
-        navigationItem.searchController = searchController
-        definesPresentationContext = true
+    private func setUpSearchButton() {
+        searchButton.addTarget(self, action: #selector(showSearch), for: .primaryActionTriggered)
+        // 加到 tabBarController 的 view 上，這樣才能和 tabBar 在同一個 hierarchy
+        guard let tabBarController = tabBarController else { return }
+        tabBarController.view.addSubview(searchButton)
+
+        NSLayoutConstraint.activate([
+            searchButton.centerYAnchor.constraint(equalTo: tabBarController.tabBar.centerYAnchor),
+            searchButton.trailingAnchor.constraint(equalTo: tabBarController.view.trailingAnchor, constant: -80),
+        ])
     }
 
     private func setUpActivityIndicator() {
@@ -99,6 +191,56 @@ class TVComicGridViewController: UIViewController {
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
+    }
+
+    // MARK: - 記住列表位置
+
+    private func currentScrollAnchor() -> (comicId: String, offset: CGFloat)? {
+        guard !sectionTitles.isEmpty else { return nil }
+        let top = collectionView.contentOffset.y + collectionView.adjustedContentInset.top
+        guard let indexPath = collectionView.indexPathForItem(at: CGPoint(x: 100, y: top))
+                ?? collectionView.indexPathsForVisibleItems.sorted().first,
+              indexPath.section < sectionTitles.count else { return nil }
+        let c = comic(at: indexPath)
+        let cellTop = collectionView.layoutAttributesForItem(at: indexPath)?.frame.minY ?? 0
+        return (c.getId(), top - cellTop)
+    }
+
+    @objc private func saveScrollPosition() {
+        guard let anchor = currentScrollAnchor() else { return }
+        UserDefaults.standard.set(["comic_id": anchor.comicId, "offset": Double(anchor.offset)],
+                                  forKey: Self.scrollAnchorKey)
+    }
+
+    private func restoreScrollPosition() {
+        guard !didRestoreScrollPosition, view.window != nil, !sectionTitles.isEmpty else { return }
+        didRestoreScrollPosition = true
+        guard let saved = UserDefaults.standard.dictionary(forKey: Self.scrollAnchorKey),
+              let comicId = saved["comic_id"] as? String,
+              let offset = saved["offset"] as? Double,
+              let indexPath = indexPathForComic(id: comicId) else { return }
+        collectionView.layoutIfNeeded()
+        let inset = collectionView.adjustedContentInset
+        let cellTop = collectionView.layoutAttributesForItem(at: indexPath)?.frame.minY ?? 0
+        let y = cellTop + CGFloat(offset) - inset.top
+        let maxY = max(collectionView.contentSize.height - collectionView.bounds.height + inset.bottom, -inset.top)
+        collectionView.setContentOffset(CGPoint(x: 0, y: min(max(y, -inset.top), maxY)), animated: false)
+    }
+
+    private func indexPathForComic(id: String) -> IndexPath? {
+        for (section, title) in sectionTitles.enumerated() {
+            if let row = sectionedComics[title]?.firstIndex(where: { $0.getId() == id }) {
+                return IndexPath(item: row, section: section)
+            }
+        }
+        return nil
+    }
+
+    // MARK: - Helpers
+
+    private func comic(at indexPath: IndexPath) -> Comic {
+        let title = sectionTitles[indexPath.section]
+        return sectionedComics[title]![indexPath.item]
     }
 
     // MARK: - Navigation
@@ -115,38 +257,32 @@ class TVComicGridViewController: UIViewController {
 
 extension TVComicGridViewController: UICollectionViewDataSource, UICollectionViewDelegate {
 
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return sectionTitles.count
+    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return displayedComics.count
+        guard section < sectionTitles.count else { return 0 }
+        return sectionedComics[sectionTitles[section]]?.count ?? 0
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TVComicCell.reuseId, for: indexPath) as! TVComicCell
-        let comic = displayedComics[indexPath.item]
-        cell.configure(with: comic, modifier: refererModifier)
+        cell.configure(with: comic(at: indexPath), modifier: refererModifier)
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        showEpisodes(for: displayedComics[indexPath.item])
+    func collectionView(_ collectionView: UICollectionView,
+                         viewForSupplementaryElementOfKind kind: String,
+                         at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind, withReuseIdentifier: Self.headerId, for: indexPath) as! TVSectionHeaderView
+        header.titleLabel.text = sectionTitles[indexPath.section]
+        return header
     }
-}
 
-// MARK: - Search
-
-extension TVComicGridViewController: UISearchResultsUpdating {
-
-    func updateSearchResults(for searchController: UISearchController) {
-        guard let text = searchController.searchBar.text, !text.isEmpty else {
-            isSearching = false
-            displayedComics = allComics
-            collectionView.reloadData()
-            return
-        }
-        isSearching = true
-        displayedComics = allComics.filter {
-            ($0.getName() as NSString).range(of: text, options: .caseInsensitive).location != NSNotFound
-        }
-        collectionView.reloadData()
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        showEpisodes(for: comic(at: indexPath))
     }
 }
 
@@ -213,7 +349,88 @@ class TVComicCell: UICollectionViewCell {
 
     override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
         coordinator.addCoordinatedAnimations({
-            self.titleLabel.textColor = self.isFocused ? .black : .white
+            if self.isFocused {
+                self.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+                self.titleLabel.textColor = .black
+            } else {
+                self.transform = .identity
+                self.titleLabel.textColor = .white
+            }
         })
+    }
+}
+
+// MARK: - TVSectionHeaderView
+
+class TVSectionHeaderView: UICollectionReusableView {
+
+    let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 38)
+        label.textColor = .white
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(titleLabel)
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 80),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+}
+
+// MARK: - TVSearchResultsController
+
+class TVSearchResultsController: UIViewController, UISearchResultsUpdating {
+
+    var allComics = [Comic]()
+    var onSelect: ((Comic) -> Void)?
+
+    private var filterComics = [Comic]()
+    private var tableView: UITableView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        tableView = UITableView(frame: view.bounds, style: .plain)
+        tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        view.addSubview(tableView)
+    }
+
+    func updateSearchResults(for searchController: UISearchController) {
+        let query = searchController.searchBar.text?.trimmingCharacters(in: .whitespaces) ?? ""
+        if query.isEmpty {
+            filterComics = []
+        } else {
+            filterComics = allComics.filter { $0.getName().localizedCaseInsensitiveContains(query) }
+        }
+        tableView.reloadData()
+    }
+}
+
+extension TVSearchResultsController: UITableViewDataSource, UITableViewDelegate {
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return filterComics.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.textLabel?.text = filterComics[indexPath.row].getName()
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let comic = filterComics[indexPath.row]
+        dismiss(animated: true) { [weak self] in
+            self?.onSelect?(comic)
+        }
     }
 }

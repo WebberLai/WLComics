@@ -22,8 +22,8 @@ class TVFavoriteGridViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "我的收藏"
         view.backgroundColor = .black
+        navigationController?.isNavigationBarHidden = true
 
         setUpCollectionView()
         setUpEmptyLabel()
@@ -43,7 +43,7 @@ class TVFavoriteGridViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         let spacing: CGFloat = 48
         let sideInset: CGFloat = 80
-        let availableWidth = UIScreen.main.bounds.width - sideInset * 2 - spacing * 5
+        let availableWidth: CGFloat = 1920 - sideInset * 2 - spacing * 5
         let itemWidth = floor(availableWidth / 6)
         let itemHeight = itemWidth * 1.5 + 40
         layout.itemSize = CGSize(width: itemWidth, height: itemHeight)
