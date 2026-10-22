@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="13122.16" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="TabBarController">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Tab Bar Controller-->
+        <scene sceneID="tab-scene">
+            <objects>
+                <tabBarController id="TabBarController" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="tab-bar">
+                        <rect key="frame" x="0.0" y="0.0" width="1920" height="100"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="comicNav" kind="relationship" relationship="viewControllers" id="seg-1"/>
+                        <segue destination="favoriteNav" kind="relationship" relationship="viewControllers" id="seg-2"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="tab-first" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="0" y="0"/>
+        </scene>
+        <!--Comics Navigation-->
+        <scene sceneID="comic-nav-scene">
+            <objects>
+                <navigationController id="comicNav" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="漫畫列表" id="comic-tab-item"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="comic-nav-bar">
+                        <rect key="frame" x="0.0" y="0.0" width="1920" height="100"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="comicGrid" kind="relationship" relationship="rootViewController" id="seg-3"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="comic-nav-first" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="800" y="-200"/>
+        </scene>
+        <!--Comic Grid-->
+        <scene sceneID="comic-grid-scene">
+            <objects>
+                <viewController id="comicGrid" customClass="TVComicGridViewController" customModule="WLTVComics" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="cg-top"/>
+                        <viewControllerLayoutGuide type="bottom" id="cg-bot"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="comic-grid-view">
+                        <rect key="frame" x="0.0" y="0.0" width="1920" height="1080"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <viewLayoutGuide key="safeArea" id="cg-safe"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="漫畫列表" id="comic-grid-nav-item"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="comic-grid-first" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1600" y="-200"/>
+        </scene>
+        <!--Favorites Navigation-->
+        <scene sceneID="fav-nav-scene">
+            <objects>
+                <navigationController id="favoriteNav" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="我的收藏" id="fav-tab-item"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="fav-nav-bar">
+                        <rect key="frame" x="0.0" y="0.0" width="1920" height="100"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="favGrid" kind="relationship" relationship="rootViewController" id="seg-4"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fav-nav-first" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="800" y="400"/>
+        </scene>
+        <!--Favorite Grid-->
+        <scene sceneID="fav-grid-scene">
+            <objects>
+                <viewController id="favGrid" customClass="TVFavoriteGridViewController" customModule="WLTVComics" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="fg-top"/>
+                        <viewControllerLayoutGuide type="bottom" id="fg-bot"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="fav-grid-view">
+                        <rect key="frame" x="0.0" y="0.0" width="1920" height="1080"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <viewLayoutGuide key="safeArea" id="fg-safe"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="我的收藏" id="fav-grid-nav-item"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fav-grid-first" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1600" y="400"/>
+        </scene>
+    </scenes>
+</document>

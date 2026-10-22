@@ -119,6 +119,7 @@
 		AA000001AAAA000100000000 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		B72AA88981B403D7045D297B /* Pods-WLComicsTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComicsTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WLComicsTests/Pods-WLComicsTests.debug.xcconfig"; sourceTree = "<group>"; };
 		BA128D022324A59500EE12B4 /* WLComics-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WLComics-Bridging-Header.h"; sourceTree = "<group>"; };
+		BA966E4C3088EB9400A5992C /* wltvcomics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = wltvcomics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE35CDB2FE2B64602A410B88 /* Episode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Episode.swift; sourceTree = "<group>"; };
 		CDD1E9E8E8EFA1FED131CE6D /* Config.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		EBCC57C77576999D43679021 /* Pods-WLComics.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WLComics.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WLComics/Pods-WLComics.debug.xcconfig"; sourceTree = "<group>"; };
@@ -129,7 +130,18 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		602725D4307617600071AD3A /* WLComicsTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WLComicsTests; sourceTree = "<group>"; };
+		BA966E4D3088EB9500A5992C /* wltvcomics */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (BA966E6A3088EB9500A5992C /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = wltvcomics; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BA966E6A3088EB9500A5992C /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BA966E4B3088EB9400A5992C /* wltvcomics */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		602725D0307617600071AD3A /* Frameworks */ = {
@@ -149,6 +161,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		60A561951F82264B004C71C1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA966E493088EB9400A5992C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -230,6 +249,7 @@
 				6056EE1C1F28233F007BBE67 /* WLComics */,
 				60A561991F82264B004C71C1 /* WLMacComic */,
 				602725D4307617600071AD3A /* WLComicsTests */,
+				BA966E4D3088EB9500A5992C /* wltvcomics */,
 				6056EE1B1F28233F007BBE67 /* Products */,
 				3526AE096006480C1DF0ADAF /* Pods */,
 				E63344A200A32F08202A6A7C /* Frameworks */,
@@ -243,6 +263,7 @@
 				6056EE1A1F28233F007BBE67 /* 看漫畫.app */,
 				60A561981F82264B004C71C1 /* WLMacComic.app */,
 				602725D3307617600071AD3A /* WLComicsTests.xctest */,
+				BA966E4C3088EB9400A5992C /* wltvcomics.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -410,13 +431,35 @@
 			productReference = 60A561981F82264B004C71C1 /* WLMacComic.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BA966E4B3088EB9400A5992C /* wltvcomics */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA966E5C3088EB9900A5992C /* Build configuration list for PBXNativeTarget "wltvcomics" */;
+			buildPhases = (
+				BA966E483088EB9400A5992C /* Sources */,
+				BA966E493088EB9400A5992C /* Frameworks */,
+				BA966E4A3088EB9400A5992C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BA966E4D3088EB9500A5992C /* wltvcomics */,
+			);
+			name = wltvcomics;
+			packageProductDependencies = (
+			);
+			productName = wltvcomics;
+			productReference = BA966E4C3088EB9400A5992C /* wltvcomics.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		6056EE121F28233F007BBE67 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 2640;
+				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = webberlai;
 				TargetAttributes = {
@@ -433,6 +476,9 @@
 					60A561971F82264B004C71C1 = {
 						CreatedOnToolsVersion = 9.0;
 						ProvisioningStyle = Automatic;
+					};
+					BA966E4B3088EB9400A5992C = {
+						CreatedOnToolsVersion = 26.3;
 					};
 				};
 			};
@@ -453,6 +499,7 @@
 				6056EE191F28233F007BBE67 /* WLComics */,
 				60A561971F82264B004C71C1 /* WLMacComic */,
 				602725D2307617600071AD3A /* WLComicsTests */,
+				BA966E4B3088EB9400A5992C /* wltvcomics */,
 			);
 		};
 /* End PBXProject section */
@@ -487,6 +534,13 @@
 			files = (
 				60A5619F1F82264B004C71C1 /* Assets.xcassets in Resources */,
 				60A561A21F82264B004C71C1 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA966E4A3088EB9400A5992C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -603,6 +657,13 @@
 			files = (
 				60A5619D1F82264B004C71C1 /* ViewController.swift in Sources */,
 				60A5619B1F82264B004C71C1 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA966E483088EB9400A5992C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -937,6 +998,106 @@
 			};
 			name = Release;
 		};
+		BA966E5A3088EB9900A5992C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7T4QCGLNFF;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = wltvcomics/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.wltvcomics;
+				PRODUCT_MODULE_NAME = WLTVComics;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = appletvos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		BA966E5B3088EB9900A5992C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7T4QCGLNFF;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = wltvcomics/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.wltvcomics;
+				PRODUCT_MODULE_NAME = WLTVComics;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = appletvos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -972,6 +1133,15 @@
 			buildConfigurations = (
 				60A561A61F82264B004C71C1 /* Debug */,
 				60A561A71F82264B004C71C1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BA966E5C3088EB9900A5992C /* Build configuration list for PBXNativeTarget "wltvcomics" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA966E5A3088EB9900A5992C /* Debug */,
+				BA966E5B3088EB9900A5992C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
