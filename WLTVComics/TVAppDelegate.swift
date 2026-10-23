@@ -33,11 +33,11 @@ class TVAppDelegate: UIResponder, UIApplicationDelegate {
         return config
     }
 
-    /// 比對 bundle 版本，若 bundle 的 plist 較新則覆蓋 Documents 目錄的副本
+    /// 比對 bundle 版本，若 bundle 的 plist 較新則覆蓋 Caches 目錄的副本
     private func refreshBundlePlistIfNeeded(name: String) {
         let fileManager = FileManager.default
         guard let bundlePath = Bundle.main.path(forResource: name, ofType: "plist") else { return }
-        let dir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        let dir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
         let docPath = (dir as NSString).appendingPathComponent("\(name).plist")
 
         let currentVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"

@@ -35,7 +35,12 @@ struct Plist {
     
     var destPath:String? {
         guard sourcePath != .none else { return .none }
+        #if os(tvOS)
+        // tvOS 的 Documents 目錄有嚴格的儲存限制，改用 Caches
+        let dir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
+        #else
         let dir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        #endif
         return (dir as NSString).appendingPathComponent("\(name).plist")
     }
     
