@@ -24,6 +24,8 @@ class TVReaderViewController: UIViewController {
     // MARK: - 直式模式（上下捲動）
     private let verticalReader = VerticalReaderView()
     private var currentMode: ReadingMode = .horizontal
+    /// 直式閱讀的欄寬佔畫面寬度的比例
+    private static let verticalWidthRatio: CGFloat = 0.55
 
     private let pageLabel = UILabel()
     private let episodeLabel = UILabel()
@@ -78,11 +80,13 @@ class TVReaderViewController: UIViewController {
         verticalReader.translatesAutoresizingMaskIntoConstraints = false
         verticalReader.backgroundColor = .black
         view.addSubview(verticalReader)
+        // 條漫原圖多半只有 700–800 px 寬，塞滿電視寬度會放大到糊掉、一個畫面也看不到多少，
+        // 所以限制成畫面寬度的一部分並置中
         NSLayoutConstraint.activate([
             verticalReader.topAnchor.constraint(equalTo: view.topAnchor),
             verticalReader.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            verticalReader.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            verticalReader.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            verticalReader.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            verticalReader.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: TVReaderViewController.verticalWidthRatio),
         ])
 
         verticalReader.onPageChanged = { [weak self] page in
@@ -188,11 +192,26 @@ class TVReaderViewController: UIViewController {
         applyMode()
         showCurrentContent()
 
-        modeLabel.text = currentMode == .vertical ? "  ↕ 直式閱讀  " : "  ↔ 翻頁閱讀  "
+        modeLabel.attributedText = modeText(for: currentMode)
         modeLabel.alpha = 1
         UIView.animate(withDuration: 0.5, delay: 1.5) {
             self.modeLabel.alpha = 0
         }
+    }
+
+    /// 模式提示：上下箭頭圖示代表直式閱讀，左右箭頭圖示代表翻頁閱讀
+    private func modeText(for mode: ReadingMode) -> NSAttributedString {
+        let symbolName = mode == .vertical ? "arrow.up.and.down" : "arrow.left.and.right"
+        let title = mode == .vertical ? "直式閱讀" : "翻頁閱讀"
+        let config = UIImage.SymbolConfiguration(font: modeLabel.font)
+        let text = NSMutableAttributedString(string: "  ")
+        if let image = UIImage(systemName: symbolName, withConfiguration: config)?
+            .withTintColor(modeLabel.textColor, renderingMode: .alwaysOriginal) {
+            text.append(NSAttributedString(attachment: NSTextAttachment(image: image)))
+            text.append(NSAttributedString(string: " "))
+        }
+        text.append(NSAttributedString(string: "\(title)  "))
+        return text
     }
 
     /// 在模式切換後，用目前的 page 重新顯示
@@ -264,9 +283,10 @@ class TVReaderViewController: UIViewController {
         switch gesture.direction {
         case .left:  goNextPage()
         case .right: goPreviousPage()
-        case .up:
-            if currentMode == .vertical { verticalReader.nextButtonPressed() }
+        // 和按觸控板上下緣一致：往下是往後讀
         case .down:
+            if currentMode == .vertical { verticalReader.nextButtonPressed() }
+        case .up:
             if currentMode == .vertical { verticalReader.previousButtonPressed() }
         default: break
         }
