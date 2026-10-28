@@ -5,6 +5,7 @@
 
 import UIKit
 import BackgroundTasks
+import Kingfisher
 import os
 
 /// 離線閱讀的下載管理。
@@ -361,11 +362,18 @@ final class DownloadManager {
         let lock = NSLock()
         var finished = 0
         var failed = false
+        var fromCache = 0
         for (index, page) in pages.enumerated() {
             let destination = folderURL.appendingPathComponent(pageFiles[index])
             queue.addOperation {
                 guard !self.isCancelled(job) else { return }
                 var ok = self.fileExists(destination)
+                var copied = false
+                if !ok {
+                    // 看過的頁面已在 Kingfisher 快取，直接複製，不必再向網站請求
+                    copied = self.copyFromImageCache(page, to: destination)
+                    ok = copied
+                }
                 if !ok {
                     ok = self.downloadFile(from: page, referer: referer, to: destination)
                     // 只有真的發出請求才停頓，續傳時已存在的頁面直接略過
@@ -373,6 +381,7 @@ final class DownloadManager {
                 }
                 lock.lock()
                 finished += 1
+                if copied { fromCache += 1 }
                 if !ok { failed = true }
                 let done = finished
                 lock.unlock()
@@ -388,7 +397,20 @@ final class DownloadManager {
         }
         let allPresent = !failed && pageFiles.allSatisfy { fileExists(folderURL.appendingPathComponent($0)) }
         updateRecord(job: job, folder: folder, pageFiles: pageFiles, completed: allPresent)
-        DownloadManager.log.notice("集數結束：\(job.episodeName, privacy: .public) 完成 \(allPresent) 有失敗頁 \(failed)")
+        DownloadManager.log.notice("集數結束：\(job.episodeName, privacy: .public) 完成 \(allPresent) 有失敗頁 \(failed) 取自快取 \(fromCache)/\(pages.count)")
+    }
+
+    /// 閱讀器以 .cacheOriginalImage 載入，原圖以網址為 key 存在 Kingfisher 磁碟快取（預設處理器）
+    private func copyFromImageCache(_ urlString: String, to destination: URL) -> Bool {
+        guard let cached = ImageCache.default.cacheFileURLIfOnDisk(forKey: urlString) else { return false }
+        try? fileManager.removeItem(at: destination)
+        do {
+            try fileManager.copyItem(at: cached, to: destination)
+            return true
+        } catch {
+            DownloadManager.log.error("從快取複製失敗：\(error.localizedDescription, privacy: .public) 檔案 \(destination.lastPathComponent, privacy: .public)")
+            return false
+        }
     }
 
     /// 同步下載單一檔案，失敗時重試

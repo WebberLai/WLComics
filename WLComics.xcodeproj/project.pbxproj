@@ -159,7 +159,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		602725D4307617600071AD3A /* WLComicsTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WLComicsTests; sourceTree = "<group>"; };
-		BA966E4D3088EB9500A5992C /* wltvcomics */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (BA966E6A3088EB9500A5992C /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = wltvcomics; sourceTree = "<group>"; };
+		BA966E4D3088EB9500A5992C /* WLTVComics */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (BA966E6A3088EB9500A5992C /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = WLTVComics; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -271,7 +271,7 @@
 				6056EE1C1F28233F007BBE67 /* WLComics */,
 				60A561991F82264B004C71C1 /* WLMacComic */,
 				602725D4307617600071AD3A /* WLComicsTests */,
-				BA966E4D3088EB9500A5992C /* wltvcomics */,
+				BA966E4D3088EB9500A5992C /* WLTVComics */,
 				6056EE1B1F28233F007BBE67 /* Products */,
 				3526AE096006480C1DF0ADAF /* Pods */,
 				E63344A200A32F08202A6A7C /* Frameworks */,
@@ -469,7 +469,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BA966E4D3088EB9500A5992C /* wltvcomics */,
+				BA966E4D3088EB9500A5992C /* WLTVComics */,
 			);
 			name = wltvcomics;
 			productName = wltvcomics;
@@ -1095,7 +1095,7 @@
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = wltvcomics/WLTVComics.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WLTVComics/WLTVComics.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1103,7 +1103,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = wltvcomics/Info.plist;
+				INFOPLIST_FILE = WLTVComics/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1148,7 +1148,7 @@
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = wltvcomics/WLTVComics.entitlements;
+				CODE_SIGN_ENTITLEMENTS = WLTVComics/WLTVComics.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1156,7 +1156,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = wltvcomics/Info.plist;
+				INFOPLIST_FILE = WLTVComics/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

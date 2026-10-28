@@ -14,12 +14,12 @@
 		<key>Kingfisher-iOS-Kingfisher.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>10</integer>
+			<integer>9</integer>
 		</dict>
 		<key>Kingfisher-iOS.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>8</integer>
+			<integer>7</integer>
 		</dict>
 		<key>Kingfisher-tvOS-Kingfisher.xcscheme_^#shared#^_</key>
 		<dict>
@@ -29,7 +29,7 @@
 		<key>Kingfisher-tvOS.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>11</integer>
+			<integer>10</integer>
 		</dict>
 		<key>Kingfisher.xcscheme</key>
 		<dict>
@@ -55,7 +55,7 @@
 		<key>Pods-wltvcomics.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>9</integer>
+			<integer>8</integer>
 		</dict>
 		<key>SVProgressHUD.xcscheme</key>
 		<dict>
