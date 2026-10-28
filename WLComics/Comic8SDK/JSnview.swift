@@ -147,7 +147,31 @@ open class JSnview{
             print("[DEBUG] JSnview JSContext error: \(exception?.toString() ?? "unknown")")
         }
 
-        context.evaluateScript(fullScript)
+        // tvOS 的 JavaScriptCore 環境較精簡，補上網頁 JS 常用的全域物件與函數
+        let polyfill = """
+        if (typeof unescape === 'undefined') { var unescape = decodeURIComponent; }
+        if (typeof ge === 'undefined') { var ge = function(id) { return { src: '', style: {} }; }; }
+        if (typeof request === 'undefined') { var request = function(key) { return ''; }; }
+        if (typeof document === 'undefined') {
+            var document = {
+                getElementById: function(id) { return { src: '', style: {}, innerHTML: '' }; },
+                getElementsByTagName: function(t) { return []; },
+                createElement: function(t) { return { src: '', style: {} }; },
+                cookie: ''
+            };
+        }
+        if (typeof window === 'undefined') {
+            var window = { location: { href: '', hostname: '' }, navigator: { userAgent: '' } };
+        }
+        if (typeof location === 'undefined') { var location = { href: '', hostname: '' }; }
+        if (typeof navigator === 'undefined') { var navigator = { userAgent: '' }; }
+        if (typeof alert === 'undefined') { var alert = function(msg) {}; }
+        """
+        context.evaluateScript(polyfill)
+
+        // 用 JS try-catch + ObjC @try/@catch 雙重保護
+        let safeScript = "try { \(fullScript) } catch(__e) { var __urls = []; }"
+        context.evaluateScript(safeScript)
 
         guard let urls = context.objectForKeyedSubscript("__urls")?.toArray() as? [String] else {
             print("[DEBUG] JSnview: 無法取得 __urls")
