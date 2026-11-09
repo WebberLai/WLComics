@@ -2,7 +2,7 @@
 //  TVReaderViewController.swift
 //  WLTVComics
 //
-//  全螢幕閱讀器 — 支援左右翻頁（日漫）與上下捲動（條漫）
+//  全螢幕閱讀器 — 支援雙頁翻頁（日漫右翻左／美漫左翻右）與上下捲動（條漫）
 //
 
 import UIKit
@@ -18,8 +18,11 @@ class TVReaderViewController: UIViewController {
     private var displayedEpisodeUrl: String?
     private var displayedEpisodeName = ""
 
-    // MARK: - 水平模式（翻頁）
-    private let imageView = UIImageView()
+    // MARK: - 水平模式（翻頁，一次兩頁）
+    private let spreadView = TVSpreadView()
+    /// 美漫（左翻右）順序；預設 false 為日漫順序。只存在本機，不同步
+    private var isLeftToRight = false
+    private var prefetcher: ImagePrefetcher?
 
     // MARK: - 直式模式（上下捲動）
     private let verticalReader = VerticalReaderView()
@@ -27,7 +30,6 @@ class TVReaderViewController: UIViewController {
     /// 直式閱讀的欄寬佔畫面寬度的比例
     private static let verticalWidthRatio: CGFloat = 0.55
 
-    private let pageLabel = UILabel()
     private let episodeLabel = UILabel()
     private let modeLabel = UILabel()
     private let activityIndicator = UIActivityIndicatorView(style: .large)
@@ -52,6 +54,9 @@ class TVReaderViewController: UIViewController {
         if let id = comicId, let saved = ReadingModeStore.mode(for: id) {
             currentMode = saved
         }
+        if let id = comicId {
+            isLeftToRight = TVReaderViewController.isLeftToRight(comicId: id)
+        }
 
         setUpImageView()
         setUpVerticalReader()
@@ -64,15 +69,15 @@ class TVReaderViewController: UIViewController {
     // MARK: - UI Setup
 
     private func setUpImageView() {
-        imageView.contentMode = .scaleAspectFit
-        imageView.backgroundColor = .black
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(imageView)
+        spreadView.backgroundColor = .black
+        spreadView.isRightToLeft = !isLeftToRight
+        spreadView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(spreadView)
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: view.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            spreadView.topAnchor.constraint(equalTo: view.topAnchor),
+            spreadView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            spreadView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            spreadView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
     }
 
@@ -92,7 +97,6 @@ class TVReaderViewController: UIViewController {
         verticalReader.onPageChanged = { [weak self] page in
             guard let self = self else { return }
             self.currentPage = page
-            self.pageLabel.text = "  \(page + 1) / \(self.displayedImages.count)  "
             if let comicId = self.comicId, let url = self.displayedEpisodeUrl {
                 ReadingProgress.save(comicId: comicId, episodeUrl: url, episodeName: self.displayedEpisodeName, page: page)
             }
@@ -103,16 +107,6 @@ class TVReaderViewController: UIViewController {
     }
 
     private func setUpOverlayLabels() {
-        pageLabel.font = .systemFont(ofSize: 32, weight: .bold)
-        pageLabel.textColor = .white
-        pageLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        pageLabel.layer.cornerRadius = 8
-        pageLabel.clipsToBounds = true
-        pageLabel.textAlignment = .center
-        pageLabel.alpha = 0
-        pageLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(pageLabel)
-
         episodeLabel.font = .systemFont(ofSize: 36, weight: .bold)
         episodeLabel.textColor = .white
         episodeLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
@@ -135,10 +129,6 @@ class TVReaderViewController: UIViewController {
         view.addSubview(modeLabel)
 
         NSLayoutConstraint.activate([
-            pageLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -40),
-            pageLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
-            pageLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
-            pageLabel.heightAnchor.constraint(equalToConstant: 50),
             episodeLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 40),
             episodeLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
             episodeLabel.heightAnchor.constraint(equalToConstant: 56),
@@ -174,27 +164,63 @@ class TVReaderViewController: UIViewController {
         let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeDown.direction = .down
         view.addGestureRecognizer(swipeDown)
+
+        // 長按觸控板中間：開閱讀模式選單
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        longPress.allowedPressTypes = [NSNumber(value: UIPress.PressType.select.rawValue)]
+        view.addGestureRecognizer(longPress)
+    }
+
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began { presentModeMenu() }
     }
 
     // MARK: - 閱讀模式切換
 
     private func applyMode() {
-        imageView.isHidden = currentMode == .vertical
+        spreadView.isHidden = currentMode == .vertical
         verticalReader.isHidden = currentMode == .horizontal
+        spreadView.isRightToLeft = !isLeftToRight
     }
 
-    private func toggleMode() {
-        let newMode: ReadingMode = currentMode == .horizontal ? .vertical : .horizontal
-        currentMode = newMode
+    /// 播放/暫停鍵或長按中間鍵：選日漫翻頁、美漫翻頁、韓漫直式
+    private func presentModeMenu() {
+        guard presentedViewController == nil else { return }
+        let alert = UIAlertController(title: "閱讀模式", message: nil, preferredStyle: .actionSheet)
+        let choices: [(String, ReadingMode, Bool)] = [
+            ("日漫翻頁（右→左）", .horizontal, false),
+            ("美漫翻頁（左→右）", .horizontal, true),
+            ("韓漫直式（上→下）", .vertical, false),
+        ]
+        for (title, mode, leftToRight) in choices {
+            let isCurrent = mode == currentMode && (mode == .vertical || leftToRight == isLeftToRight)
+            alert.addAction(UIAlertAction(title: isCurrent ? "✓ \(title)" : title, style: .default) { [weak self] _ in
+                self?.setMode(mode, leftToRight: leftToRight)
+            })
+        }
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        present(alert, animated: true)
+    }
+
+    private func setMode(_ mode: ReadingMode, leftToRight: Bool) {
+        let modeChanged = mode != currentMode
+        currentMode = mode
+        // 直式時保留原本的翻頁方向，切回翻頁才不會被重設
+        if mode == .horizontal { isLeftToRight = leftToRight }
         if let id = comicId {
-            ReadingModeStore.setManual(newMode, for: id)
+            ReadingModeStore.setManual(mode, for: id)
+            TVReaderViewController.setLeftToRight(isLeftToRight, comicId: id)
         }
         applyMode()
-        showCurrentContent()
+        if modeChanged || mode == .horizontal { showCurrentContent() }
+        showModeLabel()
+    }
 
+    private func showModeLabel() {
+        modeLabel.layer.removeAllAnimations()
         modeLabel.attributedText = modeText(for: currentMode)
         modeLabel.alpha = 1
-        UIView.animate(withDuration: 0.5, delay: 1.5) {
+        UIView.animate(withDuration: 0.5, delay: 2.5) {
             self.modeLabel.alpha = 0
         }
     }
@@ -202,7 +228,7 @@ class TVReaderViewController: UIViewController {
     /// 模式提示：上下箭頭圖示代表直式閱讀，左右箭頭圖示代表翻頁閱讀
     private func modeText(for mode: ReadingMode) -> NSAttributedString {
         let symbolName = mode == .vertical ? "arrow.up.and.down" : "arrow.left.and.right"
-        let title = mode == .vertical ? "直式閱讀" : "翻頁閱讀"
+        let title = mode == .vertical ? "韓漫直式" : (isLeftToRight ? "美漫翻頁（左→右）" : "日漫翻頁（右→左）")
         let config = UIImage.SymbolConfiguration(font: modeLabel.font)
         let text = NSMutableAttributedString(string: "  ")
         if let image = UIImage(systemName: symbolName, withConfiguration: config)?
@@ -220,7 +246,8 @@ class TVReaderViewController: UIViewController {
             verticalReader.cancelAllDownloads()
             loadCurrentPage()
         } else {
-            imageView.kf.cancelDownloadTask()
+            spreadView.cancelDownloads()
+            prefetcher?.stop()
             verticalReader.episodeUrl = displayedEpisodeUrl
             verticalReader.currentIndex = currentPage
             verticalReader.images = displayedImages
@@ -259,17 +286,29 @@ class TVReaderViewController: UIViewController {
         }
     }
 
+    /// 顯示 currentPage 開始的跨頁。currentPage 一律對齊到偶數（跨頁的第一頁）
     private func loadCurrentPage() {
         guard currentPage >= 0, currentPage < displayedImages.count else { return }
-        let urlStr = displayedImages[currentPage]
-        guard let url = URL(string: urlStr) else { return }
+        currentPage -= currentPage % 2
+        let count = displayedImages.count
+        let firstUrl = URL(string: displayedImages[currentPage])
+        let hasSecond = currentPage + 1 < count
+        let secondUrl = hasSecond ? URL(string: displayedImages[currentPage + 1]) : nil
 
-        imageView.kf.cancelDownloadTask()
-        imageView.kf.setImage(with: url,
-                              options: [.requestModifier(refererModifier),
-                                        .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))])
+        let options: KingfisherOptionsInfo = [.requestModifier(refererModifier),
+                                              .retryStrategy(DelayRetryStrategy(maxRetryCount: 3, retryInterval: .seconds(2)))]
+        spreadView.isRightToLeft = !isLeftToRight
+        // 最後一頁落單時 secondUrl 為 nil，另一半留空白
+        spreadView.show(first: firstUrl, second: secondUrl, options: options)
 
-        pageLabel.text = "  \(currentPage + 1) / \(displayedImages.count)  "
+        // 預載下一個跨頁
+        prefetcher?.stop()
+        let nextUrls = displayedImages.dropFirst(currentPage + 2).prefix(2).compactMap { URL(string: $0) }
+        if !nextUrls.isEmpty {
+            prefetcher = ImagePrefetcher(urls: nextUrls, options: [.requestModifier(refererModifier)])
+            prefetcher?.start()
+        }
+
         episodeLabel.text = "  \(displayedEpisodeName)  "
 
         if let comicId = comicId, let url = displayedEpisodeUrl {
@@ -314,8 +353,8 @@ class TVReaderViewController: UIViewController {
                 dismiss(animated: true)
                 return
             case .playPause:
-                // 播放/暫停鍵切換閱讀模式
-                toggleMode()
+                // 播放/暫停鍵開閱讀模式選單
+                presentModeMenu()
                 return
             default:
                 break
@@ -324,14 +363,40 @@ class TVReaderViewController: UIViewController {
         super.pressesBegan(presses, with: event)
     }
 
+    // pressesBegan 自己處理掉的鍵，Ended / Changed / Cancelled 也要一起攔住，
+    // 否則放開返回鍵時事件會沿 responder chain 傳到底下的 navigation controller，
+    // 在 dismiss 的同時又 pop 一層，畫面就變黑
+    private static let handledPressTypes: Set<UIPress.PressType> = [
+        .rightArrow, .leftArrow, .upArrow, .downArrow, .select, .menu, .playPause,
+    ]
+
+    private func unhandled(_ presses: Set<UIPress>) -> Set<UIPress> {
+        return presses.filter { !TVReaderViewController.handledPressTypes.contains($0.type) }
+    }
+
+    override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        let rest = unhandled(presses)
+        if !rest.isEmpty { super.pressesEnded(rest, with: event) }
+    }
+
+    override func pressesChanged(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        let rest = unhandled(presses)
+        if !rest.isEmpty { super.pressesChanged(rest, with: event) }
+    }
+
+    override func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        let rest = unhandled(presses)
+        if !rest.isEmpty { super.pressesCancelled(rest, with: event) }
+    }
+
     private func goNextPage() {
         if currentMode == .vertical {
             verticalReader.nextButtonPressed()
             return
         }
         showOverlayBriefly()
-        if currentPage < displayedImages.count - 1 {
-            currentPage += 1
+        if currentPage + 2 < displayedImages.count {
+            currentPage += 2
             loadCurrentPage()
         } else {
             loadNextEpisode()
@@ -344,8 +409,8 @@ class TVReaderViewController: UIViewController {
             return
         }
         showOverlayBriefly()
-        if currentPage > 0 {
-            currentPage -= 1
+        if currentPage >= 2 {
+            currentPage -= 2
             loadCurrentPage()
         } else {
             loadPreviousEpisode()
@@ -353,9 +418,8 @@ class TVReaderViewController: UIViewController {
     }
 
     @objc private func handleTap() {
-        let isVisible = pageLabel.alpha > 0
+        let isVisible = episodeLabel.alpha > 0
         UIView.animate(withDuration: 0.3) {
-            self.pageLabel.alpha = isVisible ? 0 : 1
             self.episodeLabel.alpha = isVisible ? 0 : 1
         }
         if !isVisible { scheduleHideTimer() }
@@ -363,7 +427,6 @@ class TVReaderViewController: UIViewController {
 
     private func showOverlayBriefly() {
         UIView.animate(withDuration: 0.2) {
-            self.pageLabel.alpha = 1
             self.episodeLabel.alpha = 1
         }
         scheduleHideTimer()
@@ -373,7 +436,6 @@ class TVReaderViewController: UIViewController {
         hideTimer?.invalidate()
         hideTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { [weak self] _ in
             UIView.animate(withDuration: 0.5) {
-                self?.pageLabel.alpha = 0
                 self?.episodeLabel.alpha = 0
             }
         }
@@ -389,6 +451,22 @@ class TVReaderViewController: UIViewController {
     private func loadPreviousEpisode() {
         guard episodeIndex > 0 else { return }
         loadEpisode(at: episodeIndex - 1)
+    }
+
+    // MARK: - 翻頁方向（本機）
+
+    private static let leftToRightKey = "tv_left_to_right_comics"
+
+    static func isLeftToRight(comicId: String) -> Bool {
+        let ids = UserDefaults.standard.stringArray(forKey: leftToRightKey) ?? []
+        return ids.contains(comicId)
+    }
+
+    static func setLeftToRight(_ value: Bool, comicId: String) {
+        var ids = UserDefaults.standard.stringArray(forKey: leftToRightKey) ?? []
+        ids.removeAll { $0 == comicId }
+        if value { ids.append(comicId) }
+        UserDefaults.standard.set(ids, forKey: leftToRightKey)
     }
 
     // MARK: - Focus

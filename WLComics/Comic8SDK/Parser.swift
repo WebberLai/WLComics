@@ -112,8 +112,14 @@ open class Parser{
             //解析集數
             if(findCviewRange != nil){
                 nameTagRange = StringUtility.indexOf(source: txt, search: mNameTag)
-                
-                var data = StringUtility.substring(source: txt, upper: (findCviewRange?.upperBound)!, lower: (nameTagRange?.lowerBound)!)
+
+                // 這行有 cview( 但沒有 );return，或順序顛倒時，原本強制解包／取 range 會閃退，直接略過
+                guard let cviewRange = findCviewRange, let nameRange = nameTagRange,
+                      cviewRange.upperBound <= nameRange.lowerBound else {
+                    continue
+                }
+
+                var data = StringUtility.substring(source: txt, upper: cviewRange.upperBound, lower: nameRange.lowerBound)
                 data = data.replacingOccurrences(of: "'", with: "")
                 let dataAry = StringUtility.split(data, separatedBy: ",") //集數圖片總張數參數
 
@@ -145,17 +151,8 @@ open class Parser{
                     continue;
                 }
                 
-                if(nameTagRange == nil){
-                    nameTagRange = StringUtility.indexOf(source: txt, search: mNameTag)
-                    
-                    if(nameTagRange != nil){
-                        continue
-                    }
-                }
-                
-                
-                //解析集數名稱
-                if(nameTagRange != nil){
+                //解析集數名稱（名稱在下一行，最後一行就沒有名稱可讀）
+                if(i + 1 < html.count){
                     var episodeName = html[i + 1]
                     
                     episodeName = self.removeScriptsTag(episodeName)

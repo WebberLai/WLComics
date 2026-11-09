@@ -17,6 +17,14 @@ class TVEpisodeListViewController: UITableViewController {
 
     private let activityIndicator = UIActivityIndicatorView(style: .large)
 
+    /// 列表沒有話數時（載入中、網站頁面是空的）畫面上沒有可聚焦的東西，
+    /// 返回鍵會直接交給最外層，App 就退回桌面。用一個看不見的 view 接住焦點，
+    /// 返回鍵才會經過 navigation controller 正常 pop
+    private let focusAnchor = TVFocusAnchorView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+    private var loadTimeoutTimer: Timer?
+    /// SDK 讀取失敗時不會呼叫 callback，等這麼久還沒回來就停掉轉圈
+    private static let loadTimeout: TimeInterval = 20
+
     private let refererModifier = AnyModifier { request in
         var r = request
         r.setValue("https://www.8comic.com/", forHTTPHeaderField: "Referer")
@@ -30,6 +38,8 @@ class TVEpisodeListViewController: UITableViewController {
 
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "EpisodeCell")
 
+        focusAnchor.isUserInteractionEnabled = true
+        view.addSubview(focusAnchor)
         setUpActivityIndicator()
         loadEpisodes()
 
@@ -41,6 +51,8 @@ class TVEpisodeListViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // 漫畫列表把 navigation bar 藏起來了，這頁要顯示才看得到「繼續閱讀」
+        navigationController?.setNavigationBarHidden(false, animated: animated)
         refreshLastRead()
         tableView.reloadData()
         navigationItem.rightBarButtonItem?.isEnabled = lastReadIndex != nil
@@ -57,19 +69,39 @@ class TVEpisodeListViewController: UITableViewController {
     }
 
     private func loadEpisodes() {
+        updateFocusAnchor()
         activityIndicator.startAnimating()
+
+        loadTimeoutTimer?.invalidate()
+        loadTimeoutTimer = Timer.scheduledTimer(withTimeInterval: Self.loadTimeout, repeats: false) { [weak self] _ in
+            self?.activityIndicator.stopAnimating()
+        }
+
         WLComics.sharedInstance().getR8Comic().loadComicDetail(currentComic) { [weak self] comicDetail in
             let episodes = comicDetail.getEpisode()
             DispatchQueue.main.async {
                 guard let self = self else { return }
+                self.loadTimeoutTimer?.invalidate()
                 self.allEpisodes = episodes
                 self.refreshLastRead()
                 self.activityIndicator.stopAnimating()
                 self.tableView.reloadData()
                 self.navigationItem.rightBarButtonItem?.isEnabled = self.lastReadIndex != nil
                 self.scrollToLastRead()
+                // 載入前焦點在錨點上，載完有話數就把焦點拉回列表
+                self.updateFocusAnchor()
             }
         }
+    }
+
+    override var preferredFocusEnvironments: [UIFocusEnvironment] {
+        return allEpisodes.isEmpty ? [focusAnchor] : [tableView]
+    }
+
+    private func updateFocusAnchor() {
+        focusAnchor.isFocusable = allEpisodes.isEmpty
+        setNeedsFocusUpdate()
+        updateFocusIfNeeded()
     }
 
     // MARK: - Reading Progress
@@ -151,4 +183,10 @@ class TVEpisodeListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 120
     }
+}
+
+/// 看不見、只在需要時能取得焦點的 view（見 TVEpisodeListViewController.focusAnchor）
+final class TVFocusAnchorView: UIView {
+    var isFocusable = false
+    override var canBecomeFocused: Bool { isFocusable }
 }

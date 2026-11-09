@@ -76,9 +76,23 @@ class TVComicGridViewController: UIViewController {
                                                name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+        searchButton.isHidden = false
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         restoreScrollPosition()
+    }
+
+    // 搜尋鈕掛在 tabBarController.view 上，不會跟著 push 消失。
+    // 不藏起來的話，集數列表還沒載入完時焦點會跑到它身上，
+    // 這時按返回鍵事件會直接到 tabBarController，App 就退回桌面
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        searchButton.isHidden = true
     }
 
     private func refreshComicsFromWeb() {
