@@ -12,6 +12,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
+        Self.configureAppearance()
+
         // 如果 storyboard 沒自動建立 window，手動建立
         if window == nil {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -63,6 +65,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                                                object: nil, queue: .main) { _ in UpdateBadge.refresh() }
         UpdateBadge.refresh()
         checkForUpdates()
+    }
+
+    /// A quiet ink-and-paper palette gives the library a more intentional feel
+    /// while keeping UIKit's semantic colors for Dark Mode and accessibility.
+    private static func configureAppearance() {
+        let navigation = UINavigationBarAppearance()
+        navigation.configureWithDefaultBackground()
+        navigation.titleTextAttributes = [.foregroundColor: UIColor.label,
+                                          .font: UIFont.systemFont(ofSize: 17, weight: .semibold)]
+        navigation.largeTitleTextAttributes = [.foregroundColor: UIColor.label,
+                                               .font: UIFont.systemFont(ofSize: 34, weight: .bold)]
+        UINavigationBar.appearance().standardAppearance = navigation
+        UINavigationBar.appearance().scrollEdgeAppearance = navigation
+        UINavigationBar.appearance().compactAppearance = navigation
+        UINavigationBar.appearance().tintColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1.0, green: 0.48, blue: 0.32, alpha: 1)
+                : UIColor(red: 0.77, green: 0.24, blue: 0.16, alpha: 1)
+        }
+
+        let tabs = UITabBarAppearance()
+        tabs.configureWithDefaultBackground()
+        UITabBar.appearance().standardAppearance = tabs
+        if #available(iOS 15.0, *) { UITabBar.appearance().scrollEdgeAppearance = tabs }
+        UITabBar.appearance().tintColor = UINavigationBar.appearance().tintColor
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {}

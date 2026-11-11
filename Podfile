@@ -1,6 +1,6 @@
 use_frameworks!
 
-platform :ios, '14.0'
+platform :ios, '15.0'
 target 'WLComics' do
   pod 'Kingfisher'
   pod 'SVProgressHUD'
@@ -22,7 +22,7 @@ post_install do |installer|
          target.name.include?('tvos') || target.name.include?('TV')
         config.build_settings['TVOS_DEPLOYMENT_TARGET'] = '16.0'
       else
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
       end
     end
   end

@@ -17,18 +17,21 @@ class DownloadsViewController: UITableViewController {
 
     private lazy var emptyLabel: UILabel = {
         let label = UILabel()
-        label.text = "還沒有下載的漫畫\n在集數列表往左滑即可下載"
+        label.text = "尚無離線漫畫\n\n前往漫畫集數列表，向左滑動即可下載。"
         label.textColor = .secondaryLabel
         label.textAlignment = .center
         label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 15, weight: .medium)
         return label
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "已下載"
-        tableView.backgroundColor = .systemBackground
+        tableView.backgroundColor = .systemGroupedBackground
         tableView.rowHeight = 116
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
         // iOS 26 之後系統 cell 的分隔線預設會被隱藏或縮排到看不見，明確指定樣式與起點（與集數列表一致）
         tableView.separatorStyle = .singleLine
         tableView.separatorColor = .separator
@@ -85,6 +88,10 @@ class DownloadsViewController: UITableViewController {
             ?? UITableViewCell(style: .subtitle, reuseIdentifier: "DownloadCell")
         let comic = comics[indexPath.row]
         cell.textLabel?.text = comic.name
+        cell.textLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        cell.backgroundColor = .secondarySystemGroupedBackground
+        cell.imageView?.layer.cornerRadius = 8
+        cell.imageView?.clipsToBounds = true
         cell.accessoryType = .disclosureIndicator
 
         let completed = comic.episodes.filter { $0.completed }.count

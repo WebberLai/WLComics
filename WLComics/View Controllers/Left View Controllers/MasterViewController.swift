@@ -86,8 +86,12 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         }
 
         self.title = "漫畫列表"
-        // storyboard 裡寫死白底，改用系統顏色才會跟著深色模式變
-        tableView.backgroundColor = .systemBackground
+        tableView.backgroundColor = .systemGroupedBackground
+        tableView.separatorStyle = .none
+        tableView.rowHeight = 116
+        tableView.estimatedRowHeight = 116
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
         navigationItem.leftBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .trash , target: self, action: #selector(clearCache))
         navigationItem.rightBarButtonItem = UIBarButtonItem.init(barButtonSystemItem: .search , target: self, action: #selector(startSearch))
         // iCloud 收到其他裝置的收藏變動時更新愛心狀態
@@ -191,6 +195,10 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
         searchController.delegate = self
         searchController.dimsBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "輸入想要搜尋的漫畫名稱"
+        searchController.searchBar.searchTextField.backgroundColor = .secondarySystemGroupedBackground
+        searchController.searchBar.searchTextField.layer.cornerRadius = 12
+        searchController.searchBar.searchTextField.clipsToBounds = true
+        searchController.searchBar.tintColor = view.tintColor
         searchController.searchBar.delegate = self
         //把搜尋功能加入tableview的最上面
         self.tableView.tableHeaderView = searchController.searchBar
@@ -276,9 +284,9 @@ class MasterViewController: UITableViewController , UISearchResultsUpdating,UISe
 
     override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else { return }
-        header.contentView.backgroundColor = .secondarySystemBackground
+        header.contentView.backgroundColor = .systemGroupedBackground
         header.textLabel?.textColor = .secondaryLabel
-        header.textLabel?.font = UIFont.boldSystemFont(ofSize: 15)
+        header.textLabel?.font = UIFont.systemFont(ofSize: 12, weight: .bold)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

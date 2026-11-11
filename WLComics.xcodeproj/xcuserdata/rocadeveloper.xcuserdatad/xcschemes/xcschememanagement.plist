@@ -27,17 +27,22 @@
 		<key>WLMacComic.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>11</integer>
+			<integer>10</integer>
 		</dict>
 		<key>wltvcomics.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>12</integer>
+			<integer>1</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>6056EE191F28233F007BBE67</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>BA966E4B3088EB9400A5992C</key>
 		<dict>
 			<key>primary</key>
 			<true/>

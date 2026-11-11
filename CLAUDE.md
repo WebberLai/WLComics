@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Open `WLComics.xcworkspace`** (not `.xcodeproj`) — CocoaPods workspace
 - Install dependencies: `pod install` at the repo root (where `Podfile` is). Pods/ is tracked in git
-- Build target: `WLComics` (iOS 14.0+), supports iPhone and iPad. Product name is `看漫畫`; `PRODUCT_MODULE_NAME = WLComics` is set explicitly so tests can `@testable import WLComics`
+- Build target: `WLComics` (iOS 15.0+; Xcode 27 no longer supports iOS 14 deployment targets — keep `Podfile` `platform :ios` and its `post_install` override in sync), supports iPhone and iPad. Product name is `看漫畫`; `PRODUCT_MODULE_NAME = WLComics` is set explicitly so tests can `@testable import WLComics`
 - Unit tests: `WLComicsTests` target (XCTest, deployment target 15.6), files in `WLComicsTests/` (synchronized folder — new files are picked up automatically). Run with ⌘U
   - `UpdateTracker` / `ReadingModeStore` expose their logic as static pure functions (`applying`, `markingSeen`, `merged`, `trimmed`, `mode(in:for:)`…); tests call those and never touch UserDefaults / iCloud KVS
   - `SDKParserTests` parses saved 8comic pages in `WLComicsTests/Fixtures/` — run after editing `Comic8SDK`'s `Parser` / `JSnview`
@@ -70,6 +70,26 @@ loadEpisodeDetail(episode) → callback (may be background thread)
 - **Reading progress** — `ReadingProgress` stores last episode/page per comic in UserDefaults + iCloud KVS key `reading_progress`; episode URLs are compared via `normalizedEpisodeUrl` (relative before load, absolute after)
 - **Offline downloads** — `DownloadManager` saves pages to `Application Support/Downloads/<comicId>/<episode>/` with a `manifest.json` per comic (file names only, never absolute paths); excluded from backup; deletion is manual only. Readers check `localPageURLs` before hitting the network. The 已下載 tab (`DownloadsViewController`) is appended to the tab bar in `SceneDelegate` and opens `ComicEpisodesViewController` (storyboard ID) with `offlineMode = true`
 - **`MasterViewController.favoriteIds`** — in-memory `Set<String>` cache of favorite comic IDs, rebuilt in `viewWillAppear`
+
+## Apple TV (`WLTVComics/`)
+
+- Scheme / target `wltvcomics`, tvOS 26.2+ (`PRODUCT_MODULE_NAME = WLTVComics`). `WLTVComics/` is a synchronized folder — new files join the target automatically. Pods: only Kingfisher (`Podfile` `target 'wltvcomics'`, tvOS 16.0)
+- **Shared with iOS** (listed explicitly in the target, not via the folder): `Comic8SDK/*`, `WLComics.swift`, `FavoriteComics.swift`, `SwiftyPlistManager.swift`, `ReadingProgress.swift`, `ReadingModeStore.swift`, `VerticalReaderView.swift`. Edits there affect both apps; use `#if os(tvOS)` for platform differences
+- **Storage**: tvOS Documents is restricted, so `SwiftyPlistManager` and `TVAppDelegate` use Caches for the plists. No offline downloads on TV
+- **Flow**: storyboard `TabBarController` → nav (bar hidden) → `TVComicGridViewController` / `TVFavoriteGridViewController` → push `TVEpisodeListViewController` (shows the nav bar for 繼續閱讀) → present `TVReaderViewController`
+
+### TVReaderViewController
+
+- Paged mode always shows two pages via `TVSpreadView`: `currentPage` is aligned to even (spread's first page), arrows step by 2, odd last page leaves the other half blank. Right arrow = next spread in both directions
+- Modes via play/pause or long-press select → menu: 日漫翻頁 (first page on the right), 美漫翻頁 (first page on the left), 韓漫直式 (`VerticalReaderView`). Paged/vertical uses the shared `ReadingModeStore`; left-to-right is TV-only, local UserDefaults key `tv_left_to_right_comics`
+- No page-number overlay — only the episode name (top-left) and mode hint (top-right)
+
+### tvOS Pitfalls
+
+- **Presses**: overriding `pressesBegan` without `super` requires also swallowing the same types in `pressesEnded` / `pressesChanged` / `pressesCancelled`, otherwise Menu's end event reaches the navigation controller and pops while the reader dismisses (black screen)
+- **Focus**: if a screen has nothing focusable, Menu goes straight to the root and the app exits to the Home screen. `TVEpisodeListViewController` uses an invisible `TVFocusAnchorView` while the list is empty (the user rejected a visible loading/retry row because it flashes). The grid's search button lives on `tabBarController.view`, so it is hidden in `viewWillDisappear`
+- **Empty episode lists**: some comics' detail pages (e.g. 24702 / 24703) return HTTP 200 with a 0-byte body — a site problem, intentionally not worked around. `loadComicDetail` never calls back on failure, hence the 20 s spinner timeout
+- **iOS-only UIKit APIs that break the tvOS build**: `UISearchBar.searchTextField`, `secondarySystemBackground` / `systemGroupedBackground` colors, `UITableView.separatorStyle` / `separatorColor`. Build the `wltvcomics` scheme after UI changes
 
 ## Key Dependencies
 

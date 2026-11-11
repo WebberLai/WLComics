@@ -16,6 +16,7 @@ class TVEpisodeListViewController: UITableViewController {
     private var lastRead: ReadingProgress.Entry?
 
     private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let statusLabel = UILabel()
 
     /// 列表沒有話數時（載入中、網站頁面是空的）畫面上沒有可聚焦的東西，
     /// 返回鍵會直接交給最外層，App 就退回桌面。用一個看不見的 view 接住焦點，
@@ -36,11 +37,12 @@ class TVEpisodeListViewController: UITableViewController {
         view.backgroundColor = .black
         tableView.backgroundColor = .black
 
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "EpisodeCell")
+        tableView.register(TVEpisodeCell.self, forCellReuseIdentifier: TVEpisodeCell.reuseId)
 
         focusAnchor.isUserInteractionEnabled = true
         view.addSubview(focusAnchor)
         setUpActivityIndicator()
+        setUpStatusLabel()
         loadEpisodes()
 
         // 加入「繼續閱讀」按鈕
@@ -61,10 +63,25 @@ class TVEpisodeListViewController: UITableViewController {
     private func setUpActivityIndicator() {
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.hidesWhenStopped = true
+        activityIndicator.color = .white
         view.addSubview(activityIndicator)
         NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+        ])
+    }
+
+    private func setUpStatusLabel() {
+        statusLabel.text = "正在載入集數…"
+        statusLabel.font = .systemFont(ofSize: 24, weight: .medium)
+        statusLabel.textColor = .secondaryLabel
+        statusLabel.textAlignment = .center
+        statusLabel.isHidden = false
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(statusLabel)
+        NSLayoutConstraint.activate([
+            statusLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            statusLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 24),
         ])
     }
 
@@ -74,7 +91,9 @@ class TVEpisodeListViewController: UITableViewController {
 
         loadTimeoutTimer?.invalidate()
         loadTimeoutTimer = Timer.scheduledTimer(withTimeInterval: Self.loadTimeout, repeats: false) { [weak self] _ in
-            self?.activityIndicator.stopAnimating()
+            guard let self = self else { return }
+            self.activityIndicator.stopAnimating()
+            self.statusLabel.text = "暫時無法載入集數，請返回後重試。"
         }
 
         WLComics.sharedInstance().getR8Comic().loadComicDetail(currentComic) { [weak self] comicDetail in
@@ -85,6 +104,8 @@ class TVEpisodeListViewController: UITableViewController {
                 self.allEpisodes = episodes
                 self.refreshLastRead()
                 self.activityIndicator.stopAnimating()
+                self.statusLabel.text = episodes.isEmpty ? "目前沒有可閱讀的集數。" : nil
+                self.statusLabel.isHidden = !episodes.isEmpty
                 self.tableView.reloadData()
                 self.navigationItem.rightBarButtonItem?.isEnabled = self.lastReadIndex != nil
                 self.scrollToLastRead()
@@ -142,36 +163,16 @@ class TVEpisodeListViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "EpisodeCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: TVEpisodeCell.reuseId, for: indexPath) as! TVEpisodeCell
         let episode = allEpisodes[indexPath.row]
-
-        var config = cell.defaultContentConfiguration()
-        config.text = episode.getName()
-        config.textProperties.font = .systemFont(ofSize: 38)
-        config.textProperties.color = .white
-
+        var subtitle: String?
         if indexPath.row == lastReadIndex, let entry = lastRead {
-            config.secondaryText = "上次看到第 \(entry.page + 1) 頁"
-            config.secondaryTextProperties.color = .systemBlue
-            cell.accessoryType = .checkmark
-        } else {
-            config.secondaryText = nil
-            cell.accessoryType = .none
+            subtitle = "上次看到第 \(entry.page + 1) 頁"
         }
 
-        // 封面
-        if let urlStr = currentComic.getSmallIconUrl(), let url = URL(string: urlStr) {
-            let imageView = UIImageView()
-            imageView.kf.setImage(with: url,
-                                  placeholder: UIImage(named: "comic_place_holder"),
-                                  options: [.requestModifier(refererModifier),
-                                            .processor(DownsamplingImageProcessor(size: CGSize(width: 80, height: 110))),
-                                            .scaleFactor(2.0)])
-            config.image = imageView.image
-        }
-
-        cell.contentConfiguration = config
-        cell.backgroundColor = .clear
+        let coverURL = currentComic.getSmallIconUrl().flatMap { URL(string: $0) }
+        cell.configure(title: episode.getName(), subtitle: subtitle,
+                       coverURL: coverURL, modifier: refererModifier)
         return cell
     }
 
@@ -181,7 +182,97 @@ class TVEpisodeListViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 120
+        return 144
+    }
+}
+
+/// A wide, focusable episode card. Keeping the cover view in the reusable cell
+/// lets Kingfisher update it when the asynchronous image request completes.
+private final class TVEpisodeCell: UITableViewCell {
+    static let reuseId = "TVEpisodeCell"
+
+    /// tvOS 沒有 secondarySystemBackground，自己定義深灰底
+    private static let cardColor = UIColor(white: 0.16, alpha: 1)
+
+    private let cardView = UIView()
+    private let coverView = UIImageView()
+    private let titleLabel = UILabel()
+    private let subtitleLabel = UILabel()
+    private let labelsStack = UIStackView()
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        backgroundColor = .clear
+        selectionStyle = .none
+        contentView.backgroundColor = .clear
+        cardView.backgroundColor = Self.cardColor
+        cardView.layer.cornerRadius = 16
+        cardView.layer.cornerCurve = .continuous
+        cardView.clipsToBounds = true
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+
+        coverView.contentMode = .scaleAspectFill
+        coverView.clipsToBounds = true
+        coverView.layer.cornerRadius = 8
+        coverView.translatesAutoresizingMaskIntoConstraints = false
+
+        titleLabel.font = .systemFont(ofSize: 32, weight: .semibold)
+        titleLabel.textColor = .label
+        titleLabel.numberOfLines = 2
+        subtitleLabel.font = .systemFont(ofSize: 22, weight: .medium)
+        subtitleLabel.textColor = .secondaryLabel
+        labelsStack.axis = .vertical
+        labelsStack.alignment = .leading
+        labelsStack.spacing = 8
+        labelsStack.addArrangedSubview(titleLabel)
+        labelsStack.addArrangedSubview(subtitleLabel)
+        labelsStack.translatesAutoresizingMaskIntoConstraints = false
+
+        contentView.addSubview(cardView)
+        cardView.addSubview(coverView)
+        cardView.addSubview(labelsStack)
+        NSLayoutConstraint.activate([
+            cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 76),
+            cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -76),
+            cardView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 6),
+            cardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6),
+            coverView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 14),
+            coverView.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
+            coverView.widthAnchor.constraint(equalToConstant: 78),
+            coverView.heightAnchor.constraint(equalToConstant: 110),
+            labelsStack.leadingAnchor.constraint(equalTo: coverView.trailingAnchor, constant: 24),
+            labelsStack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -20),
+            labelsStack.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    func configure(title: String, subtitle: String?, coverURL: URL?, modifier: ImageDownloadRequestModifier) {
+        titleLabel.text = title
+        subtitleLabel.text = subtitle
+        subtitleLabel.isHidden = subtitle == nil
+        coverView.kf.cancelDownloadTask()
+        coverView.kf.setImage(with: coverURL,
+                              placeholder: UIImage(named: "comic_place_holder"),
+                              options: [.requestModifier(modifier),
+                                        .processor(DownsamplingImageProcessor(size: CGSize(width: 156, height: 220))),
+                                        .scaleFactor(UIScreen.main.scale)])
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        coverView.kf.cancelDownloadTask()
+        coverView.image = nil
+    }
+
+    override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
+        super.didUpdateFocus(in: context, with: coordinator)
+        coordinator.addCoordinatedAnimations {
+            self.cardView.backgroundColor = self.isFocused ? .white : Self.cardColor
+            self.titleLabel.textColor = self.isFocused ? .black : .label
+            self.subtitleLabel.textColor = self.isFocused ? .darkGray : .secondaryLabel
+        }
     }
 }
 

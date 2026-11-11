@@ -27,7 +27,12 @@ class FavoriteTableViewController: UITableViewController {
         super.viewDidLoad()
         self.title = "收藏列表"
         tableView.register(UINib(nibName: "ComicTableViewCell", bundle: nil), forCellReuseIdentifier: "ComicTableViewCell")
-        tableView.backgroundColor = .systemBackground
+        tableView.backgroundColor = .systemGroupedBackground
+        tableView.separatorStyle = .none
+        tableView.rowHeight = 116
+        tableView.estimatedRowHeight = 116
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
         // iCloud 收到其他裝置的收藏變動時即時更新
         NotificationCenter.default.addObserver(self, selector: #selector(favoritesDidChange),
                                                name: FavoriteComics.didChangeNotification, object: nil)

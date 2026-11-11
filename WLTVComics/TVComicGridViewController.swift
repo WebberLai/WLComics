@@ -42,6 +42,9 @@ class TVComicGridViewController: UIViewController {
         let btn = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .medium)
         btn.setImage(UIImage(systemName: "magnifyingglass", withConfiguration: config), for: .normal)
+        btn.tintColor = UIColor(red: 1.0, green: 0.48, blue: 0.34, alpha: 1)
+        btn.accessibilityLabel = "搜尋漫畫"
+        btn.accessibilityHint = "依漫畫名稱搜尋"
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
@@ -49,6 +52,7 @@ class TVComicGridViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        view.tintColor = UIColor(red: 1.0, green: 0.48, blue: 0.34, alpha: 1)
         navigationController?.isNavigationBarHidden = true
 
         setUpCollectionView()
@@ -153,6 +157,8 @@ class TVComicGridViewController: UIViewController {
         }
         let searchController = UISearchController(searchResultsController: resultsVC)
         searchController.searchResultsUpdater = resultsVC
+        searchController.searchBar.tintColor = view.tintColor
+        searchController.searchBar.placeholder = "搜尋漫畫名稱"
         let searchContainer = UISearchContainerViewController(searchController: searchController)
         searchContainer.title = "搜尋漫畫"
         navigationController?.pushViewController(searchContainer, animated: true)
@@ -162,16 +168,17 @@ class TVComicGridViewController: UIViewController {
 
     private func setUpCollectionView() {
         let layout = UICollectionViewFlowLayout()
-        let spacing: CGFloat = 48
-        let sideInset: CGFloat = 80
-        let availableWidth: CGFloat = 1920 - sideInset * 2 - spacing * 5
-        let itemWidth = floor(availableWidth / 6)
+        let spacing: CGFloat = 42
+        let sideInset: CGFloat = 76
+        let columns: CGFloat = 6
+        let availableWidth = max(0, view.bounds.width - sideInset * 2 - spacing * (columns - 1))
+        let itemWidth = floor(availableWidth / columns)
         let itemHeight = itemWidth * 1.5 + 40
         layout.itemSize = CGSize(width: itemWidth, height: itemHeight)
         layout.minimumInteritemSpacing = spacing
         layout.minimumLineSpacing = spacing
         layout.sectionInset = UIEdgeInsets(top: 20, left: sideInset, bottom: 40, right: sideInset)
-        layout.headerReferenceSize = CGSize(width: 1920, height: 60)
+        layout.headerReferenceSize = CGSize(width: view.bounds.width, height: 60)
 
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -316,7 +323,6 @@ class TVComicCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 8
-        imageView.adjustsImageWhenAncestorFocused = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(imageView)
 
@@ -324,6 +330,8 @@ class TVComicCell: UICollectionViewCell {
         titleLabel.textColor = .white
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 2
+        titleLabel.layer.cornerRadius = 8
+        titleLabel.clipsToBounds = true
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(titleLabel)
 
@@ -366,9 +374,11 @@ class TVComicCell: UICollectionViewCell {
             if self.isFocused {
                 self.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
                 self.titleLabel.textColor = .black
+                self.titleLabel.backgroundColor = .white
             } else {
                 self.transform = .identity
                 self.titleLabel.textColor = .white
+                self.titleLabel.backgroundColor = .clear
             }
         })
     }
@@ -407,14 +417,23 @@ class TVSearchResultsController: UIViewController, UISearchResultsUpdating {
 
     private var filterComics = [Comic]()
     private var tableView: UITableView!
+    private let statusLabel = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
         tableView = UITableView(frame: view.bounds, style: .plain)
         tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tableView.backgroundColor = .black
+        tableView.rowHeight = 82
+        statusLabel.text = "輸入漫畫名稱開始搜尋"
+        statusLabel.font = .systemFont(ofSize: 28, weight: .medium)
+        statusLabel.textColor = .secondaryLabel
+        statusLabel.textAlignment = .center
+        tableView.backgroundView = statusLabel
         view.addSubview(tableView)
     }
 
@@ -425,6 +444,8 @@ class TVSearchResultsController: UIViewController, UISearchResultsUpdating {
         } else {
             filterComics = allComics.filter { $0.getName().localizedCaseInsensitiveContains(query) }
         }
+        statusLabel.text = query.isEmpty ? "輸入漫畫名稱開始搜尋" : "找不到符合的漫畫"
+        tableView.backgroundView = filterComics.isEmpty ? statusLabel : nil
         tableView.reloadData()
     }
 }
@@ -438,6 +459,12 @@ extension TVSearchResultsController: UITableViewDataSource, UITableViewDelegate 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.textLabel?.text = filterComics[indexPath.row].getName()
+        cell.textLabel?.font = .systemFont(ofSize: 30, weight: .medium)
+        cell.textLabel?.textColor = .white
+        cell.backgroundColor = .black
+        let focusedBackground = UIView()
+        focusedBackground.backgroundColor = UIColor.white.withAlphaComponent(0.16)
+        cell.selectedBackgroundView = focusedBackground
         return cell
     }
 

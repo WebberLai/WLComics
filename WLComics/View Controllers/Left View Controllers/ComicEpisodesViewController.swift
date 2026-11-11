@@ -23,6 +23,7 @@ class ComicEpisodesViewController: UIViewController {
     private var startPage = 0
 
     private lazy var continueButton = UIBarButtonItem(title: "繼續閱讀", style: .plain, target: self, action: #selector(continueReading))
+    private var originalNavigationBarMargins: NSDirectionalEdgeInsets?
 
     /// 離線模式：從「已下載」進來時，集數列表改由下載紀錄還原，不連網
     var offlineMode = false
@@ -72,8 +73,10 @@ class ComicEpisodesViewController: UIViewController {
             }
         }
         self.tableView.tableHeaderView = nil
-        view.backgroundColor = .systemBackground
-        tableView.backgroundColor = .systemBackground
+        view.backgroundColor = .systemGroupedBackground
+        tableView.backgroundColor = .systemGroupedBackground
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
         // iOS 26 之後系統 cell 的分隔線預設會被隱藏或縮排到看不見，明確指定樣式與起點
         tableView.separatorStyle = .singleLine
         tableView.separatorColor = .separator
@@ -132,8 +135,37 @@ class ComicEpisodesViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        adjustIPadTitleInset()
         // 從閱讀器回來時進度已經變了
         progressDidChange()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        restoreNavigationBarMargins()
+    }
+
+    /// Large titles sit close to the split-view edge on iPad; add a small
+    /// leading inset while this episode screen is visible, then restore it.
+    private func adjustIPadTitleInset() {
+        guard UIDevice.current.userInterfaceIdiom == .pad,
+              let navigationBar = navigationController?.navigationBar else { return }
+        if originalNavigationBarMargins == nil {
+            originalNavigationBarMargins = navigationBar.directionalLayoutMargins
+        }
+        guard let original = originalNavigationBarMargins else { return }
+        navigationBar.directionalLayoutMargins = NSDirectionalEdgeInsets(
+            top: original.top,
+            leading: original.leading + 12,
+            bottom: original.bottom,
+            trailing: original.trailing
+        )
+    }
+
+    private func restoreNavigationBarMargins() {
+        guard let original = originalNavigationBarMargins,
+              let navigationBar = navigationController?.navigationBar else { return }
+        navigationBar.directionalLayoutMargins = original
     }
 
     @objc func progressDidChange() {
@@ -244,6 +276,10 @@ extension ComicEpisodesViewController : UITableViewDataSource , UITableViewDeleg
             ?? UITableViewCell(style: .subtitle, reuseIdentifier: "Cell")
         let episode = allEpisodes[indexPath.row]
         cell.textLabel?.text = episode.getName()
+        cell.textLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        cell.textLabel?.textColor = .label
+        cell.detailTextLabel?.font = .systemFont(ofSize: 13, weight: .medium)
+        cell.backgroundColor = .secondarySystemGroupedBackground
         // 封面原圖比列高大，不裁切的話會溢出蓋住下方的分隔線
         cell.clipsToBounds = true
         cell.imageView?.clipsToBounds = true
