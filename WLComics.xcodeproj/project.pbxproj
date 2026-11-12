@@ -33,6 +33,19 @@
 		60A1B90D1F58DCEF00E41AAB /* ComicTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 60A1B90B1F58DCEF00E41AAB /* ComicTableViewCell.xib */; };
 		60A5619B1F82264B004C71C1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A5619A1F82264B004C71C1 /* AppDelegate.swift */; };
 		60A5619D1F82264B004C71C1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A5619C1F82264B004C71C1 /* ViewController.swift */; };
+		60A561A80100000100000001 /* AllComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 60AA00FF2106D73B0093780B /* AllComics.plist */; };
+		60A561AA0000000000000001 /* Comic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F914D5FAC2855926D2D68DC0 /* Comic.swift */; };
+		60A561AA0000000000000002 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD1E9E8E8EFA1FED131CE6D /* Config.swift */; };
+		60A561AA0000000000000003 /* Episode.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE35CDB2FE2B64602A410B88 /* Episode.swift */; };
+		60A561AA0000000000000004 /* JSnview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE3B07A453B692EE82BFA17 /* JSnview.swift */; };
+		60A561AA0000000000000005 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D703CCA82049F3983C5F7E2 /* Parser.swift */; };
+		60A561AA0000000000000006 /* R8Comic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580DCF0EA24504B8B273268 /* R8Comic.swift */; };
+		60A561AA0000000000000007 /* StringUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86F17BE6B036DB7CB2C3EE69 /* StringUtility.swift */; };
+		60A561AA0000000000000008 /* FavoriteComics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60A1B90F1F58E2EB00E41AAB /* FavoriteComics.swift */; };
+		60A561AA0000000000000009 /* SwiftyPlistManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C3001F73463600D2B861 /* SwiftyPlistManager.swift */; };
+		60A561AA000000000000000A /* ReadingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A1B /* ReadingProgress.swift */; };
+		60A561AA000000000000000B /* ReadingModeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A2B3C4D5E6F7081920A7B /* ReadingModeStore.swift */; };
+		60A561A80100000100000002 /* MyFavoritesComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6034C3021F73479900D2B861 /* MyFavoritesComics.plist */; };
 		60A5619F1F82264B004C71C1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 60A5619E1F82264B004C71C1 /* Assets.xcassets */; };
 		60A561A21F82264B004C71C1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 60A561A01F82264B004C71C1 /* Main.storyboard */; };
 		60AA01002106D73B0093780B /* AllComics.plist in Resources */ = {isa = PBXBuildFile; fileRef = 60AA00FF2106D73B0093780B /* AllComics.plist */; };
@@ -557,6 +570,8 @@
 			files = (
 				60A5619F1F82264B004C71C1 /* Assets.xcassets in Resources */,
 				60A561A21F82264B004C71C1 /* Main.storyboard in Resources */,
+				60A561A80100000100000001 /* AllComics.plist in Resources */,
+				60A561A80100000100000002 /* MyFavoritesComics.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -722,6 +737,17 @@
 			files = (
 				60A5619D1F82264B004C71C1 /* ViewController.swift in Sources */,
 				60A5619B1F82264B004C71C1 /* AppDelegate.swift in Sources */,
+				60A561AA0000000000000001 /* Comic.swift in Sources */,
+				60A561AA0000000000000002 /* Config.swift in Sources */,
+				60A561AA0000000000000003 /* Episode.swift in Sources */,
+				60A561AA0000000000000004 /* JSnview.swift in Sources */,
+				60A561AA0000000000000005 /* Parser.swift in Sources */,
+				60A561AA0000000000000006 /* R8Comic.swift in Sources */,
+				60A561AA0000000000000007 /* StringUtility.swift in Sources */,
+				60A561AA0000000000000008 /* FavoriteComics.swift in Sources */,
+				60A561AA0000000000000009 /* SwiftyPlistManager.swift in Sources */,
+				60A561AA000000000000000A /* ReadingProgress.swift in Sources */,
+				60A561AA000000000000000B /* ReadingModeStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1027,17 +1053,17 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = WLMacComic/WLMacComic.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7T4QCGLNFF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = WLMacComic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLMacComic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -1058,17 +1084,17 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = WLMacComic/WLMacComic.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 7T4QCGLNFF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = WLMacComic/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.webberlai.WLMacComic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

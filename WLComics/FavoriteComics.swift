@@ -6,7 +6,7 @@
 //  Copyright © 2017年 webberlai. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 class FavoriteComics: NSObject {
 
